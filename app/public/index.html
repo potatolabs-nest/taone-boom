@@ -1,36 +1,1172 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
 <title>Club Audition Asset Browser</title>
 <style>
-:root{--bg:#fff;--fg:#111;--muted:#666;--card:#f5f5f5;--line:#ddd;--accent:#2b6cb0}
-@media (prefers-color-scheme:dark){:root{--bg:#111417;--fg:#e8eaed;--muted:#9aa0a6;--card:#1b1f24;--line:#2e343b;--accent:#7cb3ff}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,sans-serif}
-main{padding:16px;max-width:1400px;margin:0 auto}
-a{color:var(--accent)}
-nav a{margin-right:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;margin:10px 0}
-.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-</style></head>
-<body>
-<main>
-<nav id="nav" class="card"></nav>
-<div id="view">Loading…</div>
-</main>
-<script>
-var ROUTES=[["#/","Overview"],["#/textures","Textures"],["#/audio","Audio"],["#/sprites","UI Sprites"],["#/data","Game Data"]];
-function esc(s){return String(s==null?"":s);}
-function h(el,txt){var e=document.createElement(el);e.textContent=txt;return e;}
-function buildNav(){var n=document.getElementById("nav");n.textContent="";
- ROUTES.forEach(function(r){var a=document.createElement("a");a.href=r[0];a.textContent=r[1];n.appendChild(a);});}
-function render(){
- var v=document.getElementById("view");v.textContent="";
- var route=location.hash||"#/";
- var el=h("p","Route: "+route+" (manifest pending)");
- v.appendChild(el);
+:root{
+  --bg:#ffffff; --fg:#14181d; --muted:#5b6672; --card:#f6f7f9; --card-2:#eceef2;
+  --line:#d9dee5; --accent:#1d63b8; --accent-fg:#ffffff; --warn-bg:#fff6e0; --warn-line:#e8c86a;
+  --warn-fg:#5c4708; --radius:10px; --shadow:0 6px 24px rgba(0,0,0,.18);
+  --c1:#1d63b8; --c2:#2b8a6b; --c3:#b8701d; --c4:#8a4fb8; --c5:#b83f5c;
 }
-window.addEventListener("hashchange",render);
-buildNav();render();
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0f1216; --fg:#e9edf2; --muted:#9aa5b1; --card:#171c22; --card-2:#1f262e;
+    --line:#2b333d; --accent:#6fb0ff; --accent-fg:#04121f; --warn-bg:#2e2611; --warn-line:#6b5a22;
+    --warn-fg:#eedfa8; --shadow:0 6px 24px rgba(0,0,0,.6);
+    --c1:#6fb0ff; --c2:#5fd0a8; --c3:#e0a75a; --c4:#c08fe8; --c5:#f08099;
+  }
+}
+*{box-sizing:border-box}
+html,body{max-width:100%}
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  overflow-x:hidden; overflow-wrap:anywhere;
+}
+header{border-bottom:1px solid var(--line); background:var(--card)}
+.wrap{padding:12px 16px; max-width:1500px; margin:0 auto}
+h1{font-size:17px; margin:0 0 2px}
+h2{font-size:15px; margin:0 0 8px; letter-spacing:.02em; text-transform:uppercase; color:var(--muted)}
+h3{font-size:14px; margin:0 0 6px}
+main{padding:16px; max-width:1500px; margin:0 auto; display:block}
+a{color:var(--accent)}
+nav{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px}
+nav a{
+  padding:5px 11px; border:1px solid var(--line); border-radius:999px;
+  text-decoration:none; color:var(--fg); background:var(--bg); font-size:13.5px;
+}
+nav a[aria-current="page"]{background:var(--accent); color:var(--accent-fg); border-color:var(--accent)}
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:12px; margin:0 0 14px}
+.note{background:var(--warn-bg); border:1px solid var(--warn-line); color:var(--warn-fg); border-radius:var(--radius); padding:10px 12px; margin:0 0 14px}
+.row{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.spread{display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between}
+label{font-size:13px; color:var(--muted)}
+select,input[type=search],input[type=text],button{
+  font:inherit; font-size:14px; color:var(--fg); background:var(--bg);
+  border:1px solid var(--line); border-radius:7px; padding:6px 9px;
+}
+button{cursor:pointer}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{opacity:.45; cursor:default}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+.stats{display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.stat{background:var(--card-2); border:1px solid var(--line); border-radius:var(--radius); padding:10px 12px}
+.stat b{display:block; font-size:22px; line-height:1.2; font-variant-numeric:tabular-nums}
+.stat span{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em}
+.bars{display:grid; gap:6px}
+.bar{display:grid; grid-template-columns:minmax(70px,150px) 1fr auto; gap:9px; align-items:center; font-size:13px}
+.bar .track{background:var(--card-2); border-radius:5px; height:16px; overflow:hidden; border:1px solid var(--line)}
+.bar .fill{height:100%; border-radius:4px 0 0 4px}
+.bar .n{font-variant-numeric:tabular-nums; color:var(--muted)}
+.bar .lab{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+table{border-collapse:collapse; width:100%; font-size:13.5px}
+th,td{text-align:left; padding:6px 9px; border-bottom:1px solid var(--line)}
+th{color:var(--muted); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:.03em}
+td.num{text-align:right; font-variant-numeric:tabular-nums}
+.grid{display:grid; gap:10px; grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.tile{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:0; overflow:hidden; cursor:pointer; display:flex; flex-direction:column;
+  text-align:left; color:inherit;
+}
+.tile .frame{
+  background:
+    repeating-conic-gradient(var(--card-2) 0% 25%, transparent 0% 50%) 50%/16px 16px;
+  display:flex; align-items:center; justify-content:center; min-height:100px; padding:6px;
+}
+.tile img{max-width:100%; max-height:150px; width:auto; height:auto; display:block; image-rendering:auto}
+.tile .meta{padding:6px 8px; font-size:12px; border-top:1px solid var(--line)}
+.tile .meta .nm{display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.tile .meta .sub{color:var(--muted); font-variant-numeric:tabular-nums}
+.badge{display:inline-block; font-size:11px; padding:1px 6px; border-radius:999px; border:1px solid var(--line); color:var(--muted); text-transform:uppercase; letter-spacing:.03em}
+.badge.high{color:var(--c2); border-color:var(--c2)}
+.badge.low{color:var(--c3); border-color:var(--c3)}
+.badge.dds{color:var(--c4); border-color:var(--c4)}
+.ph{
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+  width:100%; min-height:96px; color:var(--muted); font-size:12px; text-align:center;
+  border:1px dashed var(--line); border-radius:6px; background:var(--card-2); padding:8px;
+}
+.ph b{color:var(--fg); font-size:13px; letter-spacing:.05em}
+.pager{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:12px 0}
+.pager .info{color:var(--muted); font-size:13px; font-variant-numeric:tabular-nums}
+.listmax{max-height:60vh; overflow:auto; border:1px solid var(--line); border-radius:var(--radius)}
+ul.trk{list-style:none; margin:0; padding:0}
+ul.trk li{border-bottom:1px solid var(--line)}
+ul.trk li:last-child{border-bottom:0}
+ul.trk button{
+  width:100%; text-align:left; border:0; border-radius:0; background:transparent;
+  padding:8px 11px; display:grid; grid-template-columns:1fr auto; gap:8px; align-items:baseline;
+}
+ul.trk button:hover{background:var(--card-2)}
+ul.trk button[aria-pressed="true"]{background:var(--accent); color:var(--accent-fg)}
+ul.trk button[aria-pressed="true"] .sub{color:var(--accent-fg); opacity:.85}
+ul.trk .nm{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+ul.trk .sub{color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; white-space:nowrap}
+.player{
+  position:sticky; top:0; z-index:5; background:var(--card); border:1px solid var(--line);
+  border-radius:var(--radius); padding:10px 12px; margin:0 0 14px; box-shadow:var(--shadow);
+}
+.player audio{width:100%; margin-top:6px}
+.lines{font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; margin:0; padding:0; list-style:none}
+.lines li{padding:3px 10px; border-bottom:1px solid var(--line); display:grid; grid-template-columns:64px 1fr; gap:8px}
+.lines li:last-child{border-bottom:0}
+.lines .ln{color:var(--muted); text-align:right; user-select:none; font-variant-numeric:tabular-nums}
+.lines mark{background:var(--accent); color:var(--accent-fg); border-radius:2px}
+dialog.lb{
+  border:1px solid var(--line); border-radius:var(--radius); background:var(--bg); color:var(--fg);
+  max-width:min(96vw,1200px); width:auto; padding:0; box-shadow:var(--shadow);
+}
+dialog.lb::backdrop{background:rgba(0,0,0,.72)}
+dialog.lb .body{padding:12px; display:flex; flex-direction:column; gap:10px}
+dialog.lb .imgwrap{
+  overflow:auto; max-height:72vh; background:
+    repeating-conic-gradient(var(--card-2) 0% 25%, transparent 0% 50%) 50%/20px 20px;
+  border:1px solid var(--line); border-radius:8px; padding:8px; display:flex; justify-content:center;
+}
+dialog.lb img{max-width:100%; height:auto; display:block}
+dialog.lb dl{display:grid; grid-template-columns:auto 1fr; gap:2px 14px; margin:0; font-size:13px}
+dialog.lb dt{color:var(--muted)}
+dialog.lb dd{margin:0; font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.err{border-color:var(--c5); color:var(--c5)}
+@media (max-width:560px){
+  .grid{grid-template-columns:repeat(auto-fill,minmax(128px,1fr))}
+  .bar{grid-template-columns:1fr auto; grid-template-areas:"lab n" "track track"}
+  .bar .lab{grid-area:lab} .bar .n{grid-area:n} .bar .track{grid-area:track}
+  body{font-size:14.5px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Club Audition — extracted asset browser</h1>
+    <div class="muted" style="font-size:13px" id="subtitle">39 assets · 34 ui sprites · 12 ndadata pak · generated 2026-10-27T17:14:34Z  <span class="badge low">FIXTURE DATA</span></div>
+    <nav id="nav" aria-label="Sections"><a href="#/" aria-current="page">Overview</a><a href="#/textures">Textures</a><a href="#/audio">Audio</a><a href="#/sprites">UI Sprites</a><a href="#/data">Game Data</a></nav>
+  </div>
+</header>
+<main id="view" tabindex="-1"><div class="note"><b>Running on fixture data. </b>This is a small synthetic manifest plus real carved samples used to develop the UI. Run scripts/make_fixture.py's counterpart (extract_assets.py) and app/sync.sh to load the real manifest.</div><div class="card"><h2>Summary</h2><div class="stats"><div class="stat"><b>39</b><span>Total assets</span></div><div class="stat"><b>19</b><span>Image assets</span></div><div class="stat"><b>20</b><span>Audio assets</span></div><div class="stat"><b>34</b><span>UI sprites</span></div><div class="stat"><b>12</b><span>ndadata pak</span></div><div class="stat"><b>4</b><span>Archives</span></div></div></div><div class="card"><h2>Assets by format</h2><div class="bars"><div class="bar"><div class="lab" title="ogg">ogg</div><div class="track"><div class="fill" style="width: 100%; background: var(--c1);"></div></div><div class="n">20</div></div><div class="bar"><div class="lab" title="bmp">bmp</div><div class="track"><div class="fill" style="width: 40%; background: var(--c2);"></div></div><div class="n">8</div></div><div class="bar"><div class="lab" title="dds">dds</div><div class="track"><div class="fill" style="width: 30%; background: var(--c3);"></div></div><div class="n">6</div></div><div class="bar"><div class="lab" title="png">png</div><div class="track"><div class="fill" style="width: 25%; background: var(--c4);"></div></div><div class="n">5</div></div></div></div><div class="card"><h2>Assets by archive</h2><div class="bars"><div class="bar"><div class="lab" title="FxSound">FxSound</div><div class="track"><div class="fill" style="width: 100%; background: var(--c1);"></div></div><div class="n">20</div></div><div class="bar"><div class="lab" title="vh">vh</div><div class="track"><div class="fill" style="width: 40%; background: var(--c2);"></div></div><div class="n">8</div></div><div class="bar"><div class="lab" title="fx">fx</div><div class="track"><div class="fill" style="width: 30%; background: var(--c3);"></div></div><div class="n">6</div></div><div class="bar"><div class="lab" title="FixturePNG">FixturePNG</div><div class="track"><div class="fill" style="width: 25%; background: var(--c4);"></div></div><div class="n">5</div></div></div></div><div class="card"><h2>Archives</h2><table><thead><tr><th>Archive</th><th>Index size</th><th>Assets</th><th></th></tr></thead><tbody><tr><td>FixturePNG</td><td class="num">—</td><td class="num">5</td><td><a href="#/textures?archive=FixturePNG">textures</a></td></tr><tr><td>fx</td><td class="num">—</td><td class="num">6</td><td><a href="#/textures?archive=fx">textures</a></td></tr><tr><td>FxSound</td><td class="num">—</td><td class="num">20</td><td><a href="#/textures?archive=FxSound">textures</a></td></tr><tr><td>vh</td><td class="num">—</td><td class="num">8</td><td><a href="#/textures?archive=vh">textures</a></td></tr></tbody></table></div></main>
+
+<dialog class="lb" id="lightbox">
+  <div class="body">
+    <div class="spread">
+      <strong id="lb-title">—</strong>
+      <button type="button" id="lb-close">Close</button>
+    </div>
+    <div class="imgwrap" id="lb-imgwrap"></div>
+    <dl id="lb-meta"></dl>
+  </div>
+</dialog>
+
+<script>
+"use strict";
+(function () {
+  /* ------------------------------------------------------------------ *
+   * Club Audition asset browser — single file, no build step.
+   *
+   * SECURITY: every string that comes out of the manifest, the ssidata
+   * files or a filename is UNTRUSTED. This file never assigns such a
+   * value to innerHTML/outerHTML/insertAdjacentHTML or to a URL-valued
+   * attribute without going through safePath(). Text always goes in via
+   * textContent / createTextNode.
+   * ------------------------------------------------------------------ */
+
+  var MONTHS = 0;
+  var PAGE_TEXTURES = 60;
+  var PAGE_AUDIO = 100;
+  var PAGE_SPRITES = 60;
+  var DATA_RENDER_CAP = 400;
+  var IMG_EXT = ["bmp", "png", "jpg", "jpeg", "gif", "dds", "tga", "ktx"];
+
+  /* ---------------------------- utilities --------------------------- */
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = String(text);   // never innerHTML
+    return n;
+  }
+  function clear(node) { while (node.firstChild) node.removeChild(node.firstChild); }
+  function fmtInt(n) {
+    if (n == null || isNaN(n)) return "—";
+    return Number(n).toLocaleString("en-US");
+  }
+  function fmtBytes(n) {
+    if (n == null || isNaN(n)) return "—";
+    if (n < 1024) return n + " B";
+    var u = ["KB", "MB", "GB"], i = -1, v = n;
+    do { v /= 1024; i++; } while (v >= 1024 && i < u.length - 1);
+    return v.toFixed(v < 10 ? 1 : 0) + " " + u[i];
+  }
+  /** Reject anything that is not a plain relative path (blocks javascript:, data:, //host). */
+  function safePath(p) {
+    if (typeof p !== "string" || !p) return null;
+    if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(p)) return null;   // any scheme
+    if (p.charAt(0) === "/" || p.indexOf("\\") !== -1) return null;
+    if (p.indexOf("..") !== -1) return null;
+    return p;
+  }
+  function pct(part, whole) { return whole > 0 ? (part / whole) * 100 : 0; }
+
+  /* --------------------------- manifest state ------------------------ */
+
+  var M = null;                       // raw manifest
+  var IDX = {                         // derived indices, built once
+    assetById: Object.create(null),
+    images: [], audio: [], other: [],
+    formats: [], archives: [], imageFormats: []
+  };
+  var io = null;                      // IntersectionObserver for images
+  var audioObj = null;                // <audio> element for #/audio
+  var currentAudioId = null;
+
+  function indexManifest(m) {
+    M = m;
+    var assets = Array.isArray(m.assets) ? m.assets : [];
+    IDX = { assetById: Object.create(null), images: [], audio: [], other: [],
+            formats: [], archives: [], imageFormats: [] };
+    var fset = Object.create(null), afset = Object.create(null);
+    for (var i = 0; i < assets.length; i++) {
+      var a = assets[i];
+      if (!a || typeof a !== "object") continue;
+      var id = String(a.id == null ? "" : a.id);
+      if (id) IDX.assetById[id] = a;
+      var f = String(a.format == null ? "" : a.format).toLowerCase();
+      fset[f] = true;
+      IDX.other.push(a);
+      if (f === "ogg" || f === "mp3" || f === "wav") IDX.audio.push(a);
+      else if (IMG_EXT.indexOf(f) !== -1) IDX.images.push(a);
+    }
+    for (var k in fset) {
+      IDX.formats.push(k);
+      if (IMG_EXT.indexOf(k) !== -1) IDX.imageFormats.push(k);
+    }
+    IDX.formats.sort(); IDX.imageFormats.sort();
+    IDX.archives = (Array.isArray(m.archives) ? m.archives : []).slice();
+    IDX.archives.sort(function (x, y) { return String(x.name).localeCompare(String(y.name)); });
+  }
+  function isFixture() { return !!(M && M.fixture); }
+
+  /* ------------------------- routing / shell ------------------------- */
+
+  /* Paths here are WITHOUT the leading "#" — parseHash() strips it. */
+  var ROUTES = [
+    ["/", "Overview", viewOverview],
+    ["/textures", "Textures", viewTextures],
+    ["/audio", "Audio", viewAudio],
+    ["/sprites", "UI Sprites", viewSprites],
+    ["/data", "Game Data", viewData]
+  ];
+
+  function parseHash() {
+    var raw = location.hash || "#/";
+    if (raw.charAt(0) === "#") raw = raw.slice(1);
+    var q = raw.indexOf("?");
+    var path = q === -1 ? raw : raw.slice(0, q);
+    var params = {};
+    if (q !== -1) {
+      raw.slice(q + 1).split("&").forEach(function (kv) {
+        if (!kv) return;
+        var i = kv.indexOf("=");
+        var k = i === -1 ? kv : kv.slice(0, i);
+        var v = i === -1 ? "" : kv.slice(i + 1);
+        try { params[decodeURIComponent(k)] = decodeURIComponent(v.replace(/\+/g, " ")); }
+        catch (e) { params[k] = v; }
+      });
+    }
+    if (path === "/" || path === "") path = "/";
+    return { path: path, params: params };
+  }
+  function href(path, params) {
+    var s = "#" + path, parts = [];
+    for (var k in (params || {})) {
+      if (params[k] === "" || params[k] == null) continue;
+      parts.push(encodeURIComponent(k) + "=" + encodeURIComponent(params[k]));
+    }
+    return parts.length ? s + "?" + parts.join("&") : s;
+  }
+  function navTo(path, params) { location.hash = href(path, params).slice(1); }
+
+  function buildNav(active) {
+    var nav = document.getElementById("nav");
+    clear(nav);
+    ROUTES.forEach(function (r) {
+      var a = el("a", null, r[1]);
+      a.href = "#" + r[0];
+      if (r[0] === active) a.setAttribute("aria-current", "page");
+      nav.appendChild(a);
+    });
+  }
+
+  function setSubtitle() {
+    var s = document.getElementById("subtitle");
+    clear(s);
+    if (!M) { s.textContent = "manifest not loaded"; return; }
+    var sum = M.summary || {};
+    s.appendChild(document.createTextNode(
+      fmtInt(sum.total_assets) + " assets · " + fmtInt(sum.ui_sprites) + " ui sprites · " +
+      fmtInt(sum.ndadata_pak) + " ndadata pak · generated " + String(M.generated || "?")));
+    if (isFixture()) {
+      s.appendChild(document.createTextNode("  "));
+      var b = el("span", "badge low", "FIXTURE DATA");
+      s.appendChild(b);
+    }
+  }
+
+  function fixtureNote() {
+    if (!isFixture()) return null;
+    var n = el("div", "note");
+    n.appendChild(el("b", null, "Running on fixture data. "));
+    n.appendChild(document.createTextNode(
+      "This is a small synthetic manifest plus real carved samples used to develop the UI. " +
+      "Run scripts/make_fixture.py's counterpart (extract_assets.py) and app/sync.sh to load the real manifest."));
+    return n;
+  }
+
+  function route() {
+    var r = parseHash();
+    var found = null;
+    for (var i = 0; i < ROUTES.length; i++) if (ROUTES[i][0] === r.path) found = ROUTES[i];
+    if (!found) found = ROUTES[0];
+    buildNav(found[0]);
+    var view = document.getElementById("view");
+    clear(view);
+    if (io) { io.disconnect(); io = null; }
+    if (audioObj) { audioObj.pause(); audioObj = null; currentAudioId = null; }
+    var note = fixtureNote();
+    if (note) view.appendChild(note);
+    try {
+      found[2](view, r.params);
+    } catch (e) {
+      var box = el("div", "card err");
+      box.appendChild(el("h3", null, "This section failed to render"));
+      box.appendChild(el("pre", null, String(e && e.stack ? e.stack : e)));
+      view.appendChild(box);
+    }
+    view.focus();
+    window.scrollTo(0, 0);
+  }
+
+  /* ----------------------- lazy images / lightbox -------------------- */
+
+  function observeImages(root) {
+    var imgs = root.querySelectorAll("img[data-src]");
+    if (!("IntersectionObserver" in window)) {
+      for (var i = 0; i < imgs.length; i++) loadImg(imgs[i]);
+      return;
+    }
+    io = new IntersectionObserver(function (entries) {
+      for (var j = 0; j < entries.length; j++) {
+        if (entries[j].isIntersecting) { loadImg(entries[j].target); io.unobserve(entries[j].target); }
+      }
+    }, { rootMargin: "300px 0px" });
+    for (var k = 0; k < imgs.length; k++) io.observe(imgs[k]);
+  }
+  function loadImg(img) {
+    var src = img.getAttribute("data-src");
+    if (!src) return;
+    img.removeAttribute("data-src");
+    img.src = src;
+  }
+  function imgTile(src, altText, onFail) {
+    var img = el("img");
+    img.loading = "lazy";
+    img.decoding = "async";
+    img.alt = altText || "";
+    if (src) img.setAttribute("data-src", src);   // assigned by IntersectionObserver
+    if (onFail) img.addEventListener("error", onFail, { once: true });
+    return img;
+  }
+
+  function openLightbox(title, imgNode, rows) {
+    var lb = document.getElementById("lightbox");
+    document.getElementById("lb-title").textContent = title == null ? "—" : String(title);
+    var wrap = document.getElementById("lb-imgwrap");
+    clear(wrap);
+    if (imgNode) wrap.appendChild(imgNode);
+    var dl = document.getElementById("lb-meta");
+    clear(dl);
+    (rows || []).forEach(function (r) {
+      dl.appendChild(el("dt", null, r[0]));
+      dl.appendChild(el("dd", null, r[1]));
+    });
+    if (typeof lb.showModal === "function") lb.showModal();
+    else lb.setAttribute("open", "open");
+    var c = document.getElementById("lb-close");
+    if (c && c.focus) c.focus();
+  }
+
+  /* --------------------------- DDS decoding -------------------------- */
+  /* Returns {width,height,data:Uint8ClampedArray} for DXT1/DXT3/DXT5, else
+     null (caller then shows a labelled metadata placeholder). Pure — no DOM —
+     so it can be unit-tested with node. */
+  function ddsToRGBA(buf) {
+    var dv = new DataView(buf);
+    if (dv.byteLength < 128) return null;
+    if (dv.getUint32(0, true) !== 0x20534444) return null;      // "DDS "
+    if (dv.getUint32(4, true) !== 124) return null;
+    var h = dv.getUint32(12, true), w = dv.getUint32(16, true);
+    if (!w || !h || w > 8192 || h > 8192) return null;
+    if (dv.getUint32(76, true) !== 32) return null;             // DDS_PIXELFORMAT size
+    var four = dv.getUint32(84, true);
+    var isDXT1 = four === 0x31545844, isDXT3 = four === 0x33545844, isDXT5 = four === 0x35545844;
+    if (!isDXT1 && !isDXT3 && !isDXT5) return null;
+    var blockBytes = isDXT1 ? 8 : 16;
+    var bw = Math.max(1, (w + 3) >> 2), bh = Math.max(1, (h + 3) >> 2);
+    var need = 128 + bw * bh * blockBytes;
+    if (dv.byteLength < need) return null;
+    var out = new Uint8ClampedArray(w * h * 4);
+    var off = 128;
+    var pc = [0, 0, 0, 255], nc = [0, 0, 0, 255];
+    for (var by = 0; by < bh; by++) {
+      for (var bx = 0; bx < bw; bx++) {
+        var a0 = 255, a1 = 255, abits = 0, aBase = -1;
+        // DXT3 and DXT5 both start each block with 8 bytes of alpha data;
+        // DXT1 has none and goes straight to colour.
+        if (isDXT5 || isDXT3) {
+          aBase = off;
+          if (isDXT5) {
+            a0 = dv.getUint8(off); a1 = dv.getUint8(off + 1);
+            abits = dv.getUint8(off + 2) | (dv.getUint8(off + 3) << 8) |
+                    (dv.getUint8(off + 4) << 16) | (dv.getUint8(off + 5) << 24) |
+                    (dv.getUint8(off + 6) << 32) | (dv.getUint8(off + 7) << 40);
+          }
+          off += 8;
+        }
+        var c0 = dv.getUint16(off, true), c1 = dv.getUint16(off + 2, true);
+        var bits = dv.getUint32(off + 4, true);
+        off += 8;
+        rgb565(c0, pc); rgb565(c1, nc);
+        var pal = [pc.slice(), nc.slice(), [0, 0, 0, 255], [0, 0, 0, 255]];
+        if (c0 > c1 || isDXT3 || isDXT5) {
+          pal[2] = lerp(pc, nc, 1 / 3); pal[3] = lerp(pc, nc, 2 / 3);
+        } else {
+          pal[2] = lerp(pc, nc, 1 / 2); pal[3] = [0, 0, 0, 0];
+        }
+        for (var py = 0; py < 4; py++) {
+          for (var px = 0; px < 4; px++) {
+            var x = bx * 4 + px, y = by * 4 + py;
+            var ci = (bits >>> (2 * (py * 4 + px))) & 3;
+            var col = pal[ci], alpha = col[3];
+            if (isDXT5) {
+              var idx = (abits >>> (3 * (py * 4 + px))) & 7;
+              alpha = idx === 0 ? a0 : idx === 1 ? a1 :
+                      a0 > a1 ? Math.round(((8 - idx) * a0 + (idx - 1) * a1) / 7)
+                              : (idx === 6 ? 0 : 255);
+            } else if (isDXT3) {
+              var nb = (py * 4 + px) >> 1;
+              var byte = dv.getUint8(aBase + nb);
+              alpha = (((py * 4 + px) % 2) === 0 ? (byte & 0x0f) : (byte >> 4)) * 17;
+            }
+            if (x >= w || y >= h) continue;
+            var o = (y * w + x) * 4;
+            out[o] = col[0]; out[o + 1] = col[1]; out[o + 2] = col[2];
+            out[o + 3] = alpha;
+          }
+        }
+      }
+    }
+    return { width: w, height: h, data: out };
+  }
+  function rgb565(c, out) {
+    var r = (c >> 11) & 31, g = (c >> 5) & 63, b = c & 31;
+    out[0] = (r << 3) | (r >> 2); out[1] = (g << 2) | (g >> 4); out[2] = (b << 3) | (b >> 2); out[3] = 255;
+    return out;
+  }
+  function lerp(a, b, t) {
+    return [Math.round(a[0] + (b[0] - a[0]) * t), Math.round(a[1] + (b[1] - a[1]) * t),
+            Math.round(a[2] + (b[2] - a[2]) * t), 255];
+  }
+
+  /* Fetches a .dds and renders it into a canvas; resolves to a canvas or null. */
+  function ddsCanvas(asset, cb) {
+    var rel = safePath(asset.file);
+    if (!rel) { cb(null, "invalid path"); return; }
+    fetch(rel).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.arrayBuffer();
+    }).then(function (buf) {
+      var px = ddsToRGBA(buf);
+      if (!px) { cb(null, "unsupported DDS pixel format"); return; }
+      var cv = document.createElement("canvas");
+      cv.width = px.width; cv.height = px.height;
+      var ctx = cv.getContext("2d");
+      var id = ctx.createImageData(px.width, px.height);
+      id.data.set(px.data);
+      ctx.putImageData(id, 0, 0);
+      cb(cv, null);
+    }).catch(function (e) {
+      var text = String(e && e.message ? e.message : e);
+      // A file:// run cannot fetch(); say so instead of looking broken.
+      if (location.protocol === "file:") text = "needs a web server (see launch instructions)";
+      cb(null, text);
+    });
+  }
+
+  /* ------------------------------ overview --------------------------- */
+
+  function bar(label, value, max, color) {
+    var row = el("div", "bar");
+    var lab = el("div", "lab", label);
+    lab.title = label;
+    var track = el("div", "track");
+    var fill = el("div", "fill");
+    fill.style.width = Math.max(1.5, pct(value, max)).toFixed(2) + "%";
+    fill.style.background = color;
+    track.appendChild(fill);
+    row.appendChild(lab); row.appendChild(track); row.appendChild(el("div", "n", fmtInt(value)));
+    return row;
+  }
+
+  function viewOverview(root) {
+    var sum = (M && M.summary) || {};
+    var cards = el("div", "card");
+    cards.appendChild(el("h2", null, "Summary"));
+    var stats = el("div", "stats");
+    [["Total assets", sum.total_assets], ["Image assets", IDX.images.length],
+     ["Audio assets", IDX.audio.length], ["UI sprites", sum.ui_sprites != null ? sum.ui_sprites : (M.ui_sprites || []).length],
+     ["ndadata pak", sum.ndadata_pak != null ? sum.ndadata_pak : (M.ndadata || []).length],
+     ["Archives", IDX.archives.length]].forEach(function (s) {
+      var d = el("div", "stat");
+      d.appendChild(el("b", null, fmtInt(s[1])));
+      d.appendChild(el("span", null, s[0]));
+      stats.appendChild(d);
+    });
+    cards.appendChild(stats);
+    root.appendChild(cards);
+
+    var byFmt = sum.by_format || {};
+    var fkeys = Object.keys(byFmt);
+    if (fkeys.length) {
+      fkeys.sort(function (a, b) { return byFmt[b] - byFmt[a]; });
+      var fmax = byFmt[fkeys[0]] || 1;
+      var fc = el("div", "card");
+      fc.appendChild(el("h2", null, "Assets by format"));
+      var bars = el("div", "bars");
+      fkeys.forEach(function (k, i) {
+        bars.appendChild(bar(k, byFmt[k], fmax, "var(--c" + ((i % 5) + 1) + ")"));
+      });
+      fc.appendChild(bars);
+      root.appendChild(fc);
+    }
+
+    var byArc = sum.by_archive || {};
+    var akeys = Object.keys(byArc);
+    if (akeys.length) {
+      akeys.sort(function (a, b) { return byArc[b] - byArc[a]; });
+      var amax = byArc[akeys[0]] || 1;
+      var ac = el("div", "card");
+      ac.appendChild(el("h2", null, "Assets by archive"));
+      var abars = el("div", "bars");
+      akeys.slice(0, 24).forEach(function (k, i) {
+        abars.appendChild(bar(k, byArc[k], amax, "var(--c" + ((i % 5) + 1) + ")"));
+      });
+      if (akeys.length > 24) abars.appendChild(el("div", "muted", "… " + (akeys.length - 24) + " more archives"));
+      ac.appendChild(abars);
+      root.appendChild(ac);
+    }
+
+    var tcard = el("div", "card");
+    tcard.appendChild(el("h2", null, "Archives"));
+    if (!IDX.archives.length) {
+      tcard.appendChild(el("p", "muted", "No archives listed in the manifest."));
+    } else {
+      var t = el("table");
+      var thead = el("thead"), htr = el("tr");
+      ["Archive", "Index size", "Assets", ""].forEach(function (h) { htr.appendChild(el("th", null, h)); });
+      thead.appendChild(htr); t.appendChild(thead);
+      var tb = el("tbody");
+      IDX.archives.forEach(function (a) {
+        var tr = el("tr");
+        tr.appendChild(el("td", null, a.name == null ? "—" : a.name));
+        tr.appendChild(el("td", "num", a.idd_size ? fmtBytes(a.idd_size) : "—"));
+        tr.appendChild(el("td", "num", fmtInt(a.asset_count)));
+        var td = el("td");
+        var link = el("a", null, "textures");
+        link.href = href("/textures", { archive: a.name });
+        td.appendChild(link);
+        tr.appendChild(td);
+        tb.appendChild(tr);
+      });
+      t.appendChild(tb);
+      tcard.appendChild(t);
+    }
+    root.appendChild(tcard);
+  }
+
+  /* ---------------------------- textures ----------------------------- */
+
+  function viewTextures(root, params) {
+    var archive = params.archive || "";
+    var format = params.format || "";
+    var page = Math.max(1, parseInt(params.page, 10) || 1);
+
+    var ctl = el("div", "card");
+    ctl.appendChild(el("h2", null, "Filters"));
+    var row = el("div", "row");
+
+    function mkSelect(labelText, options, value, key) {
+      var id = "f-" + key + "-" + Math.random().toString(36).slice(2, 7);
+      var l = el("label", null, labelText); l.setAttribute("for", id);
+      var s = el("select"); s.id = id;
+      options.forEach(function (o) {
+        var op = el("option", null, o[1]); op.value = o[0];
+        if (o[0] === value) op.selected = true;
+        s.appendChild(op);
+      });
+      s.addEventListener("change", function () {
+        var p = { archive: archive, format: format };
+        p[key] = s.value;
+        p.page = "";
+        navTo("/textures", p);
+      });
+      var w = el("span", "row"); w.appendChild(l); w.appendChild(s);
+      return w;
+    }
+
+    var arcOpts = [["", "All archives"]].concat(IDX.archives.map(function (a) { return [String(a.name), String(a.name)]; }));
+    row.appendChild(mkSelect("Archive", arcOpts, archive, "archive"));
+    var fmtOpts = [["", "All image formats"]].concat(IDX.imageFormats.map(function (f) { return [f, f.toUpperCase()]; }));
+    row.appendChild(mkSelect("Format", fmtOpts, format, "format"));
+    ctl.appendChild(row);
+    root.appendChild(ctl);
+
+    var list = IDX.images.filter(function (a) {
+      if (archive && String(a.archive) !== archive) return false;
+      if (format && String(a.format).toLowerCase() !== format) return false;
+      return true;
+    });
+
+    var card = el("div", "card");
+    var head = el("div", "spread");
+    head.appendChild(el("h2", null, "Textures — " + fmtInt(list.length) + " match" + (list.length === 1 ? "" : "es")));
+    var ddsNote = el("span", "muted", "DDS files are decoded in-browser (DXT1/3/5); others show a labelled placeholder.");
+    head.appendChild(ddsNote);
+    card.appendChild(head);
+
+    if (!list.length) {
+      card.appendChild(el("p", "muted", "No image assets match these filters. If the manifest is real, image formats present are: " +
+        (IDX.imageFormats.join(", ") || "none") + "."));
+      root.appendChild(card);
+      return;
+    }
+
+    var pages = Math.ceil(list.length / PAGE_TEXTURES);
+    if (page > pages) page = pages;
+    var slice = list.slice((page - 1) * PAGE_TEXTURES, page * PAGE_TEXTURES);
+
+    var grid = el("div", "grid");
+    slice.forEach(function (a) {
+      grid.appendChild(imageTile(a));
+    });
+    card.appendChild(grid);
+    card.appendChild(pager(page, pages, list.length, function (p) {
+      navTo("/textures", { archive: archive, format: format, page: p > 1 ? p : "" });
+    }));
+    root.appendChild(card);
+    observeImages(card);
+  }
+
+  function imageTile(a) {
+    var tile = el("div", "tile");
+    var frame = el("div", "frame");
+    var fmt = String(a.format || "").toLowerCase();
+    var rel = safePath(a.file);
+    var name = a.name != null ? String(a.name) : String(a.id || "?");
+    if (!rel) {
+      frame.appendChild(placeholder("Invalid path", "manifest value rejected"));
+    } else if (fmt === "dds") {
+      // Decode the DXT blocks; if the format is unsupported, show the labelled placeholder.
+      var ph = placeholder("DDS", "decoding…");
+      frame.appendChild(ph);
+      ddsCanvas(a, function (cv, err) {
+        clear(frame);
+        if (cv) {
+          cv.style.maxWidth = "100%"; cv.style.maxHeight = "150px";
+          cv.setAttribute("role", "img");
+          cv.setAttribute("aria-label", name);
+          frame.appendChild(cv);
+          tile.dataset.decoded = "1";
+        } else {
+          frame.appendChild(placeholder("DDS", err || "not decoded"));
+          tile.dataset.decoded = "0";
+          tile.dataset.decodeErr = String(err || "");
+        }
+        if (tile._open) tile._open();
+      });
+      tile._open = function () { openAsset(a); };
+    } else {
+      var img = imgTile(rel, name, function () {
+        clear(frame);
+        frame.appendChild(placeholder(fmt.toUpperCase(), "file not found"));
+      });
+      frame.appendChild(img);
+      tile._open = function () { openAsset(a); };
+    }
+    tile.appendChild(frame);
+
+    var meta = el("div", "meta");
+    var nm = el("span", "nm", name); nm.title = name;
+    meta.appendChild(nm);
+    var sub = el("span", "sub", fmt.toUpperCase() + " · " + fmtBytes(a.size));
+    meta.appendChild(sub);
+    var conf = el("span", "badge " + (a.confidence === "high" ? "high" : "low"), String(a.confidence || "?"));
+    meta.appendChild(conf);
+    tile.appendChild(meta);
+
+    tile.tabIndex = 0;
+    tile.setAttribute("role", "button");
+    tile.setAttribute("aria-label", "Open " + name);
+    var open = function () { if (tile._open) tile._open(); };
+    tile.addEventListener("click", open);
+    tile.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); }
+    });
+    return tile;
+  }
+
+  function placeholder(big, small) {
+    var p = el("div", "ph");
+    p.appendChild(el("b", null, big));
+    if (small) p.appendChild(el("span", null, small));
+    return p;
+  }
+
+  function openAsset(a) {
+    var rows = [
+      ["ID", String(a.id == null ? "—" : a.id)],
+      ["Archive", String(a.archive == null ? "—" : a.archive)],
+      ["Index", a.index == null ? "—" : fmtInt(a.index)],
+      ["Offset", a.offset == null ? "—" : fmtInt(a.offset)],
+      ["Size", a.size == null ? "—" : fmtInt(a.size) + " B (" + fmtBytes(a.size) + ")"],
+      ["Format", String(a.format || "—") + (a.mime ? " (" + a.mime + ")" : "")],
+      ["Confidence", String(a.confidence || "—")]
+    ];
+    var rel = safePath(a.file);
+    if (!rel) { openLightbox(a.name || a.id, null, rows); return; }
+    var fmt = String(a.format || "").toLowerCase();
+    if (fmt === "dds") {
+      var holder = el("div", "ph");
+      holder.appendChild(el("b", null, "DDS"));
+      holder.appendChild(el("span", null, "decoding…"));
+      openLightbox(a.name || a.id, holder, rows);
+      ddsCanvas(a, function (cv, err) {
+        var wrap = document.getElementById("lb-imgwrap");
+        clear(wrap);
+        if (cv) { cv.style.maxWidth = "100%"; wrap.appendChild(cv); }
+        else wrap.appendChild(placeholder("DDS", err || "not decoded"));
+      });
+      return;
+    }
+    var img = el("img");
+    img.alt = a.name != null ? String(a.name) : String(a.id || "");
+    img.src = rel;
+    img.addEventListener("error", function () {
+      var wrap = document.getElementById("lb-imgwrap");
+      clear(wrap); wrap.appendChild(placeholder(fmt.toUpperCase(), "file not found"));
+    }, { once: true });
+    openLightbox(a.name || a.id, img, rows);
+  }
+
+  function pager(page, pages, total, go) {
+    var p = el("div", "pager");
+    var first = el("button", null, "« First");
+    first.disabled = page <= 1;
+    first.addEventListener("click", function () { go(1); });
+    var prev = el("button", null, "‹ Prev");
+    prev.disabled = page <= 1;
+    prev.addEventListener("click", function () { go(page - 1); });
+    var next = el("button", null, "Next ›");
+    next.disabled = page >= pages;
+    next.addEventListener("click", function () { go(page + 1); });
+    var last = el("button", null, "Last »");
+    last.disabled = page >= pages;
+    last.addEventListener("click", function () { go(pages); });
+    p.appendChild(first); p.appendChild(prev); p.appendChild(next); p.appendChild(last);
+    p.appendChild(el("span", "info", "page " + fmtInt(page) + " / " + fmtInt(pages) +
+      " · " + fmtInt(total) + " items"));
+    var jump = el("input");
+    jump.type = "text"; jump.size = 5; jump.setAttribute("aria-label", "Go to page");
+    jump.placeholder = "#";
+    var btn = el("button", null, "Go");
+    btn.addEventListener("click", function () {
+      var v = parseInt(jump.value, 10);
+      if (v >= 1 && v <= pages) go(v);
+    });
+    p.appendChild(jump); p.appendChild(btn);
+    return p;
+  }
+
+  /* ------------------------------ audio ------------------------------ */
+  /* ~24k entries in the real manifest: only PAGE_AUDIO rows exist in the
+     DOM at a time, and search always resets to page 1. */
+
+  function viewAudio(root, params) {
+    var q = params.q || "";
+    var archive = params.archive || "";
+    var page = Math.max(1, parseInt(params.page, 10) || 1);
+
+    var player = el("div", "player");
+    var ptitle = el("div");
+    ptitle.appendChild(el("strong", null, "No track selected"));
+    player.appendChild(ptitle);
+    var pmeta = el("div", "muted", "");
+    pmeta.style.fontSize = "12.5px";
+    player.appendChild(pmeta);
+    audioObj = el("audio");
+    audioObj.controls = true;
+    audioObj.preload = "none";
+    player.appendChild(audioObj);
+    root.appendChild(player);
+
+    var ctl = el("div", "card");
+    var row = el("div", "row");
+    var sid = "audio-search";
+    var lab = el("label", null, "Search"); lab.setAttribute("for", sid);
+    var input = el("input"); input.type = "search"; input.id = sid;
+    input.value = q; input.placeholder = "name, id or index…";
+    input.style.minWidth = "220px";
+    var t = null;
+    input.addEventListener("input", function () {
+      if (t) clearTimeout(t);
+      t = setTimeout(function () { navTo("/audio", { q: input.value, archive: archive }); }, 220);
+    });
+    row.appendChild(lab); row.appendChild(input);
+
+    var aid = "audio-archive";
+    var alab = el("label", null, "Archive"); alab.setAttribute("for", aid);
+    var asel = el("select"); asel.id = aid;
+    [["", "All archives"]].concat(
+      IDX.archives.filter(function (a) {
+        return IDX.audio.some(function (x) { return String(x.archive) === String(a.name); });
+      }).map(function (a) { return [String(a.name), String(a.name)]; })
+    ).forEach(function (o) {
+      var op = el("option", null, o[1]); op.value = o[0];
+      if (o[0] === archive) op.selected = true;
+      asel.appendChild(op);
+    });
+    asel.addEventListener("change", function () { navTo("/audio", { q: q, archive: asel.value }); });
+    row.appendChild(alab); row.appendChild(asel);
+    ctl.appendChild(row);
+    root.appendChild(ctl);
+
+    var needle = q.toLowerCase();
+    var list = IDX.audio.filter(function (a) {
+      if (archive && String(a.archive) !== archive) return false;
+      if (!needle) return true;
+      var hay = (String(a.name == null ? "" : a.name) + " " + String(a.id == null ? "" : a.id) +
+                 " " + String(a.archive == null ? "" : a.archive) + " " + String(a.index == null ? "" : a.index)).toLowerCase();
+      return hay.indexOf(needle) !== -1;
+    });
+
+    var card = el("div", "card");
+    card.appendChild(el("h2", null, "Audio — " + fmtInt(list.length) + " track" + (list.length === 1 ? "" : "s") +
+      (needle ? " matching “" + q + "”" : "")));
+    if (!list.length) {
+      card.appendChild(el("p", "muted", "No audio assets match."));
+      root.appendChild(card);
+      return;
+    }
+    var pages = Math.ceil(list.length / PAGE_AUDIO);
+    if (page > pages) page = pages;
+    var slice = list.slice((page - 1) * PAGE_AUDIO, page * PAGE_AUDIO);
+
+    card.appendChild(pager(page, pages, list.length, function (p) {
+      navTo("/audio", { q: q, archive: archive, page: p > 1 ? p : "" });
+    }));
+
+    var box = el("div", "listmax");
+    var ul = el("ul", "trk");
+    var frag = document.createDocumentFragment();
+    slice.forEach(function (a) {
+      var li = el("li");
+      var btn = el("button");
+      btn.type = "button";
+      var nm = el("span", "nm", a.name != null ? String(a.name) : String(a.id || "?"));
+      var sub = el("span", "sub", String(a.format || "").toUpperCase() + " · " + fmtBytes(a.size));
+      btn.appendChild(nm); btn.appendChild(sub);
+      btn.addEventListener("click", function () {
+        var rel = safePath(a.file);
+        if (!rel) { pmeta.textContent = "invalid path in manifest"; return; }
+        currentAudioId = String(a.id == null ? "" : a.id);
+        audioObj.src = rel;
+        audioObj.play().catch(function () { /* autoplay policy: user can press play */ });
+        ptitle.textContent = "";
+        ptitle.appendChild(el("strong", null, a.name != null ? String(a.name) : String(a.id || "?")));
+        pmeta.textContent = String(a.archive == null ? "" : a.archive) + " · index " + fmtInt(a.index) +
+          " · offset " + fmtInt(a.offset) + " · " + fmtInt(a.size) + " B · " + String(a.confidence || "");
+        var all = ul.querySelectorAll("button");
+        for (var i = 0; i < all.length; i++) all[i].removeAttribute("aria-pressed");
+        btn.setAttribute("aria-pressed", "true");
+      });
+      if (currentAudioId && String(a.id) === currentAudioId) btn.setAttribute("aria-pressed", "true");
+      li.appendChild(btn);
+      frag.appendChild(li);
+    });
+    ul.appendChild(frag);
+    box.appendChild(ul);
+    card.appendChild(box);
+    card.appendChild(pager(page, pages, list.length, function (p) {
+      navTo("/audio", { q: q, archive: archive, page: p > 1 ? p : "" });
+    }));
+    root.appendChild(card);
+  }
+
+  /* ------------------------------ sprites ---------------------------- */
+
+  function viewSprites(root) {
+    var list = Array.isArray(M.ui_sprites) ? M.ui_sprites : [];
+    var card = el("div", "card");
+    var head = el("div", "spread");
+    head.appendChild(el("h2", null, "UI sprite sheets — " + fmtInt(list.length)));
+    head.appendChild(el("span", "muted", "Plaintext vh/*.bmp UI atlases. Tiles keep the sheet's aspect ratio."));
+    card.appendChild(head);
+    if (!list.length) {
+      card.appendChild(el("p", "muted", "No ui_sprites in the manifest."));
+      root.appendChild(card);
+      return;
+    }
+    var page = Math.max(1, parseInt(parseHash().params.page, 10) || 1);
+    var pages = Math.ceil(list.length / PAGE_SPRITES);
+    if (page > pages) page = pages;
+    var slice = list.slice((page - 1) * PAGE_SPRITES, page * PAGE_SPRITES);
+
+    var grid = el("div", "grid");
+    slice.forEach(function (s) {
+      var name = String(s.name == null ? "?" : s.name);
+      var rel = safePath(s.file);
+      var tile = el("div", "tile");
+      var frame = el("div", "frame");
+      // Sprite sheets are often extreme aspect ratios (e.g. 921x36): cap by
+      // both width and height and never stretch, so they stay recognisable.
+      var img;
+      if (rel) {
+        img = imgTile(rel, name, function () {
+          clear(frame);
+          frame.appendChild(placeholder("BMP", "file not found"));
+        });
+        img.style.maxWidth = "100%";
+        img.style.maxHeight = "110px";
+        frame.appendChild(img);
+      } else {
+        frame.appendChild(placeholder("BMP", "invalid path"));
+      }
+      tile.appendChild(frame);
+      var meta = el("div", "meta");
+      var nm = el("span", "nm", name); nm.title = name;
+      meta.appendChild(nm);
+      meta.appendChild(el("span", "sub",
+        (s.width != null ? fmtInt(s.width) : "?") + " × " + (s.height != null ? fmtInt(s.height) : "?") +
+        " · " + fmtBytes(s.size)));
+      tile.appendChild(meta);
+      tile.tabIndex = 0;
+      tile.setAttribute("role", "button");
+      tile.setAttribute("aria-label", "Zoom " + name);
+      var open = function () {
+        var big = el("img");
+        big.alt = name;
+        if (rel) {
+          big.src = rel;
+          big.addEventListener("error", function () {
+            var w = document.getElementById("lb-imgwrap");
+            clear(w); w.appendChild(placeholder("BMP", "file not found"));
+          }, { once: true });
+        }
+        openLightbox(name, rel ? big : placeholder("BMP", "invalid path"), [
+          ["Name", name],
+          ["File", String(s.file == null ? "—" : s.file)],
+          ["Width", s.width == null ? "—" : fmtInt(s.width)],
+          ["Height", s.height == null ? "—" : fmtInt(s.height)],
+          ["Size", s.size == null ? "—" : fmtInt(s.size) + " B (" + fmtBytes(s.size) + ")"],
+          ["Aspect", (s.width && s.height) ? (s.width / s.height).toFixed(2) + " : 1" : "—"]
+        ]);
+      };
+      tile.addEventListener("click", open);
+      tile.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); }
+      });
+      grid.appendChild(tile);
+    });
+    card.appendChild(grid);
+    card.appendChild(pager(page, pages, list.length, function (p) {
+      navTo("/sprites", { page: p > 1 ? p : "" });
+    }));
+    root.appendChild(card);
+    observeImages(card);
+  }
+
+  /* ----------------------------- game data --------------------------- */
+  /* ssidata/ holds the decoded *.strings.txt (ASCII) and the original
+     *.ssd/*.ini blobs. The blobs are CP949/EUC-KR Korean; TextDecoder
+     ("euc-kr") is used on the raw bytes, with a graceful fallback. */
+
+  function viewData(root, params) {
+    var file = params.file || "";
+    var q = params.q || "";
+
+    var card = el("div", "card");
+    card.appendChild(el("h2", null, "Decoded game data (ssi)"));
+    card.appendChild(el("p", "muted",
+      "Files decoded from the .ssd / .ini containers. “.strings.txt” files are ASCII string dumps; " +
+      "“.bin” files are the original blobs and are decoded as EUC-KR (CP949) in the browser."));
+    var ctl = el("div", "row");
+    var status = el("span", "muted", "");
+    card.appendChild(ctl);
+    card.appendChild(status);
+    root.appendChild(card);
+
+    // index.json is generated next to the data; fall back to a small known list.
+    fetch("ssidata/index.json").then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function (idx) {
+      var files = (idx && Array.isArray(idx.files)) ? idx.files : [];
+      if (!files.length) throw new Error("empty index");
+      buildPicker(files);
+    }).catch(function (e) {
+      status.textContent = "Could not read ssidata/index.json (" + String(e && e.message ? e.message : e) +
+        "). Run the app from a web server (see launch instructions).";
+    });
+
+    function buildPicker(files) {
+      var id = "data-file";
+      var lab = el("label", null, "File"); lab.setAttribute("for", id);
+      var sel = el("select"); sel.id = id;
+      sel.style.maxWidth = "min(420px,100%)";
+      if (!file) file = files[0].name;
+      files.forEach(function (f) {
+        var op = el("option", null, f.name + "  (" + fmtBytes(f.bytes) + ")");
+        op.value = f.name;
+        if (f.name === file) op.selected = true;
+        sel.appendChild(op);
+      });
+      sel.addEventListener("change", function () { navTo("/data", { file: sel.value, q: q }); });
+      ctl.appendChild(lab); ctl.appendChild(sel);
+
+      var sid = "data-search";
+      var slab = el("label", null, "Filter"); slab.setAttribute("for", sid);
+      var input = el("input"); input.type = "search"; input.id = sid;
+      input.value = q; input.placeholder = "substring, case-insensitive…";
+      input.style.minWidth = "220px";
+      var t = null;
+      input.addEventListener("input", function () {
+        if (t) clearTimeout(t);
+        t = setTimeout(function () { navTo("/data", { file: file, q: input.value }); }, 220);
+      });
+      ctl.appendChild(slab); ctl.appendChild(input);
+
+      status.textContent = "Loading " + file + " …";
+      loadDataFile(file, q, root, status);
+    }
+  }
+
+  function loadDataFile(file, q, root, status) {
+    var meta = null;
+    if (!/^[A-Za-z0-9._-]+$/.test(file)) {
+      status.textContent = "Rejected file name (must be a plain name).";
+      return;
+    }
+    fetch("ssidata/" + file).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.arrayBuffer();
+    }).then(function (buf) {
+      var bytes = new Uint8Array(buf);
+      var text, enc = "utf-8";
+      var highBytes = 0;
+      for (var i = 0; i < bytes.length; i++) if (bytes[i] > 127) { highBytes++; if (highBytes > 4) break; }
+      if (highBytes > 4 && typeof TextDecoder === "function") {
+        try {
+          text = new TextDecoder("euc-kr", { fatal: false }).decode(bytes);
+          enc = "euc-kr";
+        } catch (e) { text = null; }
+      }
+      if (text == null) {
+        try { text = new TextDecoder("utf-8", { fatal: false }).decode(bytes); }
+        catch (e2) { text = ""; }
+      }
+      // Strip raw control bytes; keep newlines/tabs.
+      text = text.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "\n");
+      var lines = text.split(/\r\n|\r|\n/).filter(function (l) { return l.trim().length > 0; });
+
+      var card = el("div", "card");
+      var needle = q.toLowerCase();
+      var hits = needle ? lines.filter(function (l) { return l.toLowerCase().indexOf(needle) !== -1; }) : lines;
+      card.appendChild(el("h2", null, file + " — " + fmtInt(lines.length) + " lines, " +
+        fmtInt(hits.length) + " shown" + (needle ? " (filtered)" : "")));
+      card.appendChild(el("p", "muted", "Decoded as " + enc + " · " + fmtBytes(bytes.length) +
+        (hits.length > DATA_RENDER_CAP ? " · rendering first " + fmtInt(DATA_RENDER_CAP) + " matches" : "")));
+
+      var shown = Math.min(hits.length, DATA_RENDER_CAP);
+      var ul = el("ul", "lines");
+      var frag = document.createDocumentFragment();
+      for (var k = 0; k < shown; k++) {
+        var li = el("li");
+        li.appendChild(el("span", "ln", fmtInt(k + 1)));
+        var body = el("span");
+        var line = hits[k];
+        if (needle) {
+          // highlight the needle without ever touching innerHTML
+          var low = line.toLowerCase(), from = 0, at;
+          while ((at = low.indexOf(needle, from)) !== -1) {
+            if (at > from) body.appendChild(document.createTextNode(line.slice(from, at)));
+            body.appendChild(el("mark", null, line.slice(at, at + needle.length)));
+            from = at + needle.length;
+          }
+          body.appendChild(document.createTextNode(line.slice(from)));
+        } else {
+          body.appendChild(document.createTextNode(line));
+        }
+        li.appendChild(body);
+        frag.appendChild(li);
+      }
+      ul.appendChild(frag);
+      var box = el("div", "listmax");
+      box.appendChild(ul);
+      card.appendChild(box);
+      if (hits.length > shown) {
+        card.appendChild(el("p", "muted", "… and " + fmtInt(hits.length - shown) +
+          " more matches not rendered. Narrow the filter to see them."));
+      }
+      root.appendChild(card);
+      status.textContent = "";
+    }).catch(function (e) {
+      status.textContent = "Could not load ssidata/" + file + ": " + String(e && e.message ? e.message : e);
+    });
+  }
+
+  /* ------------------------------- boot ------------------------------ */
+
+  document.getElementById("lb-close").addEventListener("click", function () {
+    var lb = document.getElementById("lightbox");
+    if (typeof lb.close === "function") lb.close(); else lb.removeAttribute("open");
+  });
+
+  window.addEventListener("hashchange", route);
+
+  fetch("manifest.json").then(function (r) {
+    if (!r.ok) throw new Error("HTTP " + r.status + " for manifest.json");
+    return r.json();
+  }).then(function (m) {
+    indexManifest(m);
+    setSubtitle();
+    route();
+  }).catch(function (e) {
+    var view = document.getElementById("view");
+    clear(view);
+    var box = el("div", "card err");
+    box.appendChild(el("h3", null, "Could not load manifest.json"));
+    box.appendChild(el("p", null, String(e && e.message ? e.message : e)));
+    box.appendChild(el("p", null, "Serve the app/public directory over HTTP, e.g. " +
+      "cd app/public && python3 -m http.server 8000 — then open http://localhost:8000/."));
+    view.appendChild(box);
+  });
+})();
 </script>
+
+
 </body></html>

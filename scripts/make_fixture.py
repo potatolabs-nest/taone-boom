@@ -17,7 +17,7 @@ import zlib
 
 ROOT = "/Users/hieu/Workspaces/taone"
 SRC = os.path.join(ROOT, "extracted", "Boom")
-PUB = os.path.join(ROOT, "app", "public")
+PUB = os.environ.get("FIXTURE_OUT") or os.path.join(ROOT, "app", "public")
 SSI = os.path.join(ROOT, "work", "ssi")
 
 
@@ -101,7 +101,38 @@ def synth_png(w, h, rgb):
             + chunk(b"IEND", b""))
 
 
+DDS_COLORS = [(220, 60, 60), (60, 200, 120), (70, 120, 240), (230, 180, 40),
+              (170, 90, 220), (60, 200, 220)]
+
+
+def _rgb565(r, g, b):
+    return ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3)
+
+
+def dds_dxt1(w, h, rgb):
+    """A valid single-mip 64-bit-per-4x4-block DXT1 DDS of one solid colour."""
+    bw, bh = max(1, (w + 3) // 4), max(1, (h + 3) // 4)
+    data_size = bw * bh * 8
+    c = _rgb565(*rgb)
+    block = struct.pack("<HHI", c, 0, 0)          # colour0, colour1, all index 0
+    hdr = bytearray(128)
+    hdr[0:4] = b"DDS "
+    struct.pack_into("<I", hdr, 4, 124)           # dwSize
+    struct.pack_into("<I", hdr, 8, 0x81007)       # CAPS|HEIGHT|WIDTH|PIXELFORMAT|LINEARSIZE
+    struct.pack_into("<I", hdr, 12, h)            # dwHeight
+    struct.pack_into("<I", hdr, 16, w)            # dwWidth
+    struct.pack_into("<I", hdr, 20, data_size)    # dwPitchOrLinearSize
+    struct.pack_into("<I", hdr, 28, 1)            # dwMipMapCount
+    struct.pack_into("<I", hdr, 76, 32)           # DDS_PIXELFORMAT.dwSize
+    struct.pack_into("<I", hdr, 80, 0x4)          # DDPF_FOURCC
+    hdr[84:88] = b"DXT1"                          # dwFourCC
+    struct.pack_into("<I", hdr, 108, 0x1000)      # dwCaps = DDSCAPS_TEXTURE
+    return bytes(hdr) + block * (bw * bh)
+
+
 def main():
+    if not os.path.isdir(PUB):
+        os.makedirs(PUB)
     assets_root = os.path.join(PUB, "fixture-assets")
     if os.path.isdir(assets_root):
         shutil.rmtree(assets_root)
@@ -142,10 +173,11 @@ def main():
         add("vh", n, blob, "bmp", "image/bmp", os.path.splitext(fn)[0], "high")
 
     # --- synthetic DDS (DXT1) placeholders ------------------------------
+    # Proper 128-byte DDS_HEADER: DDS_PIXELFORMAT starts at 76, its dwFourCC
+    # at 84. Each file is a 64x64 DXT1 image of one solid colour (16x16
+    # blocks, all colour indices 0 -> colour0).
     for n in range(6):
-        head = (b"DDS " + struct.pack("<II", 124, 0x1007) + struct.pack("<II", 64, 64)
-                + b"\x00" * 76 + b"DXT1" + b"\x00" * 20 + struct.pack("<I", 0x1000))
-        add("fx", n, head + bytes([(n * 37 + 20) % 256]) * 2048, "dds",
+        add("fx", n, dds_dxt1(64, 64, DDS_COLORS[n % len(DDS_COLORS)]), "dds",
             "image/vnd-ms.dds", "tex_%02d" % n, "low")
 
     # --- synthetic PNGs (several sizes, incl. wide sprite-like) ---------
