@@ -1,0 +1,12 @@
+import sys, zlib, os, struct
+d=open(sys.argv[1],'rb').read()
+print(f"{os.path.basename(sys.argv[1])} size={len(d)} magic={d[:8]}")
+a,b=struct.unpack_from('<II', d, 8)
+print(f"  u32 @8={a} @12={b}")
+zf=d.find(b'\x78\xda')
+print(f"  zlib @ {zf}")
+o=zlib.decompressobj(); out=o.decompress(d[zf:])+o.flush()
+print(f"  inflated {len(out):,} bytes; unused={len(o.unused_data)}")
+print("  head:", out[:160])
+print("  hex :", out[:96].hex(' '))
+open('/tmp/pak_out.bin','wb').write(out)
