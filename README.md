@@ -30,8 +30,9 @@ Four hard blockers to a playable port:
    BlackCipher; `CA.dll` and `DWK.dll` are **encrypted on disk** (they are byte-identical
    to each other and contain no readable structure). The game logic is not directly
    readable.
-3. **The asset container is only partly reversed.** Of 12 `.idd` archives, **1 is
-   fully extractable**. The rest use a custom container we have not cracked yet.
+3. **The asset container is only partly reversed.** **~12% of the 1,086 MB of asset
+   volume is recovered** — 894 validated files. One archive (`FxSound`) is complete;
+   the rest are partial or empty. The archive reader is in Themida-protected `CA.dll`.
 4. **A renderer would have to be written from scratch.** DirectX 9, custom `.fft`
    fonts, `.idd` sprite/animation tables, Bink video (`.bik`). None of this maps to
    the browser; it would be a reimplementation, not a port.
@@ -49,19 +50,61 @@ would be an original game inspired by the assets, **not** a port of this one.
 | 0. Extract archive | ✅ Done | 367 files / 1.30 GB |
 | 1. Decode `ssi1` containers | ✅ Done | 30 files decoded |
 | 2. `ndadata/*.pak` | ✅ Done | 68 inflated |
-| 3. Extract `FxSound.idd` | ✅ Done | **693 Oggs, 100% coverage, verified** |
+| 3. Extract assets from `.idd` | 🟡 Partial | **894 files, 12.02% of 1,086 MB** |
 | 4. Copy UI sprites | ✅ Done | 34 BMPs, real names |
 | 5. Build asset extractor | ✅ Done | `scripts/extract_assets.py` |
-| 6. Generate manifest | ✅ Done | 693 assets + 34 sprites + 68 paks |
-| 7. Web app UI | 🟡 In progress | data staged, **no HTML yet** |
-| 8. Crack `.idx` filenames | 🟡 In progress | cipher not broken |
-| 9. Remaining 11 `.idd` archives | 🔴 Blocked | need container format |
-| 10. Game renderer / logic | ⬜ Not started | blocked by #9 + server |
-| 11. Server protocol | ⬜ Not started | **likely infeasible** |
+| 6. Web app | ✅ Done | 5 routes, DDS decode, XSS-tested |
+| 7. Crack `.idx` filenames | 🔴 Blocked | engine binary is protected |
+| 8. Game renderer / logic | ⬜ Not started | blocked by #7 + server |
+| 9. Server protocol | ⬜ Not started | **infeasible**, see below |
 
-**Overall: the asset-extraction half is real and verified; the "playable game" half
-is not achievable from this archive.** Roughly one of twelve asset archives is
-fully recovered.
+### Extraction coverage — measured, not estimated
+
+| archive | size | files carved | coverage |
+|---|--:|--:|--:|
+| **FxSound** | 92.1 MB | 693 | **100.00%** |
+| FxHiddenCatch | 40.3 MB | 24 | 38.32% |
+| FxContents | 51.6 MB | 21 | 8.69% |
+| FxMap | 90.2 MB | 15 | 7.84% |
+| FxDesktop | 48.5 MB | 24 | 7.53% |
+| FxStage | 56.2 MB | 18 | 6.32% |
+| EmoTE | 225.4 MB | 62 | 1.66% |
+| fx | 87.2 MB | 22 | 0.27% |
+| FxMonster | 71.9 MB | 3 | 0.13% |
+| CharTE | 289.0 MB | 12 | 0.08% |
+| FxCharacter | 33.5 MB | 0 | 0.00% |
+| **TOTAL** | **1,086 MB** | **894** | **12.02%** |
+
+**So: ~12% of the asset volume is recovered.** One archive is complete; the rest are
+partial (signature-carved) or empty. Everything carved is format-validated — 747 Ogg
+streams (`libVorbis`, decode in `afinfo`) and 147 JPEGs (`JFIF standard 1.02`).
+
+### Why the remaining 88% is blocked
+
+The archive reader lives in **`CA.dll`, which is Themida-protected** — it has a literal
+`.themida` section (7,987,200 bytes virtual, `rawsz=0`) plus a `.boot` section, and also
+carries UPX. `CA.exe` is nProtect GameGuard-packed (entropy ~7.96). Themida and
+GameGuard both defeat Ghidra's static analysis, so the container format and the `.idx`
+cipher cannot be read out of the binary.
+
+`Patcher.exe` (2.7 MB, 12,869 functions) **is** analysable, but it is only a downloader —
+it contains no `.idd`, `.idx` or `pak` strings and none of the format code.
+
+External corroboration: the Zenhax thread on this game family states the encryption is
+*"custom (something like 256 different operations) and so it's useless to make a script
+for quickbms."* Consistent with what is measured here.
+
+**Remaining options, in order of promise:**
+1. **Signature carving** (current approach) — raises coverage archive by archive. It
+   already got FxSound to 100% and FxHiddenCatch to 38%.
+2. **Find a community extractor.** This game family has public unpackers
+   (ACV tools, HyperRipper for the sibling `.idd`/`.idx`). Unknown: whether any handles
+   *this* client's generation.
+3. **Dynamic analysis** — dump decrypted code from a running client. Requires running
+   the game on Windows with anti-cheat active; outside this repo's scope.
+
+**Overall: the asset-extraction half is real and measurable; the "playable game" half
+is not achievable from this archive.** ~12% of asset volume recovered.
 
 ---
 
@@ -74,39 +117,34 @@ fully recovered.
 - [x] **Decode all 30 `.ssd`/`.ini` containers** → `work/ssi/` (`*.bin` + `*.strings.txt`)
 - [x] **Solve `ndadata/*.pak`** — `PACK0001` magic, zlib at offset 16 → inflates to the sibling `.idx`
 - [x] **Inflate 68 `.pak` files** → `work/assets/ndadata/`
-- [x] **Extract `FxSound.idd`** — 693 Oggs, verified 100% coverage, all decode
-- [x] **Copy 34 `vh/*.bmp` UI sprites** (already have real names, no extraction needed)
 - [x] **Build `scripts/extract_assets.py`** — magic detect + per-format length parsing
+- [x] **Carve 894 assets (12.02% of 1,086 MB)** — 747 Oggs + 147 JPEGs, all validated
+- [x] **Extract `FxSound.idd` completely** — 693 Oggs, 100% coverage
+- [x] **Copy 34 `vh/*.bmp` UI sprites** (already have real names)
 - [x] **Generate `work/assets/manifest.json`**
 - [x] **Get REA MCP + Ghidra 12.1.4 working** — verified, 12,869 funcs decompiled
-
-### 🟡 In progress
-
-- [ ] **Web app UI** — data staged at `app/public/`, `sync.sh` written; `index.html`,
-      router and views still missing. Routes planned: `/`, `#/textures`, `#/audio`,
-      `#/sprites`, `#/data`
-- [ ] **Crack the `.idx` cipher** → recover real filenames. Header is clear
-      (`ca da ef XX`, version 15, two counts); body encrypted. Known-plaintext
-      anchors exist (`.bmp` visible in cleartext; `?ameh`/`?onu1`/`?P3/.` repeated
-      per archive ⇒ repeating key). Target: `Patcher.exe` via Ghidra
+- [x] **Build the web app** — 5 routes, DDS DXT1/3/5 decode, 100/page pagination,
+      XSS-tested against a malicious manifest
 
 ### 🔴 Blocked
 
-- [ ] **Extract the remaining 11 `.idd` archives** (`FxMap` 90MB, `FxStage` 56MB,
-      `FxCharacter` 33MB, `fx` 87MB, `CharTE` 289MB, `EmoTE` 225MB, …)
-      **Blocker:** these are a *custom container*, not stored files. Entropy 6.0–7.4
-      vs FxSound's uniform 7.95; apparent `BM`/`DDS`/JPEG hits are coincidental
-      (e.g. `bfSize` = 1,292,292,165). Needs the container format reversed in
-      `Patcher.exe` — same engine that reads `.idx`, so this is one job with the
-      cipher work above.
+- [ ] **Crack the `.idx` cipher** → recover the 894 assets' real filenames.
+      **Blocker:** the reader is in `CA.dll`, which is **Themida-protected**
+      (`.themida` section, `rawsz=0`, plus UPX); `CA.exe` is GameGuard-packed.
+      `Patcher.exe` is analysable but contains no format code (it's a downloader).
+- [ ] **Extract the remaining 88% of asset volume**
+      (`CharTE` 289 MB, `EmoTE` 225 MB, `FxMap` 90 MB, `fx` 87 MB, …)
+      **Blocker:** same protected engine. Currently only reachable by signature
+      carving, which yields partial coverage per archive.
 
 ### ⬜ Not started
 
-- [ ] DDS texture decoding in-browser (DXT1/DXT5 → canvas)
 - [ ] Sprite-sheet slicing (the `.idd` prologue looks like an animation/UV table)
 - [ ] Font handling for the 5 `.fft` fonts
 - [ ] Optional: standalone rhythm minigame reusing extracted audio/art
-- [ ] Server protocol reverse-engineering — **likely infeasible**, see above
+- [ ] Server protocol reverse-engineering — **infeasible**, see above
+- [ ] Decide whether 89 MB of extracted Oggs should stay in git (currently tracked;
+      they are regenerable via `scripts/extract_assets.py`)
 
 ---
 

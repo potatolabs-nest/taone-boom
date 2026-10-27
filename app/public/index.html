@@ -222,6 +222,7 @@ dialog.lb dd{margin:0; font-variant-numeric:tabular-nums}
     formats: [], archives: [], imageFormats: []
   };
   var io = null;                      // IntersectionObserver for images
+  var ddsQueue = new WeakMap();        // frame element -> asset awaiting decode
   var audioObj = null;                // <audio> element for #/audio
   var currentAudioId = null;
 
@@ -355,23 +356,51 @@ dialog.lb dd{margin:0; font-variant-numeric:tabular-nums}
   /* ----------------------- lazy images / lightbox -------------------- */
 
   function observeImages(root) {
-    var imgs = root.querySelectorAll("img[data-src]");
+    var imgs = root.querySelectorAll("img[data-src], canvas[data-dds]");
     if (!("IntersectionObserver" in window)) {
-      for (var i = 0; i < imgs.length; i++) loadImg(imgs[i]);
+      for (var i = 0; i < imgs.length; i++) loadLazy(imgs[i]);
       return;
     }
     io = new IntersectionObserver(function (entries) {
       for (var j = 0; j < entries.length; j++) {
-        if (entries[j].isIntersecting) { loadImg(entries[j].target); io.unobserve(entries[j].target); }
+        if (entries[j].isIntersecting) { loadLazy(entries[j].target); io.unobserve(entries[j].target); }
       }
     }, { rootMargin: "300px 0px" });
     for (var k = 0; k < imgs.length; k++) io.observe(imgs[k]);
+  }
+  function loadLazy(node) {
+    if (node.tagName === "IMG") { loadImg(node); return; }
+    if (node.tagName === "CANVAS" && node.hasAttribute("data-dds")) {
+      decodeDdsInto(node);
+    }
   }
   function loadImg(img) {
     var src = img.getAttribute("data-src");
     if (!src) return;
     img.removeAttribute("data-src");
     img.src = src;
+  }
+  /* Decode a DDS into the placeholder frame only once it scrolls into view, so
+     a manifest with thousands of .dds files does not fetch them all up front. */
+  function decodeDdsInto(canvas) {
+    var frame = ddsQueue.get(canvas);
+    if (!frame) return;
+    ddsQueue.delete(canvas);
+    var a = canvas._ddsAsset;
+    ddsCanvas(a, function (cv, err) {
+      var ph = frame.querySelector(".ph");
+      if (cv) {
+        cv.style.display = "block";
+        cv.style.maxWidth = "100%"; cv.style.maxHeight = "150px";
+        cv.setAttribute("role", "img");
+        cv.setAttribute("aria-label", canvas.getAttribute("aria-label") || "DDS texture");
+        if (ph) frame.removeChild(ph);
+      } else if (ph) {
+        // Canvas stays hidden (set at creation); the placeholder explains why.
+        var sub = ph.querySelector("span");
+        if (sub) sub.textContent = err || "not decoded";
+      }
+    });
   }
   function imgTile(src, altText, onFail) {
     var img = el("img");
@@ -681,24 +710,17 @@ dialog.lb dd{margin:0; font-variant-numeric:tabular-nums}
     if (!rel) {
       frame.appendChild(placeholder("Invalid path", "manifest value rejected"));
     } else if (fmt === "dds") {
-      // Decode the DXT blocks; if the format is unsupported, show the labelled placeholder.
-      var ph = placeholder("DDS", "decoding…");
+      // DXT1/3/5 are decoded to a canvas; anything else gets a labelled
+      // placeholder. The decode is deferred until the tile scrolls into view.
+      var ph = placeholder("DDS", "scroll into view to decode");
       frame.appendChild(ph);
-      ddsCanvas(a, function (cv, err) {
-        clear(frame);
-        if (cv) {
-          cv.style.maxWidth = "100%"; cv.style.maxHeight = "150px";
-          cv.setAttribute("role", "img");
-          cv.setAttribute("aria-label", name);
-          frame.appendChild(cv);
-          tile.dataset.decoded = "1";
-        } else {
-          frame.appendChild(placeholder("DDS", err || "not decoded"));
-          tile.dataset.decoded = "0";
-          tile.dataset.decodeErr = String(err || "");
-        }
-        if (tile._open) tile._open();
-      });
+      var cv = document.createElement("canvas");
+      cv.setAttribute("data-dds", "1");
+      cv.setAttribute("aria-label", name);
+      cv.style.display = "none";          // revealed only once it decodes
+      cv._ddsAsset = a;
+      frame.appendChild(cv);
+      ddsQueue.set(cv, frame);
       tile._open = function () { openAsset(a); };
     } else {
       var img = imgTile(rel, name, function () {
