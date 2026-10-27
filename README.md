@@ -50,7 +50,7 @@ would be an original game inspired by the assets, **not** a port of this one.
 | 0. Extract archive | ✅ Done | 367 files / 1.30 GB |
 | 1. Decode `ssi1` containers | ✅ Done | 30 files decoded |
 | 2. `ndadata/*.pak` | ✅ Done | 68 inflated |
-| 3. Extract assets from `.idd` | 🟡 Partial | **894 files, 12.02% of 1,086 MB** |
+| 3. Extract assets from `.idd` | 🟡 Partial | **1,801 entries, 12.64% of 1,086 MB** |
 | 4. Copy UI sprites | ✅ Done | 34 BMPs, real names |
 | 5. Build asset extractor | ✅ Done | `scripts/extract_assets.py` |
 | 6. Web app | ✅ Done | 5 routes, DDS decode, XSS-tested |
@@ -60,24 +60,34 @@ would be an original game inspired by the assets, **not** a port of this one.
 
 ### Extraction coverage — measured, not estimated
 
-| archive | size | files carved | coverage |
-|---|--:|--:|--:|
-| **FxSound** | 92.1 MB | 693 | **100.00%** |
-| FxHiddenCatch | 40.3 MB | 24 | 38.32% |
-| FxContents | 51.6 MB | 21 | 8.69% |
-| FxMap | 90.2 MB | 15 | 7.84% |
-| FxDesktop | 48.5 MB | 24 | 7.53% |
-| FxStage | 56.2 MB | 18 | 6.32% |
-| EmoTE | 225.4 MB | 62 | 1.66% |
-| fx | 87.2 MB | 22 | 0.27% |
-| FxMonster | 71.9 MB | 3 | 0.13% |
-| CharTE | 289.0 MB | 12 | 0.08% |
-| FxCharacter | 33.5 MB | 0 | 0.00% |
-| **TOTAL** | **1,086 MB** | **894** | **12.02%** |
+Two carving strategies, both format-validated:
+- **Raw payloads** — files stored uncompressed, detected by magic with lengths parsed
+  from each format's own header.
+- **zlib streams** — entries stored as zlib-compressed records (`FxMap` has 893;
+  `FxDesktop` 14). Each is carved and inflated; 200/200 sampled inflate cleanly at an
+  8.26× ratio.
 
-**So: ~12% of the asset volume is recovered.** One archive is complete; the rest are
-partial (signature-carved) or empty. Everything carved is format-validated — 747 Ogg
-streams (`libVorbis`, decode in `afinfo`) and 147 JPEGs (`JFIF standard 1.02`).
+| archive | size | entries | carved | coverage |
+|---|--:|--:|--:|--:|
+| **FxSound** | 92.1 MB | 693 | 92.08 MB | **100.00%** |
+| FxHiddenCatch | 40.3 MB | 24 | 15.44 MB | 38.32% |
+| FxMap | 90.2 MB | 908 | 13.40 MB | 14.85% |
+| FxContents | 51.6 MB | 21 | 4.49 MB | 8.69% |
+| FxDesktop | 48.5 MB | 38 | 4.08 MB | 8.41% |
+| FxStage | 56.2 MB | 18 | 3.55 MB | 6.32% |
+| EmoTE | 225.4 MB | 62 | 3.75 MB | 1.66% |
+| fx | 87.2 MB | 22 | 0.23 MB | 0.27% |
+| FxMonster | 71.9 MB | 3 | 0.09 MB | 0.13% |
+| CharTE | 289.0 MB | 12 | 0.23 MB | 0.08% |
+| FxCharacter | 33.5 MB | 0 | 0.00 MB | 0.00% |
+| **TOTAL** | **1,086 MB** | **1,801** | **137 MB** | **12.64%** |
+
+By format: 747 Ogg streams (`libVorbis`, decode in `afinfo`), 147 JPEGs
+(`JFIF standard 1.02`), 251 zlib-wrapped BMP, 656 zlib-wrapped binary records.
+
+**So: ~12.6% of the asset volume is recovered.** One archive is complete; the rest are
+partial. FxMap and FxHiddenCatch are the next-most-promising — both have substantial
+compressed content still uncarved.
 
 ### Why the remaining 88% is blocked
 
@@ -118,7 +128,7 @@ is not achievable from this archive.** ~12% of asset volume recovered.
 - [x] **Solve `ndadata/*.pak`** — `PACK0001` magic, zlib at offset 16 → inflates to the sibling `.idx`
 - [x] **Inflate 68 `.pak` files** → `work/assets/ndadata/`
 - [x] **Build `scripts/extract_assets.py`** — magic detect + per-format length parsing
-- [x] **Carve 894 assets (12.02% of 1,086 MB)** — 747 Oggs + 147 JPEGs, all validated
+- [x] **Carve 1,801 entries (12.64% of 1,086 MB)** — 747 Oggs + 147 JPEGs raw, plus 907 zlib streams
 - [x] **Extract `FxSound.idd` completely** — 693 Oggs, 100% coverage
 - [x] **Copy 34 `vh/*.bmp` UI sprites** (already have real names)
 - [x] **Generate `work/assets/manifest.json`**
@@ -128,7 +138,7 @@ is not achievable from this archive.** ~12% of asset volume recovered.
 
 ### 🔴 Blocked
 
-- [ ] **Crack the `.idx` cipher** → recover the 894 assets' real filenames.
+- [ ] **Crack the `.idx` cipher** → recover the 1,801 entries' real filenames.
       **Blocker:** the reader is in `CA.dll`, which is **Themida-protected**
       (`.themida` section, `rawsz=0`, plus UPX); `CA.exe` is GameGuard-packed.
       `Patcher.exe` is analysable but contains no format code (it's a downloader).

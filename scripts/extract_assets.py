@@ -381,6 +381,55 @@ def inflate_paks():
     return done
 
 
+def find_zlib_streams(buf):
+    """Carve standalone zlib streams.
+
+    Some .idd archives store entries as zlib-compressed records rather than raw
+    files (FxMap has ~893 of them). Inflate each and sniff the result so the
+    entry gets a real extension where possible.
+
+    Returns (offset, used_compressed_bytes, inflated_bytes, fmt, confidence).
+    """
+    import zlib
+    out = []
+    i = 0
+    n = len(buf)
+    while True:
+        i = buf.find(b"\x78\xda", i)
+        if i < 0:
+            break
+        if i + 2 >= n:
+            break
+        try:
+            o = zlib.decompressobj()
+            data = o.decompress(buf[i:])
+            data += o.flush()
+        except Exception:
+            i += 1
+            continue
+        used = (n - i) - len(o.unused_data)
+        if len(data) < 64 or used < 8:
+            i += 1
+            continue
+        # sniff the inflated payload
+        fmt = None
+        for magic, name in ((b"DDS ", "dds"), (b"\x89PNG", "png"),
+                            (b"\xff\xd8\xff", "jpg"), (b"OggS", "ogg"),
+                            (b"RIFF", "riff")):
+            if data[:len(magic)] == magic:
+                fmt = name
+                break
+        if fmt is None:
+            for magic, name in ((b"DDS ", "dds"), (b"BM", "bmp"),
+                                (b"\xff\xd8\xff", "jpg"), (b"PNG", "png")):
+                if data.find(magic) > 0:
+                    fmt = name
+                    break
+        out.append((i, used, len(data), fmt or "bin", "high"))
+        i += used                       # continue past this stream
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
@@ -422,6 +471,45 @@ def main():
 
     sprites = load_ui_sprites()
     paks = inflate_paks()
+
+    # Second pass: carve standalone zlib streams from archives that use them.
+    zlib_assets = []
+    for name in targets:
+        fn = ARCHIVES.get(name)
+        if not fn:
+            continue
+        path = os.path.join(BOOM, fn)
+        if not os.path.exists(path):
+            continue
+        with open(path, "rb") as fh:
+            zbuf = fh.read()
+        streams = find_zlib_streams(zbuf)
+        if not streams:
+            del zbuf
+            continue
+        zdir = os.path.join(OUT, name + "_zlib")
+        os.makedirs(zdir, exist_ok=True)
+        for k, (off, used, outlen, fmt, conf) in enumerate(streams):
+            ext = "bin" if fmt == "bin" else fmt
+            rel = f"{name}_zlib/{k:06d}.{ext}"
+            with open(os.path.join(OUT, rel), "wb") as fh:
+                fh.write(zbuf[off:off + used])
+            zlib_assets.append({
+                "id": f"{name}_zlib/{k:06d}",
+                "archive": name + "_zlib",
+                "index": k,
+                "offset": off,
+                "size": used,
+                "inflated_size": outlen,
+                "format": "zlib+" + fmt,
+                "mime": "application/zlib",
+                "name": None,
+                "file": rel,
+                "confidence": conf,
+            })
+        del zbuf
+        print(f"{name + '_zlib':14s} {len(streams):>7,} zlib streams")
+    all_assets.extend(zlib_assets)
 
     by_format = {}
     by_archive = {}
