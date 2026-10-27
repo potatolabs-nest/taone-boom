@@ -264,3 +264,22 @@ and audio, not a reconstruction of the original.
 `scripts/build_artifact.py` inlines ten songs and twelve sprites into one ~6.8 MB
 HTML file (`app/artifact/audition-web.html`) for hosts that take a single page rather
 than a directory.
+
+---
+
+## Getting set up from a fresh clone
+
+`main` carries source only. The extracted assets are generated, so build them first:
+
+```bash
+# 1. put Boom.zip in the repo root, then
+python3 -I scripts/extract_assets.py    # -> work/assets + manifest  (~140 MB, a few minutes)
+python3 -I scripts/build_deploy.py      # -> deploy/                 (the playable site)
+python3 -I scripts/build_artifact.py    # -> one self-contained HTML file
+python3 -I scripts/names_lua.py         # -> real UI names from the Lua bundles
+
+cd deploy && python3 -m http.server 8000
+```
+
+Nothing under `work/assets/`, `deploy/` or `app/public/<Archive>/` is committed —
+all of it regenerates from `Boom.zip`, which is why `.gitignore` lists it.
