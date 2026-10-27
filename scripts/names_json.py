@@ -1,4 +1,20 @@
-import sys, os, struct, json, re, collections
+#!/usr/bin/env python3
+"""Mine Club Audition / Boom decoded data for asset & package names -> work/names.json
+
+Sources (read-only):
+  extracted/Boom/vh/*.bmp        34 UI sprites, real filenames
+  extracted/Boom/ndadata/*       91 popup bundles, real filenames
+  extracted/Boom/**/*.idd        UI layout scripts; PLAINTEXT asset paths inside
+  work/ssi/*.bin                 decoded ssi1 containers ([u32len][payload] records)
+
+Two clearly separated tiers are emitted:
+  HARD  - verbatim plaintext (vh stems, ndadata stems, idd script paths)
+  SOFT  - ASCII records recovered from decoded .bin via length-prefix records
+See work/names_report.md.
+"""
+import os, re, json, struct, sys, collections
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from names_records import scan_ascii, best_korean_chain, korean_payload
 
 ROOT = "/Users/hieu/Workspaces/taone"
 SSI  = os.path.join(ROOT, "work/ssi")
@@ -6,143 +22,148 @@ BOOM = os.path.join(ROOT, "extracted/Boom")
 OUT  = os.path.join(ROOT, "work/names.json")
 
 by_source = collections.OrderedDict()
-def add(src, name):
+tier      = {}                                   # source -> "hard"/"soft"
+ext_counts = collections.Counter()
+ext_example= collections.defaultdict(set)
+
+def add(src, name, t="soft"):
     if not name: return
+    if re.search(r'\s', name): return          # no spaces (sentences)
     by_source.setdefault(src, set()).add(name)
+    tier[src] = t
 
-def printable(b):
-    return all(0x20 <= c < 0x7f for c in b)
-
-def lp_strings(d, maxlen=512):
-    """Walk u32-length-prefixed ASCII strings; return list of (offset,str)."""
-    n=len(d); i=0; out=[]
-    while i+4 <= n:
-        L=struct.unpack_from('<I', d, i)[0]
-        if 1 <= L <= maxlen and i+4+L <= n and printable(d[i+4:i+4+L]):
-            out.append((i, d[i+4:i+4+L].decode('ascii'))); i += 4+L
-        else:
-            i += 1
-    return out
-
-# ---- NAME FILTER ------------------------------------------------------
 NAME_RE = re.compile(r'^[A-Za-z][A-Za-z0-9_\-]{2,}$')
-PATH_RE = re.compile(r'^[A-Za-z][A-Za-z0-9_\-]*(/[A-Za-z0-9_\-]+)+$')
-SENT_RE = re.compile(r'[ <>{}\[\]|@#$%^&*()=+~`"\'\\:,;?!]')
-def is_name(s):
-    if NAME_RE.match(s): return True
-    if PATH_RE.match(s): return True
-    return False
-
-# generic english words / ui sentences to reject
-STOP = set("""the and for you are not all any can use new add del set get
-test none random space name type item icon shop info time date size mode
-data file open save close back next ok cancel yes no on off up down left right
-start stop play pause exit quit help list view edit copy paste undo redo
-true false null none empty full half zero one two three four five six seven
-eight nine ten this that with from into over under more less than then
-player server room user pass word credit cash point level grade rank
-normal battle ready stage map mode game menu option config sound music
+PATH_RE = re.compile(r'^[A-Za-z0-9_\-]+(/[A-Za-z0-9_\-./]+)+$')
+STOP = set("""the and for you are not all any can use new add del set get test
+none random space name type item icon shop info time date size mode data file
+open save close back next ok cancel yes no on off up down left right start stop
+play pause exit quit help list view edit copy paste undo redo true false null
+empty full half zero two three four five six seven eight nine ten this that
+with from into over under more less than then player server room user pass word
+credit cash point level grade rank normal battle ready stage map game menu option
+config sound music press click select using used value values result error
 """.split())
-def reject_common(s):
-    return s.lower() in STOP
+def keep(s):
+    if not (NAME_RE.match(s) or PATH_RE.match(s)): return False
+    if s.lower() in STOP: return False
+    if re.fullmatch(r'[0-9_\-]+', s): return False
+    if re.search(r'\s', s): return False            # no spaces (sentences)
+    stem = s.rsplit('/', 1)[-1]
+    if re.fullmatch(r'[0-9_\-]+', stem): return False   # digit-only stem
+    return bool(re.search(r'[A-Za-z]{2}', stem))
 
-# ---- 1. vh sprites ----------------------------------------------------
-vhd = os.path.join(BOOM, "vh")
-for fn in sorted(os.listdir(vhd)):
+EXT_LIST = ("bmp dds tga png jpg jpeg ogg wav mp3 ond ani scr msk eff bik bnk "
+            "tmb dat ini ssd idx idd pak fft ttf exe dll cfg log aes").split()
+ASSET_PATH_RE = re.compile(
+    rb'([A-Za-z0-9_][A-Za-z0-9_\-./\\]{1,90}?\.(?:%s))\b' % b'|'.join(x.encode() for x in EXT_LIST), re.I)
+
+def note_ext(s):
+    m = re.search(r'\.([A-Za-z]{2,4})$', s)
+    if m:
+        e = m.group(1).lower()
+        if e in EXT_LIST:
+            ext_counts[e] += 1; ext_example[e].add(s[:70])
+
+# ---------------------------------------------------------- HARD: vh
+for fn in sorted(os.listdir(os.path.join(BOOM, "vh"))):
     if fn.lower().endswith(".bmp"):
-        add("vh", fn[:-4])
+        add("vh", fn[:-4], "hard")
 
-# ---- 2. ndadata bundle stems -----------------------------------------
+# ---------------------------------------------------------- HARD: ndadata
 nda = os.path.join(BOOM, "ndadata")
-stems = set()
-for fn in sorted(os.listdir(nda)):
-    base, ext = os.path.splitext(fn)
-    stems.add(base)
-for s in sorted(stems):
-    add("ndadata", s)
+stems = {os.path.splitext(f)[0] for f in os.listdir(nda)}
+for s in sorted(stems): add("ndadata", s, "hard")
 
-# ---- 3. structural parse of decoded .bin -----------------------------
-SSI_MAP = {
-  "fxstagemap.ssd.bin": "fxstagemap",
-  "fxdynmapinfo.ssd.bin": "fxdynmapinfo",
-  "fxdynimginfo.ssd.bin": "fxdynimginfo",
-  "fxstock0.ini.bin": "fxstock0", "fxstock1.ini.bin": "fxstock1",
-  "fxstock2.ini.bin": "fxstock2", "fxstock3.ini.bin": "fxstock3",
-  "csysstr.ssd.bin": "csysstr", "csysqstr.ssd.bin": "csysqstr",
-  "filterstr.ssd.bin": "filterstr", "stringtable.ini.bin": "stringtable",
-  "multisvr.ssd.bin": "multisvr", "csysfxmg.ssd.bin": "csysfxmg",
-  "spcc.ssd.bin": "spcc", "fxstovi.ini.bin": "fxstovi",
+# ---------------------------------------------------------- HARD: .idd scripts
+for root, _, fs in os.walk(BOOM):
+    for f in fs:
+        if not f.lower().endswith(".idd"): continue
+        try: d = open(os.path.join(root, f), "rb").read()
+        except OSError: continue
+        for m in ASSET_PATH_RE.finditer(d):
+            s = m.group(1).decode("latin-1").replace("\\", "/").lstrip("./")
+            if s.startswith("/"): s = s[1:]
+            if "/" in s and keep(s.rsplit("/",1)[-1]) or ("/" in s and re.search(r'[A-Za-z]{2}', s)):
+                add("idd_scripts", s, "hard"); note_ext(s)
+
+# ----------------------------------------- SOFT: decoded ssi .bin records
+SOURCES = {
+    "fxstagemap.ssd.bin": "fxstagemap", "fxdynmapinfo.ssd.bin": "fxdynmapinfo",
+    "fxdynimginfo.ssd.bin": "fxdynimginfo", "fxstock0.ini.bin": "fxstock",
+    "fxstock1.ini.bin": "fxstock", "fxstock2.ini.bin": "fxstock",
+    "fxstock3.ini.bin": "fxstock", "csysstr.ssd.bin": "csysstr",
+    "csysqstr.ssd.bin": "csysqstr", "csysfxmg.ssd.bin": "csysfxmg",
+    "stringtable.ini.bin": "stringtable", "multisvr.ssd.bin": "multisvr",
+    "spcc.ssd.bin": "spcc", "filterstr.ssd.bin": "filterstr",
+    "fxstovi.ini.bin": "fxstovi", "packagemap.ini.bin": "packagemap",
+    "product.ini.bin": "product",
 }
-exts = collections.Counter(); ext_ctx = collections.defaultdict(set)
 struct_report = {}
-for fn, src in SSI_MAP.items():
+for fn, src in SOURCES.items():
     p = os.path.join(SSI, fn)
     if not os.path.exists(p): continue
     d = open(p, "rb").read()
-    # best start offset
-    best=[]; 
-    for s in range(0,24):
-        r=lp_strings(d[s:]) if s==0 else [(o+s,t) for o,t in lp_strings(d[s:])]
-        if len(r)>len(best): best=r
-    struct_report[src]=(len(best), sum(4+len(t) for _,t in best), len(d))
-    for off, s in best:
-        if s.lower().endswith(tuple("."+e for e in
-              ("bmp dds tga png jpg jpeg ogg ani scr msk eff bik avi wav mp3 tmb dat ini ssd idx idd pak fft ttf".split()))):
-            e=s.rsplit(".",1)[1].lower(); exts[e]+=1; ext_ctx[e].add(s)
-        if is_name(s) and not reject_common(s):
-            add(src, s)
+    # non-overlapping ASCII records from validated length prefixes
+    recs = scan_ascii(d)
+    nonover = []; last = -1
+    for off, L, pay in sorted(recs):
+        if off > last:
+            nonover.append((off, L, pay)); last = off + 4 + L
+    kor = best_korean_chain(d)
+    struct_report[src] = {
+        "size": len(d),
+        "ascii_records_all_offsets": len(recs),
+        "ascii_records_nonoverlapping": len(nonover),
+        "ascii_coverage": round(sum(4+L for _,L,_ in nonover)/len(d), 3),
+        "korean_records_chained": len(kor),
+    }
+    for off, L, pay in nonover:
+        s = pay.decode("ascii").strip()
+        note_ext(s)
+        if keep(s): add(src, s)
+    for off, L, pay in kor:
+        try: s = pay.decode("cp949").strip()
+        except Exception: continue
+        note_ext(s)
+        if keep(s): add(src, s)
 
-# raw extension scan across ALL bins + strings
-for fn in sorted(os.listdir(SSI)):
-    p=os.path.join(SSI,fn)
-    d=open(p,'rb').read()
-    for m in re.finditer(rb'[A-Za-z0-9_\-/]{1,60}\.([A-Za-z][A-Za-z0-9]{1,4})\b', d):
-        e=m.group(1).decode().lower()
-        if e in ("bmp dds tga png jpg jpeg ogg ani scr msk eff bik avi wav mp3 tmb dat ini ssd idx idd pak fft ttf exe dll dat".split()):
-            exts[e]+=1
+# extension census across the whole tree (background context)
+for root, _, fs in os.walk(BOOM):
+    for f in fs:
+        try: d = open(os.path.join(root, f), "rb").read()
+        except OSError: continue
+        for m in re.finditer(rb'\.([A-Za-z]{2,4})(?![A-Za-z0-9])', d):
+            e = m.group(1).decode().lower()
+            if e in EXT_LIST: ext_counts[e] += 1
 
-# ---- 4. root-level ssi files (esfn, CALauncher, 720897) ---------------
-for fn in ("esfn.ssd","CALauncher.cfg","720897.dat","720897_NGM_v2"):
-    p=os.path.join(BOOM,fn)
-    if not os.path.exists(p): continue
-    d=open(p,'rb').read()
-    for _,s in lp_strings(d):
-        if is_name(s) and not reject_common(s): add("root_ssi", s)
-    for m in re.finditer(rb'[A-Za-z][A-Za-z0-9_\-]{2,40}', d):
-        s=m.group(0).decode()
-        if is_name(s): add("root_ssi", s)
-
-# ---- 5. strings.txt regex fallback (path-ish tokens) ------------------
-for fn in sorted(os.listdir(SSI)):
-    if not fn.endswith(".strings.txt"): continue
-    src=fn[:-len(".strings.txt")]+"_txt"
-    txt=open(os.path.join(SSI,fn),encoding="latin-1").read()
-    for m in re.finditer(r'[A-Za-z][A-Za-z0-9_\-]{2,}(?:/[A-Za-z0-9_\-]+)*', txt):
-        s=m.group(0)
-        if s.lower() in ("font","color","div","br","nbsp"): continue
-        if is_name(s) and not reject_common(s): add(src, s)
-
-# ---- assemble ---------------------------------------------------------
-extensions = sorted(exts, key=lambda e:-exts[e])
+# ---------------------------------------------------------------- assemble
+AUX_SOURCES = {"filterstr"}          # profanity blacklist, not asset names
 cand = set()
-for src, names in by_source.items():
-    cand |= names
-candidates = sorted(cand, key=lambda s:(s.lower(), s))
-
+for k, names in by_source.items():
+    if k not in AUX_SOURCES: cand |= names
+candidates = sorted(cand, key=lambda s: (s.lower(), s))
+ASSET_EXTS = [e for e in ("bmp","dds","tga","png","jpg","jpeg","ani","scr","ogg",
+                          "wav","mp3","tmb","msk","eff","bik","dat","ini","ssd",
+                          "idd","idx","pak","fft","ttf") if ext_counts.get(e)]
 out = {
-  "candidates": candidates,
-  "by_source": {k: sorted(v, key=lambda s:(s.lower(),s)) for k,v in by_source.items()},
-  "extensions": extensions,
-  "count": len(candidates),
-  "_meta": {
-    "generated_by": "scripts/names_json.py",
-    "struct_report": {k:{"strings":v[0],"covered":v[1],"total":v[2]} for k,v in struct_report.items()},
-    "extension_hits": dict(exts),
-    "source_counts": {k:len(v) for k,v in by_source.items()},
-  },
+    "candidates": candidates,
+    "by_source": {k: sorted(v, key=lambda s: (s.lower(), s)) for k, v in by_source.items()},
+    "extensions": ASSET_EXTS,
+    "count": len(candidates),
+    "_meta": {
+        "generator": "scripts/names_json.py",
+        "tiers": {k: tier.get(k, "soft") for k in by_source},
+        "aux_sources": sorted(AUX_SOURCES),
+        "source_counts": {k: len(v) for k, v in by_source.items()},
+        "struct_report": struct_report,
+        "extension_hits": dict(ext_counts.most_common()),
+        "extension_examples": {k: sorted(v)[:4] for k, v in ext_example.items()},
+    },
 }
-json.dump(out, open(OUT,"w"), indent=1)
-print("wrote", OUT)
-print("count", len(candidates))
-for k,v in by_source.items(): print("  %-20s %d"%(k,len(v)))
-print("extensions:", extensions)
+json.dump(out, open(OUT, "w"), indent=1, ensure_ascii=False)
+chk = json.load(open(OUT))
+assert chk["count"] == len(chk["candidates"])
+print("wrote", OUT, "count", chk["count"], "(JSON verified)")
+print("extensions:", ASSET_EXTS)
+for k, v in by_source.items():
+    print("   %-14s %-5s %5d" % (k, tier.get(k), len(v)))

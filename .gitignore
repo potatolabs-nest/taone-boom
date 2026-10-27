@@ -1,2 +1,28 @@
 Boom.zip
 extracted/
+
+# Extractor output is regenerable from Boom.zip — never commit it
+work/assets/
+work/idx/
+work/ssi2/
+app/public/FxSound/
+app/public/EmoTE/
+app/public/CharTE/
+app/public/FxMap/
+app/public/FxMap_zlib/
+app/public/FxDesktop/
+app/public/FxDesktop_zlib/
+app/public/FxContents/
+app/public/FxHiddenCatch/
+app/public/FxMonster/
+app/public/FxStage/
+app/public/fx/
+app/public/vh/
+app/public/ndadata/
+app/public/ssidata/
+app/public/FixturePNG/
+app/artifact/
+scripts/__pycache__/
+
+# Deployed site is published on the gh-pages branch
+deploy/
