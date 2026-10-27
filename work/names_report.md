@@ -241,3 +241,25 @@ regions. The whole-file test is the sound one, and it is negative.)
   `.idd` archives (`FxMap`, `CharTE`, `EmoTE`, `fx`, …) is *not* plaintext
   markup — only 43 of ~80 archives yielded ASCII asset paths, so those remain
   where NOTES.md left them.
+
+---
+
+## 6. Applicability to the asset manifest
+
+`work/assets/manifest.json` has 1,801 assets with `name: null`. How far these
+names can actually fill it, honestly:
+
+- **`ui_sprites` (34) is already fully named** (`vh/123.bmp` etc.) — nothing to do.
+- **`ndadata_pak` (68)** — the bundle stems in `by_source.ndadata` give the
+  *package* name, not the individual entries inside each `.idx`.
+- **The 693 `FxSound` Oggs and the other carved payloads cannot be named from
+  this data.** Their names live in the obfuscated `.idx` files, and per §4 the
+  cipher is not broken. The whole-file content match (§4) is negative, so
+  content-matching the `vh` sprites cannot name them either.
+- **What this does supply** is (a) the `idd_scripts` path corpus, which is the
+  *actual plaintext* the ndadata `.idx` name fields encrypt — i.e. ready-made
+  cribs, and (b) the extension evidence (`.bmp` dominant, `.dds` absent).
+
+So: the manifest's `name: null` gap is **not** closed by this work. What is
+closed is the known-plaintext shortage for the cipher agent, plus a concrete
+format finding (`.idd` carries plaintext UI markup).

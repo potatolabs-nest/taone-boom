@@ -218,3 +218,49 @@ Two earlier claims were retracted for skipping that step:
    byte matches; a strict validator rejects them.
 
 Raw magic-hit counts are **not** asset counts. See `NOTES.md` §2 CORRECTION.
+
+---
+
+## ▶ Playable game
+
+`app/public/game.html` is an **original browser rhythm game** built on the real
+extracted assets — 693 songs and 34 UI sprites feed it, and beat maps are detected
+from each track's own audio.
+
+**To play it locally right now:**
+
+```bash
+python3 -I scripts/build_deploy.py     # builds ./deploy
+cd deploy && python3 -m http.server 8000
+# open http://localhost:8000/
+```
+
+Controls: `←` `↓` `↑` `→` hit the arrows · `Space` pause · `Esc` quit to lobby.
+There is also an on-screen pad for touch devices. Add `?selftest=1` to the URL to
+run the built-in smoke test of the detection and judging logic.
+
+### Sharing it
+
+The `gh-pages` branch already carries a self-contained build (16 songs, 34 sprites,
+~10 MB), so the site is ready to serve — it only needs Pages switched on:
+
+> **Repo → Settings → Pages → Source: Deploy from a branch → Branch: `gh-pages` / `(root)` → Save**
+
+That gives `https://potatolabs-nest.github.io/taone-boom/`.
+
+One catch: **Pages on a private repo needs GitHub Pro.** The repo currently returns
+404 publicly, so either make it public or enable Pages on a paid plan.
+
+### What the game is and is not
+
+It **is** a real, playable rhythm game using unmodified assets from the shipped client.
+It is **not** a port of Club Audition: the original is an online, server-authoritative
+MMO whose server is not in this archive, and its client binaries are Themida/GameGuard
+protected. See the four blockers above. Treat this as a new game built on rescued art
+and audio, not a reconstruction of the original.
+
+### Also published as a single HTML file
+
+`scripts/build_artifact.py` inlines ten songs and twelve sprites into one ~6.8 MB
+HTML file (`app/artifact/audition-web.html`) for hosts that take a single page rather
+than a directory.
