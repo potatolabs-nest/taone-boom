@@ -208,3 +208,47 @@ the measurement here (not zlib/bz2/lzma; XOR of two archives = 7.46 bits/byte).
    Windows + anti-cheat active; outside this repo's scope.
 
 Do not spend more time decompiling `CA.dll` or `CA.exe` — they are protected.
+
+## 8. THE .idx NAME CIPHER — CRACKED (2026-10-28)
+
+**Solved, and verified against independent ground truth.**
+
+### The transform
+Names are stored with a self-differential stream:
+
+    stem[i] = name[i] ^ name[i-4]        for i >= 4
+    stem[i] = name[i] ^ seed[i]          for i <  4
+
+so `name[i] = stem[i] ^ name[i-4]`. Only a 4-byte seed is unknown, and it is
+**derived** (not guessed) from the directory the record starts with:
+
+    seed = stem[0:4] XOR prefix[0:4]
+
+This is what made the earlier attempts fail: they looked for a keystream or a
+repeating key, but the "keystream" is just the plaintext four positions earlier.
+
+### Record layout (ndadata family, magic fc 01 b2 05)
+    u32 magic | u32 version=15 | u32 count
+    per record: u32 len | stem[len] | u32 hash | u32 size | u32 size | u32 zero
+
+The big Fx* family (magic ca da ef) is fixed-width instead — an obfuscated head
+followed by a plaintext `u16 len` + name — so the same cipher applies but the
+record walk differs.
+
+### Prefixes are the only prior knowledge needed
+`Game/` carries the big Fx* archives (e.g. `Game/AIBattle_SuperStar`), `Quest/`
+and `PopupEvent/` the ndadata popup bundles.
+
+### Verification
+Decrypted names match the plaintext paths found independently in the compiled
+Lua of the same bundles — **128 exact matches** — and 63 further names the Lua
+does not reference but which are plainly real (`Quest/PCR_Quest_2015_07_02_Bt01.BMP`).
+379 unique names recovered across 29 archives, **0 malformed**, 212 .bmp /
+148 .jpg / 17 .png.
+
+Run: `python3 -I scripts/idx_decrypt.py`
+
+### Not needed: Ghidra
+The cipher was recovered entirely from file structure plus known plaintext. No
+decompiler was involved, and none would have helped: its targets are
+Themida-protected (`CA.dll`) or GameGuard-packed (`CA.exe`).

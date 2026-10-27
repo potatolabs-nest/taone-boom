@@ -1,0 +1,2100 @@
+{
+ "ndadata/21thBirthPopUp": [
+  {
+   "offset": 52,
+   "name": "Quest/c21thBirthPopUp.luc",
+   "confidence": "high"
+  },
+  {
+   "offset": 97,
+   "name": "Quest/KBNB_20221006_21thBirthLobby_Bg.png",
+   "confidence": "high"
+  },
+  {
+   "offset": 158,
+   "name": "Quest/KBNB_20221006_21thBirthLobby_BT01.png",
+   "confidence": "high"
+  },
+  {
+   "offset": 221,
+   "name": "Quest/KBNB_20221006_21thBirthLobby_BT02.png",
+   "confidence": "high"
+  },
+  {
+   "offset": 284,
+   "name": "Quest/KBNB_20221006_21thBirthLobby_BT03.png",
+   "confidence": "high"
+  },
+  {
+   "offset": 347,
+   "name": "Quest/KBNB_20221006_21thBirthLobby_BT04.png",
+   "confidence": "high"
+  },
+  {
+   "offset": 410,
+   "name": "Quest/KBNB_20221006_21thBirthLobby_BT05.png",
+   "confidence": "high"
+  },
+  {
+   "offset": 473,
+   "name": "Quest/KBNB_20221006_21thBirthLobby_BT06.png",
+   "confidence": "high"
+  },
+  {
+   "offset": 536,
+   "name": "Quest/KBNB_20221006_21thBirthLobby_BT07.png",
+   "confidence": "high"
+  },
+  {
+   "offset": 599,
+   "name": "Quest/KBNB_20221006_21thBirthLobby_BT08.png",
+   "confidence": "high"
+  },
+  {
+   "offset": 662,
+   "name": "Quest/KBNB_20221006_21thBirthLobby_BT09.png",
+   "confidence": "high"
+  },
+  {
+   "offset": 725,
+   "name": "Quest/KBNB_20221006_21thBirthLobby_BT10.png",
+   "confidence": "high"
+  },
+  {
+   "offset": 788,
+   "name": "Quest/KBNB_20221006_21thBirthLobby_LB_Bg.png",
+   "confidence": "high"
+  },
+  {
+   "offset": 852,
+   "name": "Quest/KBNB_20221006_21thBirthLobby_LB_Bt.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/CAMissionPopUp": [
+  {
+   "offset": 57,
+   "name": "Quest/Quest_2019_04_11_Back.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 108,
+   "name": "Quest/Quest_2019_04_11_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 157,
+   "name": "Quest/Quest_2019_04_11List.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/EventPopup_CABoard_220908_k_1": [
+  {
+   "offset": 52,
+   "name": "PopupEvent/_EventPopup_CombineNotice_BtClose.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 120,
+   "name": "PopupEvent/_EventPopup_VScroll_Ball.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 179,
+   "name": "PopupEvent/BbokkiBbokki.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 226,
+   "name": "PopupEvent/CAjjang_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 271,
+   "name": "PopupEvent/CAMission.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 315,
+   "name": "PopupEvent/config.xml",
+   "confidence": "high"
+  },
+  {
+   "offset": 356,
+   "name": "PopupEvent/DropTheTem_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 404,
+   "name": "PopupEvent/EggGacha_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 450,
+   "name": "PopupEvent/ExpPointPresent_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 503,
+   "name": "PopupEvent/FashionKing_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 552,
+   "name": "PopupEvent/HotTime_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 597,
+   "name": "PopupEvent/Hyundai.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 639,
+   "name": "PopupEvent/Hyundai_BT.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 684,
+   "name": "PopupEvent/MonWarsRank_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 733,
+   "name": "PopupEvent/MonWarsShop_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 782,
+   "name": "PopupEvent/NoticeBoard_10.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 831,
+   "name": "PopupEvent/NoticeBoard_20201203_2_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 891,
+   "name": "PopupEvent/NoticeBoard_20220630_3_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 951,
+   "name": "PopupEvent/NoticeBoard_20220804_1.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1008,
+   "name": "PopupEvent/NoticeBoard_20220804_2.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1065,
+   "name": "PopupEvent/NoticeBoard_20220804_3_BT.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1125,
+   "name": "PopupEvent/NoticeBoard_20220901.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1180,
+   "name": "PopupEvent/NoticeBoard_20220901_1.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1237,
+   "name": "PopupEvent/NoticeBoard_20220901_2.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1294,
+   "name": "PopupEvent/NoticeBoard_20220901_3.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1351,
+   "name": "PopupEvent/NoticeBoard_20220901_4.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1408,
+   "name": "PopupEvent/NoticeBoard_20220901_5.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1465,
+   "name": "PopupEvent/NoticeBoard_20220901_6.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1522,
+   "name": "PopupEvent/NoticeBoard_20220908.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1577,
+   "name": "PopupEvent/NoticeBoard_9.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1625,
+   "name": "PopupEvent/PCFreeRechargeItem_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1681,
+   "name": "PopupEvent/PointLogin3_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1730,
+   "name": "PopupEvent/SuperHoou_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1777,
+   "name": "PopupEvent/TimeShop_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1823,
+   "name": "PopupEvent/Vacance3_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1869,
+   "name": "PopupEvent/WeekendEvent_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1919,
+   "name": "PopupEvent/WeekendEvent_Go_Bt.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/EventPopup_CABoard_221006_k_1": [
+  {
+   "offset": 52,
+   "name": "PopupEvent/_EventPopup_CombineNotice_BtClose.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 120,
+   "name": "PopupEvent/_EventPopup_VScroll_Ball.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 179,
+   "name": "PopupEvent/BbokkiBbokki.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 226,
+   "name": "PopupEvent/CAjjang_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 271,
+   "name": "PopupEvent/CAMission.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 315,
+   "name": "PopupEvent/config.xml",
+   "confidence": "high"
+  },
+  {
+   "offset": 356,
+   "name": "PopupEvent/DropTheTem_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 404,
+   "name": "PopupEvent/EggGacha_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 450,
+   "name": "PopupEvent/ExpPointPresent_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 503,
+   "name": "PopupEvent/FashionKing_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 552,
+   "name": "PopupEvent/HotTime_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 597,
+   "name": "PopupEvent/MonWarsRank_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 646,
+   "name": "PopupEvent/MonWarsShop_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 695,
+   "name": "PopupEvent/NoticeBoard_10.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 744,
+   "name": "PopupEvent/NoticeBoard_20201203_2_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 804,
+   "name": "PopupEvent/NoticeBoard_202201006_1.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 862,
+   "name": "PopupEvent/NoticeBoard_202201006_2.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 920,
+   "name": "PopupEvent/NoticeBoard_202201006_3.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 978,
+   "name": "PopupEvent/NoticeBoard_202201006_3_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1039,
+   "name": "PopupEvent/NoticeBoard_20220630_3_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1099,
+   "name": "PopupEvent/NoticeBoard_20220804_1.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1156,
+   "name": "PopupEvent/NoticeBoard_20220804_2.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1213,
+   "name": "PopupEvent/NoticeBoard_20220804_3_BT.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1273,
+   "name": "PopupEvent/NoticeBoard_20220901_5.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1330,
+   "name": "PopupEvent/NoticeBoard_20220908.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1385,
+   "name": "PopupEvent/NoticeBoard_20221006.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1440,
+   "name": "PopupEvent/NoticeBoard_20221013.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1495,
+   "name": "PopupEvent/NoticeBoard_9.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1543,
+   "name": "PopupEvent/PCFreeRechargeItem_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1599,
+   "name": "PopupEvent/PointLogin3_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1648,
+   "name": "PopupEvent/StampKing_BT.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1695,
+   "name": "PopupEvent/SuperHoou_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1742,
+   "name": "PopupEvent/TimeShop_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1788,
+   "name": "PopupEvent/TokTokTree_BT.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1836,
+   "name": "PopupEvent/Vacance3_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1882,
+   "name": "PopupEvent/WeekendEvent_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1932,
+   "name": "PopupEvent/WeekendEvent_Go_Bt.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/ExpPointPresent": [
+  {
+   "offset": 58,
+   "name": "Quest/Quest_ExPointPresent_20160604_btnDone.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 125,
+   "name": "Quest/Quest_ExPointPresent_20160604_btnExit.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 192,
+   "name": "Quest/Quest_ExPointPresent_20160604_exp.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 255,
+   "name": "Quest/Quest_ExPointPresent_20160604_expX2.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 320,
+   "name": "Quest/Quest_ExPointPresent_20160604_expX3.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 385,
+   "name": "Quest/Quest_ExPointPresent_20160604_StarLuckyBean.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 458,
+   "name": "Quest/Quest_ExPointPresent_20190214_bg.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/FindNote": [
+  {
+   "offset": 51,
+   "name": "Quest/Event_2012_03_15_Count.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 103,
+   "name": "Quest/Event_2012_03_15_Gage.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 154,
+   "name": "Quest/Event_2012_03_15_Item.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 205,
+   "name": "Quest/Quest_2012_03_15_Back.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 256,
+   "name": "Quest/Quest_2012_03_15_Back01.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 309,
+   "name": "Quest/Quest_2012_03_15_Back02.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 362,
+   "name": "Quest/Quest_2012_03_15_bt01.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 413,
+   "name": "Quest/Quest_2012_03_15_bt02.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 464,
+   "name": "Quest/Quest_2012_03_15_List.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/FishTrade": [
+  {
+   "offset": 52,
+   "name": "Quest/Quest_2014_06_26_Back.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 103,
+   "name": "Quest/Quest_2014_06_26_Bt01.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 154,
+   "name": "Quest/Quest_2014_06_26_Bt02.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 205,
+   "name": "Quest/Quest_2014_06_26_Bt03.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 256,
+   "name": "Quest/Quest_2014_06_26_Bt04.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 307,
+   "name": "Quest/Quest_2014_06_26_Bt05.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 358,
+   "name": "Quest/Quest_2014_06_26_Bt06.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 409,
+   "name": "Quest/Quest_2014_06_26_List.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 460,
+   "name": "Quest/Quest_2014_10_30_01_img.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/MonRank": [
+  {
+   "offset": 50,
+   "name": "Quest/Quest_2009_07_23_Back.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 101,
+   "name": "Quest/Quest_2009_07_23_Back_END.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 156,
+   "name": "Quest/Quest_2009_07_23_BT.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 205,
+   "name": "Quest/Quest_2009_07_23_Count.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 257,
+   "name": "Quest/Quest_2009_07_23_END_ITEM.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 312,
+   "name": "Quest/Quest_2009_07_23_List.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 363,
+   "name": "Quest/Quest_2009_07_23_Mon00.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 415,
+   "name": "Quest/Quest_2009_07_23_Mon01.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 467,
+   "name": "Quest/Quest_2009_07_23_Mon02.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 519,
+   "name": "Quest/Quest_2009_07_23_Mon03.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/MonWarsRank2nd": [
+  {
+   "offset": 57,
+   "name": "Quest/KBNB_Quest_MonWarsRankBG.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 111,
+   "name": "Quest/KBNB_Quest_MonWarsRankingClose.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/MonWarsShop": [
+  {
+   "offset": 54,
+   "name": "Quest/Quest_2018_09_13_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 103,
+   "name": "Quest/Quest_2018_09_13_Count.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 155,
+   "name": "Quest/Quest_2018_09_13_List.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 206,
+   "name": "Quest/Quest_2019_09_05_Img.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 256,
+   "name": "Quest/Quest_2021_09_02_1_Back.jpg",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/NoviceAIBattle": [
+  {
+   "offset": 57,
+   "name": "Quest/Quest_2009_06_18_Npc_Bt_Game.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 115,
+   "name": "Quest/Quest_2009_06_18_Npc_Bt_Join.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 173,
+   "name": "Quest/Quest_2009_06_18_Npc_Icon.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 228,
+   "name": "Quest/Quest_2009_06_18_Npc_List.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 283,
+   "name": "Quest/Quest_2009_06_18_Npc_Misson_000.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 344,
+   "name": "Quest/Quest_2009_06_18_Npc_Misson_001.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 405,
+   "name": "Quest/Quest_2009_06_18_Npc_Misson_002.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 466,
+   "name": "Quest/Quest_2009_06_18_Npc_Misson_003.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 527,
+   "name": "Quest/Quest_2009_06_18_Npc_Misson_004.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 588,
+   "name": "Quest/Quest_2009_06_18_Npc_Misson_005.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 649,
+   "name": "Quest/Quest_2009_06_18_Npc_Misson_006.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 710,
+   "name": "Quest/Quest_2009_06_18_Npc_Misson_007.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 771,
+   "name": "Quest/Quest_2009_06_18_Npc_Misson_008.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 832,
+   "name": "Quest/Quest_2009_06_18_Npc_Misson_009.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 893,
+   "name": "Quest/Quest_2009_06_18_Npc_Misson_010.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 954,
+   "name": "Quest/Quest_2009_06_18_Npc_Pre.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1008,
+   "name": "Quest/Quest_2009_06_18_Npc_Text_001.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1067,
+   "name": "Quest/Quest_2009_06_18_Npc_Text_002.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1126,
+   "name": "Quest/Quest_2009_06_18_Npc_Text_003.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1185,
+   "name": "Quest/Quest_2009_06_18_Npc_Top_001.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1243,
+   "name": "Quest/Quest_2009_06_18_Npc_Top_002.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1301,
+   "name": "Quest/Quest_2009_06_18_Npc_Top_003.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1359,
+   "name": "Quest/Quest_2009_06_18_Npc_Top_004.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1417,
+   "name": "Quest/Quest_2009_06_18_Npc_Top_005.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1475,
+   "name": "Quest/Quest_2009_06_18_Npc_Top_006.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1533,
+   "name": "Quest/Quest_2009_06_18_Npc_Top_007.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1591,
+   "name": "Quest/Quest_2009_06_18_Npc_Top_008.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1649,
+   "name": "Quest/Quest_2009_06_18_Npc_Top_009.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1707,
+   "name": "Quest/Quest_2009_06_18_Npc_Top_010.jpg",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/NoviceMonster": [
+  {
+   "offset": 56,
+   "name": "Quest/Quest_2009_06_18_Mon_Bt_Game.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 114,
+   "name": "Quest/Quest_2009_06_18_Mon_Bt_Join.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 172,
+   "name": "Quest/Quest_2009_06_18_Mon_Icon.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 227,
+   "name": "Quest/Quest_2009_06_18_Mon_List.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 282,
+   "name": "Quest/Quest_2009_06_18_Mon_Misson_000.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 343,
+   "name": "Quest/Quest_2009_06_18_Mon_Misson_001.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 404,
+   "name": "Quest/Quest_2009_06_18_Mon_Misson_002.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 465,
+   "name": "Quest/Quest_2009_06_18_Mon_Misson_003.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 526,
+   "name": "Quest/Quest_2009_06_18_Mon_Misson_004.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 587,
+   "name": "Quest/Quest_2009_06_18_Mon_Misson_005.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 648,
+   "name": "Quest/Quest_2009_06_18_Mon_Misson_006.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 709,
+   "name": "Quest/Quest_2009_06_18_Mon_Misson_007.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 770,
+   "name": "Quest/Quest_2009_06_18_Mon_Misson_008.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 831,
+   "name": "Quest/Quest_2009_06_18_Mon_Misson_009.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 892,
+   "name": "Quest/Quest_2009_06_18_Mon_Misson_010.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 953,
+   "name": "Quest/Quest_2009_06_18_Mon_Pre.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1007,
+   "name": "Quest/Quest_2009_06_18_Mon_Text_001.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1066,
+   "name": "Quest/Quest_2009_06_18_Mon_Text_002.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1125,
+   "name": "Quest/Quest_2009_06_18_Mon_Text_003.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1184,
+   "name": "Quest/Quest_2009_06_18_Mon_Top_001.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1242,
+   "name": "Quest/Quest_2009_06_18_Mon_Top_002.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1300,
+   "name": "Quest/Quest_2009_06_18_Mon_Top_003.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1358,
+   "name": "Quest/Quest_2009_06_18_Mon_Top_004.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1416,
+   "name": "Quest/Quest_2009_06_18_Mon_Top_005.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1474,
+   "name": "Quest/Quest_2009_06_18_Mon_Top_006.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1532,
+   "name": "Quest/Quest_2009_06_18_Mon_Top_007.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1590,
+   "name": "Quest/Quest_2009_06_18_Mon_Top_008.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1648,
+   "name": "Quest/Quest_2009_06_18_Mon_Top_009.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1706,
+   "name": "Quest/Quest_2009_06_18_Mon_Top_010.jpg",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/NoviceNormal": [
+  {
+   "offset": 55,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Bt_Game.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 115,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Bt_Join.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 175,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Count_001.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 237,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Count_002.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 299,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Count_003.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 361,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Count_004.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 423,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Count_005.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 485,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Count_006.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 547,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Count_007.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 609,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Count_008.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 671,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Count_009.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 733,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Count_010.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 795,
+   "name": "Quest/Quest_2009_06_18_Bazzi_icon.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 852,
+   "name": "Quest/Quest_2009_06_18_Bazzi_List.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 909,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Misson_000.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 972,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Misson_001.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1035,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Misson_002.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1098,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Misson_003.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1161,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Misson_004.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1224,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Misson_005.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1287,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Misson_006.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1350,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Misson_007.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1413,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Misson_008.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1476,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Misson_009.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1539,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Misson_010.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1602,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Pre.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1658,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Text_001.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1719,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Text_002.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1780,
+   "name": "Quest/Quest_2009_06_18_Bazzi_Text_003.jpg",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/PCRoomGift4": [
+  {
+   "offset": 54,
+   "name": "Quest/PCR_Event_2010_01_02_Count.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 110,
+   "name": "Quest/PCR_Quest_2010_01_02_Count.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 166,
+   "name": "Quest/PCR_Quest_2015_07_02_Back00.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 223,
+   "name": "Quest/PCR_Quest_2015_07_02_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 276,
+   "name": "Quest/PCR_Quest_2015_07_02_Bt01.BMP",
+   "confidence": "high"
+  },
+  {
+   "offset": 331,
+   "name": "Quest/PCR_Quest_2015_07_02_Bt02.BMP",
+   "confidence": "high"
+  },
+  {
+   "offset": 386,
+   "name": "Quest/PCR_Quest_2015_07_02_List.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/QD2_EP01": [
+  {
+   "offset": 58,
+   "name": "Quest/2008_04_15_Back_1P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 106,
+   "name": "Quest/2008_04_15_Back_2P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 154,
+   "name": "Quest/2008_04_15_Back_3P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 241,
+   "name": "Quest/Event_2008_04_15_Ani-1.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 293,
+   "name": "Quest/Event_2008_04_15_Ani-2.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 345,
+   "name": "Quest/Event_2008_04_15_Ani-3.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 397,
+   "name": "Quest/Event_2008_04_15_Back_BtLeft.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 455,
+   "name": "Quest/Event_2008_04_15_Back_BtRight.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 514,
+   "name": "Quest/Event_2008_04_15_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 563,
+   "name": "Quest/Event_2008_04_15_Count.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 615,
+   "name": "Quest/Event_2008_04_15_List.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 666,
+   "name": "Quest/Item2QD_EP01.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/QD2_EP02": [
+  {
+   "offset": 58,
+   "name": "Quest/2008_04_29_Back_1P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 106,
+   "name": "Quest/2008_04_29_Back_2P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 154,
+   "name": "Quest/2008_04_29_Back_3P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 241,
+   "name": "Quest/Event_2008_04_29_2_Count.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 295,
+   "name": "Quest/Event_2008_04_29_Ani-1.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 347,
+   "name": "Quest/Event_2008_04_29_Ani-2.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 399,
+   "name": "Quest/Event_2008_04_29_Ani-3.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 451,
+   "name": "Quest/Event_2008_04_29_Back_BtLeft.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 509,
+   "name": "Quest/Event_2008_04_29_Back_BtRight.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 568,
+   "name": "Quest/Event_2008_04_29_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 617,
+   "name": "Quest/Event_2008_04_29_List.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 668,
+   "name": "Quest/Item2QD_EP02.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/QD2_EP03": [
+  {
+   "offset": 58,
+   "name": "Quest/2008_05_13_Back_1P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 106,
+   "name": "Quest/2008_05_13_Back_2P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 154,
+   "name": "Quest/2008_05_13_Back_3P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 241,
+   "name": "Quest/Event_2008_05_13_Ani-1.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 293,
+   "name": "Quest/Event_2008_05_13_Ani-2.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 345,
+   "name": "Quest/Event_2008_05_13_Ani-3.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 397,
+   "name": "Quest/Event_2008_05_13_Back_BtLeft.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 455,
+   "name": "Quest/Event_2008_05_13_Back_BtRight.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 514,
+   "name": "Quest/Event_2008_05_13_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 563,
+   "name": "Quest/Event_2008_05_13_Count.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 615,
+   "name": "Quest/Event_2008_05_13_List.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 666,
+   "name": "Quest/Item2QD_EP03.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/QD2_EP04": [
+  {
+   "offset": 58,
+   "name": "Quest/2008_05_27_Back_1P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 106,
+   "name": "Quest/2008_05_27_Back_2P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 154,
+   "name": "Quest/2008_05_27_Back_3P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 241,
+   "name": "Quest/Event_2008_05_27_Ani-1.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 293,
+   "name": "Quest/Event_2008_05_27_Ani-2.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 345,
+   "name": "Quest/Event_2008_05_27_Ani-3.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 397,
+   "name": "Quest/Event_2008_05_27_Back_BtLeft.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 455,
+   "name": "Quest/Event_2008_05_27_Back_BtRight.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 514,
+   "name": "Quest/Event_2008_05_27_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 563,
+   "name": "Quest/Event_2008_05_27_Count.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 615,
+   "name": "Quest/Event_2008_05_27_List.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/QD2_EP05": [
+  {
+   "offset": 58,
+   "name": "Quest/2008_06_10_Back_1P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 106,
+   "name": "Quest/2008_06_10_Back_2P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 154,
+   "name": "Quest/2008_06_10_Back_3P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 241,
+   "name": "Quest/Event_2008_06_10_Ani-1.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 293,
+   "name": "Quest/Event_2008_06_10_Ani-2.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 345,
+   "name": "Quest/Event_2008_06_10_Ani-3.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 397,
+   "name": "Quest/Event_2008_06_10_Back_BtLeft.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 455,
+   "name": "Quest/Event_2008_06_10_Back_BtRight.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 514,
+   "name": "Quest/Event_2008_06_10_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 563,
+   "name": "Quest/Event_2008_06_10_Count.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 615,
+   "name": "Quest/Event_2008_06_10_List.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/QD2_EP06": [
+  {
+   "offset": 58,
+   "name": "Quest/2008_06_24_Back_1P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 106,
+   "name": "Quest/2008_06_24_Back_2P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 154,
+   "name": "Quest/2008_06_24_Back_3P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 241,
+   "name": "Quest/Event_2008_06_24_Ani-1.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 293,
+   "name": "Quest/Event_2008_06_24_Ani-2.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 345,
+   "name": "Quest/Event_2008_06_24_Ani-3.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 397,
+   "name": "Quest/Event_2008_06_24_Back_BtLeft.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 455,
+   "name": "Quest/Event_2008_06_24_Back_BtRight.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 514,
+   "name": "Quest/Event_2008_06_24_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 563,
+   "name": "Quest/Event_2008_06_24_Count.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 615,
+   "name": "Quest/Event_2008_06_24_List.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/QD2_EP07": [
+  {
+   "offset": 58,
+   "name": "Quest/2008_07_08_Back_1P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 106,
+   "name": "Quest/2008_07_08_Back_2P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 154,
+   "name": "Quest/2008_07_08_Back_3P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 241,
+   "name": "Quest/Event_2008_07_08_Ani-1.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 293,
+   "name": "Quest/Event_2008_07_08_Ani-2.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 345,
+   "name": "Quest/Event_2008_07_08_Ani-3.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 397,
+   "name": "Quest/Event_2008_07_08_Back_BtLeft.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 455,
+   "name": "Quest/Event_2008_07_08_Back_BtRight.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 514,
+   "name": "Quest/Event_2008_07_08_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 563,
+   "name": "Quest/Event_2008_07_08_Count.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 615,
+   "name": "Quest/Event_2008_07_08_List.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/QD2_EP08": [
+  {
+   "offset": 58,
+   "name": "Quest/2008_07_22_Back_1P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 106,
+   "name": "Quest/2008_07_22_Back_2P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 154,
+   "name": "Quest/2008_07_22_Back_3P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 241,
+   "name": "Quest/Event_2008_07_22_Ani-1.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 293,
+   "name": "Quest/Event_2008_07_22_Ani-2.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 345,
+   "name": "Quest/Event_2008_07_22_Ani-3.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 397,
+   "name": "Quest/Event_2008_07_22_Back_BtLeft.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 455,
+   "name": "Quest/Event_2008_07_22_Back_BtRight.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 514,
+   "name": "Quest/Event_2008_07_22_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 563,
+   "name": "Quest/Event_2008_07_22_Count.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 615,
+   "name": "Quest/Event_2008_07_22_Count_00.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 670,
+   "name": "Quest/Event_2008_07_22_List.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/QD2_EP09": [
+  {
+   "offset": 58,
+   "name": "Quest/2008_08_05-Up_3P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 104,
+   "name": "Quest/2008_08_05-Up_4P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 150,
+   "name": "Quest/2008_08_05_Back_1P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 198,
+   "name": "Quest/2008_08_05_Back_2P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 246,
+   "name": "Quest/2008_08_05_Back_3P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 294,
+   "name": "Quest/2008_08_05_Back_4P.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 381,
+   "name": "Quest/Event_2008_08_05_Ani-1.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 433,
+   "name": "Quest/Event_2008_08_05_Ani-2.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 485,
+   "name": "Quest/Event_2008_08_05_Ani-3.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 537,
+   "name": "Quest/Event_2008_08_05_Ani-4.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 589,
+   "name": "Quest/Event_2008_08_05_Back_BtLeft.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 647,
+   "name": "Quest/Event_2008_08_05_Back_BtRight.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 706,
+   "name": "Quest/Event_2008_08_05_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 755,
+   "name": "Quest/Event_2008_08_05_Count.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 807,
+   "name": "Quest/Event_2008_08_05_List.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/SelectCandy": [
+  {
+   "offset": 54,
+   "name": "Quest/Quest_2009_09_30_Back.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 105,
+   "name": "Quest/Quest_2009_09_30_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 154,
+   "name": "Quest/Quest_2009_09_30_End.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 204,
+   "name": "Quest/Quest_2009_09_30_Item01.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 257,
+   "name": "Quest/Quest_2009_09_30_Item02.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 310,
+   "name": "Quest/Quest_2009_09_30_Item03.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 363,
+   "name": "Quest/Quest_2009_09_30_Item04.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 416,
+   "name": "Quest/Quest_2009_09_30_Item05.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 469,
+   "name": "Quest/Quest_2009_09_30_Item06.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 522,
+   "name": "Quest/Quest_2009_09_30_Item07.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 575,
+   "name": "Quest/Quest_2009_09_30_Item08.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 628,
+   "name": "Quest/Quest_2009_09_30_List.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/StampKing3": [
+  {
+   "offset": 53,
+   "name": "Quest/Quest_2019_07_18_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 102,
+   "name": "Quest/Quest_2019_07_18_Count01.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 156,
+   "name": "Quest/Quest_2019_07_18_Count03.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 210,
+   "name": "Quest/Quest_2019_07_18_Img01.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 262,
+   "name": "Quest/Quest_2019_07_18_Img02.png",
+   "confidence": "high"
+  },
+  {
+   "offset": 314,
+   "name": "Quest/Quest_2019_07_18_Img03.png",
+   "confidence": "high"
+  },
+  {
+   "offset": 366,
+   "name": "Quest/Quest_2019_07_18_List.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 417,
+   "name": "Quest/Quest_2021_07_01_Back.jpg",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/SuperHoou": [
+  {
+   "offset": 52,
+   "name": "Quest/Quest_2019_08_01_Back.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 103,
+   "name": "Quest/Quest_2019_08_01_Bt01.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 154,
+   "name": "Quest/Quest_2019_08_01_Img01.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 206,
+   "name": "Quest/Quest_2019_08_01_Img02.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 258,
+   "name": "Quest/Quest_2019_08_01_List.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/TokTokTreeNut3": [
+  {
+   "offset": 57,
+   "name": "Quest/Quest_2015_04_02_Bt.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 106,
+   "name": "Quest/Quest_2015_04_02_Count.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 158,
+   "name": "Quest/Quest_2015_04_02_Img02.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 210,
+   "name": "Quest/Quest_2015_04_02_List.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 261,
+   "name": "Quest/Quest_2018_04_05_Img01.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 313,
+   "name": "Quest/Quest_2019_04_01_Back.jpg",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/TwoDayFlow01": [
+  {
+   "offset": 55,
+   "name": "Quest/TwoDayFlow01_BG.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 100,
+   "name": "Quest/TwoDayFlow01_BG.png",
+   "confidence": "high"
+  },
+  {
+   "offset": 145,
+   "name": "Quest/TwoDayFlow01_Btn_AIBattle.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 200,
+   "name": "Quest/TwoDayFlow01_Btn_Close.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 252,
+   "name": "Quest/TwoDayFlow01_Btn_Left.png",
+   "confidence": "high"
+  },
+  {
+   "offset": 303,
+   "name": "Quest/TwoDayFlow01_Btn_Right.png",
+   "confidence": "high"
+  },
+  {
+   "offset": 355,
+   "name": "Quest/TwoDayFlow01_Img_Guid.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 406,
+   "name": "Quest/TwoDayFlow01_Text_Guid01.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 460,
+   "name": "Quest/TwoDayFlow01_Text_Guid02.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 514,
+   "name": "Quest/TwoDayFlow01_Text_Guid03.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 568,
+   "name": "Quest/TwoDayFlow01_Text_Guid04.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 622,
+   "name": "Quest/TwoDayFlow01_Text_Guid05.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 676,
+   "name": "Quest/TwoDayFlow01_Text_Guid06.bmp",
+   "confidence": "high"
+  }
+ ],
+ "ndadata/WelcomeToBnB": [
+  {
+   "offset": 55,
+   "name": "Quest/Quest_2009_10_15_AN01.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 106,
+   "name": "Quest/Quest_2009_10_15_AN02.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 157,
+   "name": "Quest/Quest_2009_10_15_AN03.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 208,
+   "name": "Quest/Quest_2009_10_15_AN04.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 259,
+   "name": "Quest/Quest_2009_10_15_AN05.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 310,
+   "name": "Quest/Quest_2009_10_15_AN06.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 361,
+   "name": "Quest/Quest_2009_10_15_Back01.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 414,
+   "name": "Quest/Quest_2009_10_15_Back02.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 467,
+   "name": "Quest/Quest_2009_10_15_Back05.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 520,
+   "name": "Quest/Quest_2009_10_15_Back10.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 573,
+   "name": "Quest/Quest_2009_10_15_BT01_01.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 627,
+   "name": "Quest/Quest_2009_10_15_BT01_02.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 681,
+   "name": "Quest/Quest_2009_10_15_BT02_01.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 735,
+   "name": "Quest/Quest_2009_10_15_BT02_02.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 789,
+   "name": "Quest/Quest_2009_10_15_BT03_01.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 843,
+   "name": "Quest/Quest_2009_10_15_BT03_02.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 897,
+   "name": "Quest/Quest_2009_10_15_BT04_01.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 951,
+   "name": "Quest/Quest_2009_10_15_BT04_02.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1005,
+   "name": "Quest/Quest_2009_10_15_BT05_01.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1059,
+   "name": "Quest/Quest_2009_10_15_BT05_02.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1113,
+   "name": "Quest/Quest_2009_10_15_BT06_01.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1167,
+   "name": "Quest/Quest_2009_10_15_BT06_02.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1221,
+   "name": "Quest/Quest_2009_10_15_BT07.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1272,
+   "name": "Quest/Quest_2009_10_15_List.bmp",
+   "confidence": "high"
+  },
+  {
+   "offset": 1323,
+   "name": "Quest/Quest_2018_07_05_1_Back03.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1378,
+   "name": "Quest/Quest_2018_07_05_1_Back04.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1433,
+   "name": "Quest/Quest_2018_07_05_1_Back06.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1488,
+   "name": "Quest/Quest_2018_07_05_1_Back07.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1543,
+   "name": "Quest/Quest_2018_07_05_1_Back08.jpg",
+   "confidence": "high"
+  },
+  {
+   "offset": 1598,
+   "name": "Quest/Quest_2018_07_05_1_Back09.jpg",
+   "confidence": "high"
+  }
+ ]
+}
