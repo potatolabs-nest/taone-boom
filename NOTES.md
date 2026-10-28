@@ -33,7 +33,7 @@ per-archive counts in this block were wrong.)
 Two earlier claims here were WRONG:
 
 1. **"~23,877 Ogg streams in FxSound.idd" is wrong.** That counted `OggS` *page
-   headers* (~4 pages per stream). True count: **693 Ogg streams**, now extracted
+   headers* (~4 pages per stream). True count: **693 Ogg streams**, extracted
    and VERIFIED — last payload ends at byte 92,079,817 = exact file size, fully
    contiguous from offset 0, zero gaps, all 693 validate as `Xiph.Org libVorbis`
    and decode via `afinfo`. That is **100% coverage of the archive**.

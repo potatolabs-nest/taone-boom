@@ -12,15 +12,18 @@ to something usable on the web.
 
 ## ⚠️ Read this first: what "port to web" can and cannot mean
 
-**Can this become a playable game in the browser? No — not from this archive.**
+**Can this become a playable game in the browser? A new one, yes — a port of the
+original, no.**
 
 | | Verdict | Why |
 |---|---|---|
-| **Asset browser / viewer** | ✅ **Feasible, underway** | Assets extract cleanly in places; a static web app needs no game logic. |
-| **Playable game** | ❌ **Not feasible** | See the four blockers below. |
-| **Data/string browser** | ✅ **Feasible, done** | 30 decoded containers incl. 10k+ Korean strings. |
+| **Asset browser / viewer** | ✅ **Done** | 5 routes, DDS decode, XSS-tested. |
+| **Data/string browser** | ✅ **Done** | 30 decoded containers incl. 10k+ Korean strings. |
+| **Playable rhythm game** | ✅ **Done** | Original game on the real assets — see [Playable game](#-playable-game). |
+| **Port of the original game** | ❌ **Not feasible** | See the four blockers below. |
+| **All assets extracted** | 🟡 **~12.6%** | Payload layout needs a protected binary. |
 
-Four hard blockers to a playable port:
+Four hard blockers to a *port*:
 
 1. **It's an online-only, server-authoritative MMO.** Rooms, matchmaking, scoring,
    item ownership and song sync all live on the *server*, which is **not in this
@@ -30,16 +33,17 @@ Four hard blockers to a playable port:
    BlackCipher; `CA.dll` and `DWK.dll` are **encrypted on disk** (they are byte-identical
    to each other and contain no readable structure). The game logic is not directly
    readable.
-3. **The asset container is only partly reversed.** **~12% of the 1,086 MB of asset
-   volume is recovered** — 894 validated files. One archive (`FxSound`) is complete;
-   the rest are partial or empty. The archive reader is in Themida-protected `CA.dll`.
+3. **The asset container is only partly reversed.** **~12.6% of the 1,086 MB of asset
+   volume is recovered** — 1,801 entries. One archive (`FxSound`) is complete; the rest
+   are partial or empty. The `.idx` cipher is cracked, but the payload layout lives in
+   Themida-protected `CA.dll`.
 4. **A renderer would have to be written from scratch.** DirectX 9, custom `.fft`
    fonts, `.idd` sprite/animation tables, Bink video (`.bik`). None of this maps to
    the browser; it would be a reimplementation, not a port.
 
-**Realistic end state:** a web **asset & data browser** over everything extractable,
-plus — if wanted later — a *new* rhythm minigame reusing extracted audio/art. That
-would be an original game inspired by the assets, **not** a port of this one.
+**Delivered end state:** a web **asset & data browser** over everything extractable,
+plus a **playable rhythm game** built on the extracted audio and art. That game is an
+original work inspired by these assets, **not** a port of the original.
 
 ---
 
@@ -54,9 +58,11 @@ would be an original game inspired by the assets, **not** a port of this one.
 | 4. Copy UI sprites | ✅ Done | 34 BMPs, real names |
 | 5. Build asset extractor | ✅ Done | `scripts/extract_assets.py` |
 | 6. Web app | ✅ Done | 5 routes, DDS decode, XSS-tested |
-| 7. Crack `.idx` filenames | 🔴 Blocked | engine binary is protected |
-| 8. Game renderer / logic | ⬜ Not started | blocked by #7 + server |
-| 9. Server protocol | ⬜ Not started | **infeasible**, see below |
+| 7. Playable game | ✅ Done | rhythm game, beat maps from audio, SELFTEST PASS |
+| 8. Crack `.idx` cipher | ✅ Done | **379 real names, 128 verified** |
+| 9. Name the big Fx* indexes | 🟡 In progress | cipher cracked, record walk pending |
+| 10. Game renderer / logic | ⬜ Not started | blocked by #3 + server |
+| 11. Server protocol | ⬜ Not started | **infeasible**, see below |
 
 ### Extraction coverage — measured, not estimated
 
@@ -89,32 +95,48 @@ By format: 747 Ogg streams (`libVorbis`, decode in `afinfo`), 147 JPEGs
 partial. FxMap and FxHiddenCatch are the next-most-promising — both have substantial
 compressed content still uncarved.
 
-### Why the remaining 88% is blocked
+### Why the remaining ~87% is blocked
 
-The archive reader lives in **`CA.dll`, which is Themida-protected** — it has a literal
-`.themida` section (7,987,200 bytes virtual, `rawsz=0`) plus a `.boot` section, and also
-carries UPX. `CA.exe` is nProtect GameGuard-packed (entropy ~7.96). Themida and
-GameGuard both defeat Ghidra's static analysis, so the container format and the `.idx`
-cipher cannot be read out of the binary.
+Two separate reasons, and only the second is hard:
+
+**1. The `.idx` cipher is CRACKED** (see §8 of `NOTES.md`). Names use
+`name[i] = stem[i] ^ name[i-4]`, with the 4-byte seed derived from the leading
+directory. 379 real names recovered, 128 of them verified against plaintext found
+independently in the bundles' compiled Lua. **No decompiler was needed** and none
+would have helped — a decompiler yields code, not the known plaintext that solves
+a cipher.
+
+**2. The payload layout is still unknown, and this is the real wall.** The big
+archives' contents are zlib-compressed custom structs rather than stored files, and
+the index offset fields do **not** point at payload starts — verified: they land on
+struct headers (`01 00 00 00 02 00 00 00`). FxStage, FxCharacter, FxContents and `fx`
+contain **zero** valid zlib streams. Reading that layout requires the engine binary,
+and **`CA.dll` is Themida-protected** (`.themida` section, 7,987,200 bytes virtual,
+`rawsz=0`, plus UPX) while `CA.exe` is nProtect GameGuard-packed. Both defeat static
+analysis.
 
 `Patcher.exe` (2.7 MB, 12,869 functions) **is** analysable, but it is only a downloader —
-it contains no `.idd`, `.idx` or `pak` strings and none of the format code.
+no `.idd`, `.idx` or `pak` strings and none of the format code.
 
-External corroboration: the Zenhax thread on this game family states the encryption is
+External corroboration: the Zenhax thread on this game family calls the encryption
 *"custom (something like 256 different operations) and so it's useless to make a script
 for quickbms."* Consistent with what is measured here.
 
 **Remaining options, in order of promise:**
-1. **Signature carving** (current approach) — raises coverage archive by archive. It
-   already got FxSound to 100% and FxHiddenCatch to 38%.
-2. **Find a community extractor.** This game family has public unpackers
-   (ACV tools, HyperRipper for the sibling `.idd`/`.idx`). Unknown: whether any handles
-   *this* client's generation.
-3. **Dynamic analysis** — dump decrypted code from a running client. Requires running
-   the game on Windows with anti-cheat active; outside this repo's scope.
+1. **Finish the big-index record walk.** The cipher already works on them — forcing
+   `Game/` on `FxStage.idx` yields `Game/AIBattle_SuperSt…` — only the fixed-width
+   record layout needs parsing. Cheapest real win available.
+2. **Signature carving** — raises coverage archive by archive. Already got FxSound to
+   100% and FxHiddenCatch to 38%.
+3. **Find a community extractor.** This family has public unpackers (ACV tools,
+   HyperRipper for the sibling `.idd`/`.idx`). Unknown: whether any handles *this*
+   client's generation.
+4. **Dynamic analysis** — dump decrypted code from a running client. Requires Windows
+   with anti-cheat active; outside this repo's scope.
 
-**Overall: the asset-extraction half is real and measurable; the "playable game" half
-is not achievable from this archive.** ~12% of asset volume recovered.
+**Overall: the asset-extraction half is real and measurable, and a playable
+asset-based game is DONE. A port of the original game remains impossible from this
+archive.** ~12.6% of asset volume recovered.
 
 ---
 
@@ -135,17 +157,31 @@ is not achievable from this archive.** ~12% of asset volume recovered.
 - [x] **Get REA MCP + Ghidra 12.1.4 working** — verified, 12,869 funcs decompiled
 - [x] **Build the web app** — 5 routes, DDS DXT1/3/5 decode, 100/page pagination,
       XSS-tested against a malicious manifest
+- [x] **Build a playable game** — original rhythm game on the extracted assets,
+      beat maps detected from each track's own audio, `?selftest=1` passes
+- [x] **Crack the `.idx` name cipher** — self-differential stream,
+      `name[i] = stem[i] ^ name[i-4]`, seed derived from the leading directory.
+      **379 real names, 128 verified against the Lua plaintext.** No decompiler
+      needed; `scripts/idx_decrypt.py`
 
 ### 🔴 Blocked
 
-- [ ] **Crack the `.idx` cipher** → recover the 1,801 entries' real filenames.
-      **Blocker:** the reader is in `CA.dll`, which is **Themida-protected**
-      (`.themida` section, `rawsz=0`, plus UPX); `CA.exe` is GameGuard-packed.
-      `Patcher.exe` is analysable but contains no format code (it's a downloader).
-- [ ] **Extract the remaining 88% of asset volume**
-      (`CharTE` 289 MB, `EmoTE` 225 MB, `FxMap` 90 MB, `fx` 87 MB, …)
-      **Blocker:** same protected engine. Currently only reachable by signature
-      carving, which yields partial coverage per archive.
+- [ ] **Extract the remaining ~87% of asset volume**
+      (`CharTE` 289 MB, `EmoTE` 225 MB, `FxMap` 90 MB, `fx` 87 MB, …).
+      **Blocker:** the payloads are zlib-compressed custom structs rather than
+      stored files, and the index offset fields do **not** point at payload
+      starts — verified: they land on struct headers (`01 00 00 00 02 00 00 00`).
+      FxStage, FxCharacter, FxContents and `fx` contain **zero** valid zlib
+      streams. Reading the real layout needs the engine binary, and `CA.dll` is
+      Themida-protected while `CA.exe` is GameGuard-packed.
+
+### 🟡 In progress
+
+- [ ] **Name the big `Fx*` indexes.** The cipher is cracked and applies to them
+      too — forcing `Game/` on `FxStage.idx` yields `Game/AIBattle_SuperSt…` —
+      but those indexes use a **fixed-width** record layout instead of the
+      ndadata length-prefixed one, so the record walk still needs writing.
+      This would name the archives holding most of the remaining bytes.
 
 ### ⬜ Not started
 
@@ -200,12 +236,17 @@ cd app/public && python3 -m http.server 8000
 
 - **`ssi1`/`ssi3`** = magic + raw zlib ⇒ clean key/value data tables.
 - **`ndadata/*.pak`** = `PACK0001` + zlib@16 ⇒ exactly the sibling `.idx` bytes.
-- **`.idx`** header clear (`ca da ef XX`, v15, 2 counts); **body encrypted**.
-  Not zlib/bz2/lzma, not a fixed keystream (XOR of two archives = 7.46 bits/byte).
-  ~40-byte records; name field then two equal u32s then a zero.
+- **`.idx` names: CRACKED.** Self-differential stream, `name[i] = stem[i] ^ name[i-4]`,
+  with the 4-byte seed derived from the leading directory (`Game/`, `Quest/`,
+  `PopupEvent/`). 379 real names, 128 verified against Lua plaintext. Two index
+  families: `fc 01 b2 05` (length-prefixed, decoded) and `ca da ef` (fixed-width,
+  walk pending).
 - **`.idd` is only sometimes a plain container.** `FxSound.idd` holds stored Oggs
-  (100% recovered); most others are a custom container.
-- **`CA.exe`/`CA.dll`/`DWK.dll` are protected.** `Patcher.exe` is not — use it.
+  (100% recovered); most others hold zlib-compressed custom structs whose index
+  offsets point at struct *headers*, not payloads.
+- **`CA.exe`/`CA.dll`/`DWK.dll` are protected** — Themida and GameGuard. `Patcher.exe`
+  is analysable but holds no format code. **A decompiler was not needed for the
+  cipher**, and none of these would have helped with it.
 
 ## Verification standard
 
@@ -214,8 +255,10 @@ Two earlier claims were retracted for skipping that step:
 
 1. "~23,877 Ogg streams in FxSound" — actually counted Ogg *page headers*; real
    count **693**. Verified by 100% byte coverage.
-2. "FxMap/FxStage are BMP/DDS-heavy and magic-carveable" — those were coincidental
-   byte matches; a strict validator rejects them.
+2. "FxMap/FxStage are BMP/DDS-heavy and magic-carveable" — the *counts* came from
+   coincidental byte matches, and a strict validator rejects those. Note the JPEGs
+   that did validate are genuinely real (`JFIF standard 1.02`); it was the volume,
+   not the format, that was wrong.
 
 Raw magic-hit counts are **not** asset counts. See `NOTES.md` §2 CORRECTION.
 
