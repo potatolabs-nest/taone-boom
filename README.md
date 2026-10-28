@@ -19,6 +19,7 @@ original, no.**
 |---|---|---|
 | **Asset browser / viewer** | ✅ **Done** | 5 routes, DDS decode, XSS-tested. |
 | **Data/string browser** | ✅ **Done** | 30 decoded containers incl. 10k+ Korean strings. |
+| **Web client shell** | ✅ **Done** | Login → lobby → room → play → result, real UI strings and sprites. |
 | **Playable rhythm game** | ✅ **Done** | Original game on the real assets — see [Playable game](#-playable-game). |
 | **Port of the original game** | ❌ **Not feasible** | See the four blockers below. |
 | **All assets extracted** | 🟡 **~12.6%** | Payload layout needs a protected binary. |
@@ -57,7 +58,8 @@ original work inspired by these assets, **not** a port of the original.
 | 3. Extract assets from `.idd` | 🟡 Partial | **1,801 entries, 12.64% of 1,086 MB** |
 | 4. Copy UI sprites | ✅ Done | 34 BMPs, real names |
 | 5. Build asset extractor | ✅ Done | `scripts/extract_assets.py` |
-| 6. Web app | ✅ Done | 5 routes, DDS decode, XSS-tested |
+| 6. Asset browser | ✅ Done | 5 routes, DDS decode, XSS-tested |
+| 6b. Web client shell | ✅ Done | login/lobby/room/play/result, FLOWTEST PASS |
 | 7. Playable game | ✅ Done | rhythm game, beat maps from audio, SELFTEST PASS |
 | 8. Crack `.idx` cipher | ✅ Done | **379 real names, 128 verified** |
 | 9. Name the big Fx* indexes | 🟡 In progress | cipher cracked, record walk pending |
@@ -159,6 +161,10 @@ archive.** ~12.6% of asset volume recovered.
       XSS-tested against a malicious manifest
 - [x] **Build a playable game** — original rhythm game on the extracted assets,
       beat maps detected from each track's own audio, `?selftest=1` passes
+- [x] **Build the web client shell** — `client.html`, login → lobby → room → play
+      → result, driven by the client's own strings (`나가기`, `상점`, `내아이템`,
+      `난이도`, `쉬움/보통/어려움`) and its real sprite assets. `?flowtest=1` passes,
+      in both `app/public` and the built bundle.
 - [x] **Crack the `.idx` name cipher** — self-differential stream,
       `name[i] = stem[i] ^ name[i-4]`, seed derived from the leading directory.
       **379 real names, 128 verified against the Lua plaintext.** No decompiler
@@ -175,13 +181,26 @@ archive.** ~12.6% of asset volume recovered.
       streams. Reading the real layout needs the engine binary, and `CA.dll` is
       Themida-protected while `CA.exe` is GameGuard-packed.
 
-### 🟡 In progress
+### 🟡 In progress (agents running)
 
-- [ ] **Name the big `Fx*` indexes.** The cipher is cracked and applies to them
-      too — forcing `Game/` on `FxStage.idx` yields `Game/AIBattle_SuperSt…` —
-      but those indexes use a **fixed-width** record layout instead of the
-      ndadata length-prefixed one, so the record walk still needs writing.
-      This would name the archives holding most of the remaining bytes.
+- [ ] **Name the big `Fx*` indexes.** The cipher works on them — forcing `Game/`
+      on `FxStage.idx` yields `Game/AIBattle_SuperSt…` — but they use a
+      **fixed-width** record layout instead of the ndadata length-prefixed one.
+      Success criterion: `FxSound.idx` must decrypt to ~693 `.ogg` names to match
+      the 693 real Ogg streams already extracted from `FxSound.idd`.
+- [ ] **Extract the named `ndadata` popup assets.** The names are known (130 real
+      paths) and the records carry two unexplained `u32` fields; if those resolve
+      to offsets, the sprites inside become extractable as *named* files.
+- [ ] **Crack the large `.idd` internal layout.** Nine of twelve archives are
+      unreachable; `FxStage`, `FxCharacter`, `FxContents` and `fx` have no valid
+      zlib streams at all, so their record form is still unknown.
+
+### ⬜ Not started (and not achievable from this archive)
+
+- [ ] Server protocol, matchmaking, rooms, scoring — **the server is not in the
+      archive**.
+- [ ] A faithful gameplay port — the client binaries are Themida/GameGuard
+      protected, so the original logic cannot be read out.
 
 ### ⬜ Not started
 
