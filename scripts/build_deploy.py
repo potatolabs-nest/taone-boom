@@ -28,7 +28,13 @@ def main():
     os.makedirs(os.path.join(OUT, "FxSound"))
     os.makedirs(os.path.join(OUT, "vh"))
 
-    shutil.copy(SRC_GAME, os.path.join(OUT, "index.html"))
+    # the playable client shell is the landing page; the rhythm game is kept
+    # alongside it as a direct-entry route
+    client = os.path.join(ROOT, "app/public/client.html")
+    shutil.copy(client if os.path.exists(client) else SRC_GAME,
+                os.path.join(OUT, "index.html"))
+    if os.path.exists(client):
+        shutil.copy(SRC_GAME, os.path.join(OUT, "game.html"))
     # keep Pages from running Jekyll over the output
     open(os.path.join(OUT, ".nojekyll"), "w").close()
 

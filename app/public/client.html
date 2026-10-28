@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Club Audition — Web Client</title>
+<style>
+  :root{
+    /* Palette taken from the client's own UI art: deep navy panel, magenta
+       accent, cyan secondary — the Audition lobby palette. */
+    --bg:#080b13; --bg2:#0d1220; --panel:#141b2b; --panel2:#1b2436;
+    --line:#27334a; --line2:#33415c;
+    --ink:#e9eefc; --muted:#8ea0bf;
+    --accent:#ff4fa3; --accent2:#39d0ff; --gold:#ffd166;
+    --ok:#4ade80; --warn:#fbbf24; --bad:#f87171;
+    --perfect:#ff4fa3; --great:#39d0ff; --cool:#a78bfa; --good:#4ade80; --miss:#64748b;
+    --kr: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", ui-sans-serif, system-ui, sans-serif;
+    --disp: "Chakra Petch", ui-sans-serif, system-ui, sans-serif;
+    --g: max(16px, env(safe-area-inset-left, 0px));
+    --g2: max(16px, env(safe-area-inset-right, 0px));
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink); font-family:var(--kr);
+    min-height:100dvh; overflow-x:hidden;
+    padding-left:var(--g); padding-right:var(--g2);
+  }
+  .app{max-width:1060px;margin:0 auto;padding:18px 0 40px}
+  a{color:var(--accent2)}
+  button,input,select{font-family:inherit}
+  button{cursor:pointer;border-radius:10px;border:1px solid var(--line);
+    background:var(--panel2);color:var(--ink);padding:10px 14px;font-size:14px}
+  button:hover{border-color:var(--accent2)}
+  button:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
+  button.primary{background:linear-gradient(180deg,var(--accent),#d4327f);border-color:transparent;color:#fff;font-weight:700}
+  button.gold{background:linear-gradient(180deg,#ffd166,#e0a800);border-color:transparent;color:#3a2a00;font-weight:700}
+  button[disabled]{opacity:.45;cursor:not-allowed}
+  .hide{display:none !important}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .grow{flex:1;min-width:0}
+  .muted{color:var(--muted);font-size:13px;line-height:1.6}
+  .pill{border:1px solid var(--line2);border-radius:999px;padding:4px 11px;font-size:12px;color:var(--muted)}
+
+  /* ---------- title bar ---------- */
+  .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .logo{font-family:var(--disp);font-weight:700;font-size:24px;letter-spacing:.5px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .topnav{display:flex;gap:6px;flex-wrap:wrap}
+  .topnav button{padding:8px 12px;font-size:13px;border-radius:9px;background:transparent;border-color:transparent;color:var(--muted)}
+  .topnav button:hover{background:var(--panel2);color:var(--ink);border-color:var(--line)}
+  .topnav button[aria-current="true"]{background:var(--panel2);color:var(--ink);border-color:var(--line2)}
+
+  /* ---------- login ---------- */
+  .login{display:grid;gap:14px;grid-template-columns:1fr;max-width:430px;margin:6vh auto 0}
+  .login h1{margin:0;font-size:22px}
+  .field{display:grid;gap:6px}
+  .field label{font-size:13px;color:var(--muted)}
+  .field input,.field select{padding:11px 12px;border-radius:10px;border:1px solid var(--line);
+    background:var(--panel2);color:var(--ink);font-size:15px}
+  .neterr{border-color:var(--bad);color:var(--bad);font-size:13px;padding:8px 10px;border-radius:9px;
+    border:1px solid var(--bad);background:#f8717111;display:none}
+  .neterr.on{display:block}
+
+  /* ---------- lobby ---------- */
+  .lobby{display:grid;gap:14px;grid-template-columns:minmax(0,1fr) 300px}
+  @media (max-width:820px){.lobby{grid-template-columns:1fr}}
+  .banner{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);
+    background:#05070c;min-height:150px;display:flex;align-items:center;padding:20px}
+  .banner .art{position:absolute;inset:0;object-fit:cover;width:100%;height:100%;opacity:.5}
+  .banner .on{position:relative;z-index:1}
+  .banner h2{margin:0 0 6px;font-size:20px}
+  .modegrid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+  .mode{display:flex;gap:10px;align-items:center;padding:12px;border-radius:12px;
+    background:var(--panel2);border:1px solid var(--line);cursor:pointer;text-align:left}
+  .mode:hover{border-color:var(--accent2)}
+  .mode img{width:44px;height:44px;object-fit:contain}
+  .mode b{display:block;font-size:14px}
+  .mode span{font-size:12px;color:var(--muted)}
+  .chan{display:grid;gap:8px}
+  .chanrow{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;
+    border-radius:10px;background:var(--panel2);border:1px solid var(--line);font-size:14px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);display:inline-block;margin-right:7px}
+  .dot.busy{background:var(--warn)} .dot.full{background:var(--bad)}
+
+  /* ---------- room ---------- */
+  .seats{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+  .seat{padding:12px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);min-height:82px}
+  .seat.me{border-color:var(--accent)}
+  .seat b{display:block;font-size:14px;margin-bottom:2px}
+  .seat span{font-size:12px;color:var(--muted)}
+  .seat .rdy{color:var(--ok);font-weight:700;font-size:12px}
+  .songs{max-height:330px;overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
+  .song{display:flex;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+  .song:last-child{border-bottom:0}
+  .song:hover{background:#ffffff08}
+  .song[aria-selected="true"]{background:color-mix(in srgb,var(--accent) 20%,transparent)}
+  .song .n{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums;min-width:58px}
+  .song .k{margin-left:auto;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+  .diffrow{display:flex;gap:8px;flex-wrap:wrap}
+  .diffrow button[aria-pressed="true"]{border-color:var(--accent);color:var(--ink);background:#ff4fa31a}
+
+  /* ---------- play ---------- */
+  .stage{position:relative;background:#05070c;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  canvas{display:block;width:100%;height:auto;touch-action:none}
+  .hud{position:absolute;inset:10px 12px auto;display:flex;gap:14px;pointer-events:none;
+    font-variant-numeric:tabular-nums;text-shadow:0 2px 8px #000a}
+  .hud .sc{font-family:var(--disp);font-size:26px;font-weight:700;line-height:1}
+  .hud .cm{font-size:28px;font-weight:800;color:var(--accent);text-align:right;line-height:1}
+  .hud .mt{font-size:12px;color:#cbd5e1}
+  .life{height:8px;background:#ffffff22;border-radius:99px;overflow:hidden;margin-top:6px;width:150px}
+  .life>i{display:block;height:100%;background:linear-gradient(90deg,var(--ok),var(--warn));width:100%}
+  .judge{position:absolute;left:50%;top:32%;transform:translate(-50%,-50%);font-size:34px;font-weight:800;
+    opacity:0;pointer-events:none;text-shadow:0 4px 18px #000b}
+  .judge.on{animation:pop .5s ease}
+  @keyframes pop{0%{opacity:0;transform:translate(-50%,-50%) scale(.7)}
+    25%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(1)}}
+  .pad{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+  .pad button{padding:18px 0;font-size:20px}
+  .prog{position:absolute;left:12px;right:12px;bottom:10px;height:6px;background:#ffffff22;border-radius:99px;overflow:hidden}
+  .prog>i{display:block;height:100%;background:var(--accent2);width:0}
+
+  /* ---------- result ---------- */
+  .grade{font-family:var(--disp);font-size:64px;font-weight:900;line-height:1;letter-spacing:-2px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:10px;margin-top:14px}
+  .stat{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:10px}
+  .stat b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+  .stat span{font-size:12px;color:var(--muted)}
+
+  /* ---------- misc ---------- */
+  .tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-bottom:12px;flex-wrap:wrap}
+  .tabs button{border:0;border-radius:0;background:transparent;padding:10px 12px;color:var(--muted);
+    border-bottom:2px solid transparent}
+  .tabs button[aria-current="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+  .shopgrid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+  .itembox{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:10px;text-align:center}
+  .itembox img{max-height:64px;max-width:100%;object-fit:contain}
+  .itembox b{display:block;font-size:12px;margin-top:6px;word-break:break-all}
+  .itembox span{font-size:11px;color:var(--muted)}
+  .strip{display:flex;gap:10px;overflow-x:auto;padding:4px 0}
+  .strip img{max-height:62px;width:auto}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;background:var(--panel);
+    border:1px solid var(--line2);border-radius:12px;padding:11px 16px;font-size:14px;z-index:40;
+    box-shadow:0 12px 40px #000a;display:none}
+  .toast.on{display:block}
+  @media (prefers-reduced-motion:reduce){.judge.on{animation:none;opacity:1}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== title bar (real client nav labels) ===== -->
+  <div class="top">
+    <span class="logo">CLUB AUDITION</span>
+    <span class="pill" id="pillNet">● 연결됨</span>
+    <span class="grow"></span>
+    <nav class="topnav" id="nav">
+      <button data-go="lobby" aria-current="true">로비</button>
+      <button data-go="info">내정보</button>
+      <button data-go="items">내아이템</button>
+      <button data-go="shop">상점</button>
+      <button data-go="mypage">마이페이지</button>
+      <button data-go="option">옵션</button>
+      <button data-go="browse">에셋 브라우저</button>
+    </nav>
+    <button id="btnLeave" class="hide">나가기</button>
+  </div>
+
+  <!-- ===== LOGIN ===== -->
+  <section id="v-login">
+    <div class="login">
+      <div class="card">
+        <h1>로그인</h1>
+        <p class="muted" style="margin:6px 0 14px">
+          원본 클라이언트에서 추출한 UI와 문자열로 구성한 웹 클라이언트입니다.
+        </p>
+        <div class="field">
+          <label for="nick">이름</label>
+          <input id="nick" maxlength="12" placeholder="닉네임" autocomplete="off" value="Dancer">
+        </div>
+        <div class="field" style="margin-top:10px">
+          <label for="chan">채널</label>
+          <select id="chan">
+            <option>초보 채널</option><option selected>자유 채널</option>
+            <option>고수 채널</option><option>이벤트 채널</option>
+          </select>
+        </div>
+        <div class="row" style="margin-top:14px">
+          <button class="primary" id="btnLogin">접속</button>
+          <span class="muted" id="loginNote"></span>
+        </div>
+        <div class="neterr" id="netErr" style="margin-top:12px"></div>
+      </div>
+      <p class="muted">
+        이 게임은 <b>서버가 없습니다</b>. 원본은 서버 권한형 온라인 게임이며 서버가
+        아카이브에 포함되어 있지 않습니다. 따라서 로비·방·플레이는 모두 로컬에서
+        동작하고, 곡과 UI는 추출한 실제 에셋을 사용합니다.
+      </p>
+    </div>
+  </section>
+
+  <!-- ===== LOBBY ===== -->
+  <section id="v-lobby" class="hide">
+    <div class="lobby">
+      <div style="display:grid;gap:14px">
+        <div class="banner">
+          <img class="art" id="bannerArt" alt="">
+          <div class="on">
+            <h2 id="hello">안녕하세요</h2>
+            <p class="muted" style="margin:0" id="lobbySub">채널을 선택하고 게임을 시작하세요.</p>
+          </div>
+        </div>
+        <div class="card">
+          <b>게임 모드</b>
+          <div class="modegrid" style="margin-top:10px" id="modes"></div>
+        </div>
+      </div>
+      <div style="display:grid;gap:14px">
+        <div class="card">
+          <b>채널</b>
+          <div class="chan" style="margin-top:10px" id="chanList"></div>
+        </div>
+        <div class="card">
+          <b>곡</b>
+          <div class="muted" id="songStat" style="margin-top:6px">—</div>
+          <div class="strip" id="artStrip" style="margin-top:10px"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ROOM ===== -->
+  <section id="v-room" class="hide">
+    <div class="lobby">
+      <div style="display:grid;gap:14px">
+        <div class="card">
+          <div class="row" style="justify-content:space-between">
+            <b id="roomName">대기방</b>
+            <span class="pill" id="roomMode">—</span>
+          </div>
+          <div class="seats" style="margin-top:12px" id="seats"></div>
+          <div class="row" style="margin-top:14px">
+            <button class="primary" id="btnReady">준비</button>
+            <button id="btnStartGame" disabled>시작</button>
+            <span class="muted" id="roomNote"></span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="row" style="justify-content:space-between">
+            <b>스테이지</b><span class="muted" id="stageName">—</span>
+          </div>
+          <div class="muted" style="margin:6px 0 0">
+            난이도
+          </div>
+          <div class="diffrow" id="diffs" style="margin-top:6px"></div>
+        </div>
+      </div>
+      <div style="display:grid;gap:14px">
+        <div class="card">
+          <div class="row" style="justify-content:space-between">
+            <b>음악</b>
+            <input id="q" type="search" placeholder="검색" autocomplete="off"
+              style="padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);width:130px">
+          </div>
+          <div class="songs" id="songs" role="listbox" style="margin-top:10px"></div>
+          <div class="row" style="margin-top:12px">
+            <button id="btnPreview">미리듣기</button>
+            <span class="muted" id="pickNote">곡을 선택하세요</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PLAY ===== -->
+  <section id="v-play" class="hide">
+    <div class="stage">
+      <canvas id="cv" width="1000" height="560"></canvas>
+      <div class="hud">
+        <div>
+          <div class="sc" id="hScore">0</div>
+          <div class="mt" id="hSong">—</div>
+          <div class="life"><i id="hLife"></i></div>
+        </div>
+        <div class="grow"></div>
+        <div>
+          <div class="cm" id="hCombo"></div>
+          <div class="mt" id="hAcc" style="text-align:right"></div>
+        </div>
+      </div>
+      <div class="judge" id="hJudge"></div>
+      <div class="prog"><i id="prog"></i></div>
+    </div>
+    <div class="pad" id="pad">
+      <button data-dir="left">←</button><button data-dir="down">↓</button>
+      <button data-dir="up">↑</button><button data-dir="right">→</button>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button id="btnPause">일시정지</button>
+      <button class="ghost" id="btnQuit">나가기</button>
+      <span class="muted" id="playNote"></span>
+    </div>
+  </section>
+
+  <!-- ===== RESULT ===== -->
+  <section id="v-result" class="hide">
+    <div class="card">
+      <div class="row" style="gap:20px">
+        <div class="grade" id="rGrade">—</div>
+        <div class="grow">
+          <div style="font-size:20px;font-weight:700" id="rScore">0</div>
+          <div class="muted" id="rSong"></div>
+        </div>
+      </div>
+      <div class="stats" id="rStats"></div>
+      <div class="row" style="margin-top:16px">
+        <button class="primary" id="btnAgain">다시하기</button>
+        <button id="btnBackRoom">대기방으로</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== generic content views (info / items / shop / mypage / option) ===== -->
+  <section id="v-content" class="hide">
+    <div class="card">
+      <div class="tabs" id="ctabs"></div>
+      <div id="cbody"></div>
+    </div>
+  </section>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ==========================================================================
+   Club Audition — web client.
+
+   This is a RECONSTRUCTION of the client's shell, not a port of the game:
+   the original is a server-authoritative MMO and its server is not in the
+   archive. Screens, labels, sprites, strings and songs are the real extracted
+   ones; the lobby/room logic is local.
+   ========================================================================== */
+
+var $ = function(id){ return document.getElementById(id); };
+function el(tag, cls, text){
+  var n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = String(text);   // never innerHTML
+  return n;
+}
+function safePath(p){
+  if (typeof p !== "string" || !p) return null;
+  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(p)) return null;
+  if (p.charAt(0) === "/" || p.charAt(0) === "\\") return null;
+  if (p.indexOf("\\") !== -1) return null;
+  if (p.split("/").indexOf("..") !== -1) return null;
+  return p;
+}
+function toast(msg){
+  var t = $("toast"); t.textContent = msg; t.classList.add("on");
+  clearTimeout(t._h); t._h = setTimeout(function(){ t.classList.remove("on"); }, 2200);
+}
+
+/* ---------- real client strings (work/strings/csysstr.ssd.json) ---------- */
+var L = {
+  exit:"나가기", option:"옵션", score:"점수", difficulty:"난이도",
+  easy:"쉬움", normal:"보통", hard:"어려움", stage:"스테이지",
+  name:"이름", item:"아이템", level:"레벨", back:"뒤로가기",
+  help:"도움말", myInfo:"내정보", myItem:"내아이템", myPage:"마이페이지",
+  shop:"상     점", userMarket:"유저장터", myQuest:"퀘스트", messenger:"메신저",
+  lobbyButton:"로비 가기", allMustReady:" 모든 플레이어가 준비 상태이어야 합니다.",
+  cantCreateRoom:" 방을 만들 수 없습니다. 잠시 후 다시 시도하세요.",
+  connFailed:"로그인 서버 접속에 실패했습니다. (%d) DEF1",
+  noChannel:"채널 접속이 끊어졌습니다."
+};
+
+var S = {
+  nick:"Dancer", chan:"자유 채널", screen:"login",
+  manifest:null, songs:[], sprites:[], spriteBy:{},
+  selected:null, diff:"normal", ready:false, mode:"normal",
+  roommates:[]
+};
+
+var MODES = [
+  {id:"normal", label:"일반",   sprite:"Lobby_Normal_bt01",  desc:"4방향 노트"},
+  {id:"battle", label:"대결",   sprite:"Lobby_Battle_bt01",  desc:"1:1 승부"},
+  {id:"monster",label:"몬스터", sprite:"Lobby_Monster2_bt01",desc:"보스 스테이지"},
+  {id:"quick",  label:"빠른시작",sprite:"UXMatching_RoomUI_Bt_QuickStart", desc:"바로 입장"},
+  {id:"ladder", label:"래더",   sprite:"UXMatching_RoomUI_Bt_Ladder", desc:"랭크전"},
+  {id:"practice",label:"연습",  sprite:"UxMatching_RoomUI_Bt_Practice", desc:"자유 연습"}
+];
+
+/* ============================ screens ============================= */
+function show(name){
+  S.screen = name;
+  ["login","lobby","room","play","result","content"].forEach(function(v){
+    $("v-"+v).classList.toggle("hide", v !== name);
+  });
+  $("nav").classList.toggle("hide", name === "login");
+  $("btnLeave").classList.toggle("hide", name === "login");
+  $("btnLeave").classList.toggle("hide", name === "lobby" || name === "login" || name === "content");
+  Array.prototype.forEach.call($("nav").children, function(b){
+    b.setAttribute("aria-current", b.getAttribute("data-go") === name ? "true" : "false");
+  });
+  if (name !== "play") window.scrollTo({top:0, behavior:"smooth"});
+}
+
+/* ============================ login ============================== */
+$("btnLogin").addEventListener("click", function(){
+  var n = ($("nick").value || "").trim();
+  if (!n){ $("loginNote").textContent = "이름을 입력하세요."; return; }
+  S.nick = n; S.chan = $("chan").value;
+  $("hello").textContent = "안녕하세요, " + n + "님";
+  $("lobbySub").textContent = S.chan + " · 곡 " + S.songs.length.toLocaleString() + "개";
+  $("lobbySub").textContent = S.chan + " · " + L.difficulty + " " +
+    (S.diff==="easy"?L.easy:S.diff==="hard"?L.hard:L.normal) + " · 곡 " +
+    S.songs.length.toLocaleString() + "개";
+  show("lobby");
+});
+
+/* ============================ lobby ============================== */
+function renderModes(){
+  var host = $("modes"); host.textContent = "";
+  MODES.forEach(function(m){
+    var b = el("button","mode");
+    b.type = "button";
+    var sp = S.spriteBy[m.sprite];
+    if (sp){
+      var img = el("img"); img.src = sp.file; img.alt = ""; img.loading = "lazy";
+      b.appendChild(img);
+    }
+    var box = el("span");
+    box.appendChild(el("b", null, m.label));
+    box.appendChild(el("span", null, m.desc));
+    b.appendChild(box);
+    b.addEventListener("click", function(){ enterRoom(m); });
+    host.appendChild(b);
+  });
+}
+function renderChannels(){
+  var host = $("chanList"); host.textContent = "";
+  [["초보 채널", 3, 30], [S.chan, 12, 30], ["고수 채널", 28, 30], ["이벤트 채널", 0, 30]]
+  .forEach(function(c){
+    var r = el("div","chanrow");
+    var left = el("span");
+    var d = el("i","dot" + (c[1]>25?" full":c[1]>15?" busy":""));
+    left.appendChild(d);
+    left.appendChild(document.createTextNode(c[0]));
+    r.appendChild(left);
+    r.appendChild(el("span","muted", c[1] + "/" + c[2]));
+    r.addEventListener("click", function(){
+      S.chan = c[0]; renderChannels();
+      $("lobbySub").textContent = S.chan + " · 곡 " + S.songs.length.toLocaleString() + "개";
+      toast(c[0] + " 접속");
+    });
+    host.appendChild(r);
+  });
+}
+function renderStrip(){
+  var host = $("artStrip"); host.textContent = "";
+  ["GlobalUI_BtShop","GlobalUI_BtMyItem","GlobalUI_BtMenu","Etc_BtOk",
+   "GlobalUI_BtShop","Prepare_PRE_Bt_Selectmap"].forEach(function(n){
+    var sp = S.spriteBy[n]; if (!sp) return;
+    var img = el("img"); img.src = sp.file; img.alt = n; img.loading = "lazy";
+    host.appendChild(img);
+  });
+  var b = S.spriteBy["Lobby_Normal_bt01"] || S.sprites[0];
+  if (b) $("bannerArt").src = b.file;
+}
+
+/* ============================ room =============================== */
+function enterRoom(mode){
+  S.mode = mode.id;
+  S.ready = false;
+  $("roomName").textContent = mode.label + " 방";
+  $("roomMode").textContent = mode.label;
+  $("stageName").textContent = S.selected ? (S.selected.name || S.selected.id) : "—";
+  S.roommates = [{n:S.nick, me:true, rdy:false}, {n:"댄서A", me:false, rdy:true},
+                 {n:"댄서B", me:false, rdy:false}];
+  renderSeats(); renderDiffs(); renderSongs(); show("room");
+}
+function renderSeats(){
+  var host = $("seats"); host.textContent = "";
+  S.roommates.forEach(function(p){
+    var d = el("div","seat" + (p.me ? " me" : ""));
+    d.appendChild(el("b", null, p.n + (p.me ? " (나)" : "")));
+    d.appendChild(el("span", null, "Lv." + (p.me ? 12 : 8 + Math.floor(Math.random()*30))));
+    if (p.rdy) d.appendChild(el("div","rdy","준비 완료"));
+    host.appendChild(d);
+  });
+  $("btnStartGame").disabled = !S.roomsAllReady();
+}
+S.roomsAllReady = function(){ return false; };   // start gated on local ready
+function renderDiffs(){
+  var host = $("diffs"); host.textContent = "";
+  [["easy",L.easy],["normal",L.normal],["hard",L.hard]].forEach(function(d){
+    var b = el("button", null, d[1]);
+    b.type = "button";
+    b.setAttribute("aria-pressed", S.diff === d[0] ? "true" : "false");
+    b.addEventListener("click", function(){ S.diff = d[0]; renderDiffs(); });
+    host.appendChild(b);
+  });
+}
+
+function renderSongs(){
+  var host = $("songs"); host.textContent = "";
+  var q = ($("q").value || "").trim().toLowerCase();
+  var frag = document.createDocumentFragment(), shown = 0;
+  for (var i=0;i<S.songs.length && shown<300;i++){
+    var s = S.songs[i];
+    var label = s.name || s.id || s.file;
+    if (q && String(label).toLowerCase().indexOf(q) === -1) continue;
+    shown++;
+    var r = el("div","song");
+    r.setAttribute("role","option"); r.tabIndex = 0;
+    r.appendChild(el("span","n", String(i).padStart(4,"0")));
+    r.appendChild(el("span", null, label));
+    r.appendChild(el("span","k", Math.round((s.size||0)/1024) + " KB"));
+    r.setAttribute("aria-selected", S.selected === s ? "true" : "false");
+    r.addEventListener("click", function(){ pickSong(s); });
+    r.addEventListener("keydown", function(e){
+      if (e.key==="Enter"||e.key===" "){ e.preventDefault(); pickSong(s); }
+    });
+    frag.appendChild(r);
+  }
+  host.appendChild(frag);
+}
+function pickSong(s){
+  S.selected = s;
+  renderSongs();
+  $("stageName").textContent = s.name || s.id || s.file;
+  $("pickNote").textContent = (s.name || s.id) + " 선택됨";
+}
+$("q").addEventListener("input", renderSongs);
+$("btnReady").addEventListener("click", function(){
+  S.ready = !S.ready;
+  S.roommates[0].rdy = S.ready;
+  $("btnReady").textContent = S.ready ? "준비 취소" : "준비";
+  renderSeats();
+  $("btnStartGame").disabled = !(S.ready && S.selected);
+  $("roomNote").textContent = S.ready && !S.selected ? "곡을 선택하세요" : "";
+  if (S.ready && S.selected) $("btnStartGame").disabled = false;
+});
+$("btnStartGame").addEventListener("click", startGame);
+$("btnBackRoom").addEventListener("click", function(){ show("room"); });
+$("btnAgain").addEventListener("click", startGame);
+
+/* ===================== rhythm engine (same as game.html) =========== */
+var DIRS = ["left","down","up","right"];
+var ARROW = {left:"←",down:"↓",up:"↑",right:"→"};
+var KEYS = {ArrowLeft:"left",ArrowDown:"down",ArrowUp:"up",ArrowRight:"right"};
+var WINDOWS = [["perfect",0.055],["great",0.100],["cool",0.150],["good",0.210]];
+var G = { running:false, paused:false, ended:false, notes:[], idx:0, score:0, combo:0,
+  maxCombo:0, counts:{perfect:0,great:0,cool:0,good:0,miss:0}, life:100, startAt:0,
+  raf:0, buf:null, src:null, gain:null, audioCtx:null, flash:0, song:null };
+
+function judgeFor(dt){
+  for (var i=0;i<WINDOWS.length;i++) if (dt <= WINDOWS[i][1]) return WINDOWS[i][0];
+  return null;
+}
+function detectBeats(ab, diff){
+  var sr = ab.sampleRate, ch = ab.getChannelData(0), hop = 1024;
+  var frames = Math.floor(ch.length/hop);
+  if (frames < 8) return {times:[], detected:false, duration:ab.duration};
+  var env = new Float32Array(frames);
+  for (var f=0; f<frames; f++){
+    var s=f*hop, e=Math.min(s+hop, ch.length), sum=0;
+    for (var i=s;i<e;i++){ var v=ch[i]; sum += v*v; }
+    env[f] = Math.sqrt(sum/Math.max(1,e-s));
+  }
+  var sm = new Float32Array(frames);
+  for (var g=0; g<frames; g++){
+    var a=env[Math.max(0,g-1)], b=env[g], c=env[Math.min(frames-1,g+1)];
+    sm[g]=(a+b*2+c)/4;
+  }
+  var flux = new Float32Array(frames), maxF=1e-9;
+  for (var h=1; h<frames; h++){
+    var d=sm[h]-sm[h-1]; flux[h]= d>0?d:0; if (flux[h]>maxF) maxF=flux[h];
+  }
+  var hopSec = hop/sr;
+  var minGap = diff==="hard"?0.14:diff==="easy"?0.34:0.22;
+  var win = Math.max(4, Math.round(0.35/hopSec));
+  var times=[], lastT=-99;
+  for (var k=1;k<frames-1;k++){
+    var lo=Math.max(0,k-win), hi=Math.min(frames-1,k+win), sum2=0, cnt=0;
+    for (var q2=lo;q2<=hi;q2++){ sum2+=flux[q2]; cnt++; }
+    if (flux[k] < (sum2/Math.max(1,cnt))*1.45) continue;
+    if (flux[k] < maxF*0.10) continue;
+    if (flux[k] < flux[k-1] || flux[k] < flux[k+1]) continue;
+    var t=k*hopSec;
+    if (t-lastT < minGap) continue;
+    times.push(t); lastT=t;
+  }
+  var dur = ab.duration || 1;
+  var want = Math.max(24, Math.round(dur * (diff==="hard"?2.6:diff==="easy"?0.9:1.6)));
+  if (times.length > want){
+    var stride = times.length/want, kept=[];
+    for (var s2=0;s2<want;s2++) kept.push(times[Math.floor(s2*stride)]);
+    times = kept;
+  }
+  var detected = times.length >= 8;
+  if (!detected){
+    times = [];
+    for (var t2=1.2; t2<dur-0.6; t2+=60/128){ times.push(t2); if (diff!=="easy") times.push(t2+60/256); }
+  }
+  return {times:times, detected:detected, duration:dur};
+}
+function buildNotes(beats){
+  var notes=[];
+  for (var i=0;i<beats.times.length;i++){
+    var d = DIRS[(Math.random()*4)|0];
+    notes.push({t:beats.times[i], dir:d, lane:DIRS.indexOf(d), hit:false, missed:false});
+  }
+  notes.sort(function(a,b){ return a.t-b.t; });
+  return notes;
+}
+function hud(){
+  $("hScore").textContent = G.score.toLocaleString();
+  $("hCombo").textContent = G.combo>=2 ? (G.combo + " COMBO") : "";
+  var tot = G.counts.perfect+G.counts.great+G.counts.cool+G.counts.good+G.counts.miss;
+  var acc = tot ? Math.round(100*(G.counts.perfect + G.counts.great*.8 + G.counts.cool*.5 + G.counts.good*.25)/tot) : 100;
+  $("hAcc").textContent = tot ? (acc + "% · " + tot + " notes") : "";
+  $("hLife").style.width = Math.max(0,Math.min(100,G.life)) + "%";
+  $("hSong").textContent = (G.song && (G.song.name || G.song.id)) || "";
+}
+function flashJudge(kind){
+  var n = $("hJudge");
+  n.textContent = kind.toUpperCase();
+  n.style.color = "var(--" + kind + ")";
+  n.classList.remove("on"); void n.offsetWidth; n.classList.add("on");
+}
+function press(dir){
+  if (!G.running || G.paused || G.ended) return;
+  var now = G.audioCtx.currentTime - G.startAt;
+  var lane = DIRS.indexOf(dir), best=-1, bestDt=1e9;
+  for (var i=G.idx;i<G.notes.length;i++){
+    var n=G.notes[i];
+    if (n.hit||n.missed||n.lane!==lane) continue;
+    if (n.t-now > 0.4) break;
+    var dt=Math.abs(n.t-now);
+    if (dt<bestDt){ bestDt=dt; best=i; }
+  }
+  if (best<0) return;
+  var kind = judgeFor(bestDt); if (!kind) return;
+  G.notes[best].hit = true;
+  G.counts[kind]++; G.combo++;
+  if (G.combo>G.maxCombo) G.maxCombo=G.combo;
+  var base = {perfect:300,great:200,cool:100,good:50}[kind];
+  G.score += Math.round(base*(1+Math.min(G.combo,50)/50));
+  G.life = Math.min(100, G.life + (kind==="good"?0.5:1.2));
+  flashJudge(kind); G.flash=0.22; hud();
+}
+function draw(now, flash){
+  var cv=$("cv"), g=cv.getContext("2d"), w=cv.width, h=cv.height;
+  g.clearRect(0,0,w,h);
+  var bg=g.createLinearGradient(0,0,0,h);
+  bg.addColorStop(0,"#0a1020"); bg.addColorStop(1,"#05070c");
+  g.fillStyle=bg; g.fillRect(0,0,w,h);
+  for (var l=0;l<4;l++){
+    var x=w*(0.18+0.2133*l);
+    g.fillStyle="rgba(255,255,255,.035)"; g.fillRect(x-52,0,104,h);
+    g.strokeStyle="rgba(255,255,255,.06)"; g.beginPath(); g.moveTo(x-52,0); g.lineTo(x-52,h); g.stroke();
+  }
+  var ty=h*0.80;
+  g.strokeStyle="rgba(255,79,163,.85)"; g.lineWidth=3;
+  g.beginPath(); g.moveTo(0,ty); g.lineTo(w,ty); g.stroke();
+  var look = 1.9;
+  g.textAlign="center"; g.textBaseline="middle";
+  for (var i=0;i<G.notes.length;i++){
+    var n=G.notes[i];
+    if (n.hit||n.missed) continue;
+    var dt=n.t-now;
+    if (dt>look || dt<-0.35) continue;
+    var x2=w*(0.18+0.2133*n.lane);
+    var y=ty-(dt/look)*(ty-40);
+    var grad=g.createLinearGradient(x2,y-30,x2,y+30);
+    grad.addColorStop(0,"#ffffff"); grad.addColorStop(1,"#ffd0e6");
+    g.fillStyle=grad; g.beginPath(); g.arc(x2,y,30,0,Math.PI*2); g.fill();
+    g.strokeStyle="rgba(255,79,163,.9)"; g.lineWidth=2; g.stroke();
+    g.fillStyle="#12161f"; g.font="bold 30px "+getComputedStyle(document.body).fontFamily;
+    g.fillText(ARROW[DIRS[n.lane]], x2, y+1);
+  }
+  if (flash>0){ g.globalAlpha=flash; g.fillStyle="#fff"; g.fillRect(0,ty-2,w,4); g.globalAlpha=1; }
+}
+function loop(){
+  if (!G.running) return;
+  G.raf = requestAnimationFrame(loop);
+  if (G.paused) return;
+  var now = G.audioCtx.currentTime - G.startAt;
+  while (G.idx < G.notes.length){
+    var n=G.notes[G.idx];
+    if (n.hit){ G.idx++; continue; }
+    if (now - n.t > 0.21){ n.missed=true; G.counts.miss++; G.combo=0; G.life-=4; hud(); G.idx++; continue; }
+    break;
+  }
+  if (G.life<=0){ endGame(true); return; }
+  if (now > (G.buf.duration+0.4)){ endGame(false); return; }
+  draw(now, G.flash);
+  G.flash = Math.max(0, G.flash-0.02);
+  $("prog").style.width = Math.max(0,Math.min(100,(now/(G.buf.duration||1))*100)) + "%";
+}
+function startGame(){
+  if (!S.selected){ toast("곡을 선택하세요"); return; }
+  var p = safePath(S.selected.file);
+  if (!p){ toast("잘못된 경로"); return; }
+  G.song = S.selected;
+  $("playNote").textContent = "로딩…";
+  show("play");
+  fetch(p).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.arrayBuffer(); })
+  .then(function(buf){
+    if (!G.audioCtx) G.audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    return G.audioCtx.decodeAudioData(buf.slice(0));
+  }).then(function(ab){
+    G.buf = ab;
+    var beats = detectBeats(ab, S.diff);
+    G.notes = buildNotes(beats);
+    G.idx=0; G.score=0; G.combo=0; G.maxCombo=0; G.life=100;
+    G.counts={perfect:0,great:0,cool:0,good:0,miss:0};
+    G.ended=false; G.paused=false; G.running=true;
+    hud();
+    G.startAt = G.audioCtx.currentTime + 0.9;
+    var src = G.audioCtx.createBufferSource(), gain = G.audioCtx.createGain();
+    gain.gain.value = 0.9;
+    src.buffer = ab; src.connect(gain); gain.connect(G.audioCtx.destination);
+    G.src = src; G.gain = gain;
+    src.start(G.startAt);
+    $("playNote").textContent = beats.detected
+      ? ("노트 " + beats.times.length + "개 (오디오에서 검출)")
+      : ("노트 " + beats.times.length + "개 (고정 그리드)");
+    loop();
+  }).catch(function(e){
+    $("playNote").textContent = "재생 실패: " + e.message + " — 이 브라우저가 Ogg Vorbis를 지원하지 않을 수 있습니다.";
+  });
+}
+function endGame(failed){
+  G.ended=true; G.running=false;
+  cancelAnimationFrame(G.raf);
+  try { if (G.src) G.src.stop(); } catch(e){}
+  var tot = G.counts.perfect+G.counts.great+G.counts.cool+G.counts.good+G.counts.miss;
+  var acc = tot ? (100*(G.counts.perfect + G.counts.great*.8 + G.counts.cool*.5 + G.counts.good*.25)/tot) : 0;
+  var grade = failed ? "F" : acc>=97?"S":acc>=92?"A":acc>=85?"B":acc>=70?"C":"D";
+  $("rGrade").textContent = grade;
+  $("rGrade").style.color = grade==="F"?"var(--bad)":grade==="S"?"var(--accent)":"var(--accent2)";
+  $("rScore").textContent = G.score.toLocaleString() + " " + L.score;
+  $("rSong").textContent = ((G.song && (G.song.name||G.song.id)) || "곡") +
+    " · 정확도 " + acc.toFixed(1) + "%" + (failed ? " · 실패" : "");
+  var host=$("rStats"); host.textContent="";
+  [["PERFECT",G.counts.perfect],["GREAT",G.counts.great],["COOL",G.counts.cool],
+   ["GOOD",G.counts.good],["MISS",G.counts.miss],["MAX COMBO",G.maxCombo]].forEach(function(kv){
+    var d=el("div","stat"); d.appendChild(el("b",null,kv[1])); d.appendChild(el("span",null,kv[0]));
+    host.appendChild(d);
+  });
+  show("result");
+}
+function togglePause(){
+  if (!G.running && !G.paused) return;
+  G.paused = !G.paused;
+  $("btnPause").textContent = G.paused ? "재개" : "일시정지";
+  if (G.paused){
+    try { if (G.src){ G.stoppedAt = G.audioCtx.currentTime - G.startAt; G.src.stop(); } } catch(e){}
+    $("playNote").textContent = "일시정지됨";
+  } else {
+    var off = Math.max(0, G.stoppedAt||0);
+    var src = G.audioCtx.createBufferSource();
+    src.buffer = G.buf; src.connect(G.gain);
+    G.src = src; G.startAt = G.audioCtx.currentTime - off;
+    src.start(0, off);
+    $("playNote").textContent = "재개됨";
+    loop();
+  }
+}
+$("btnPause").addEventListener("click", togglePause);
+$("btnQuit").addEventListener("click", function(){
+  G.running=false; G.paused=false;
+  cancelAnimationFrame(G.raf);
+  try { if (G.src) G.src.stop(); } catch(e){}
+  show("room");
+});
+document.addEventListener("keydown", function(ev){
+  if (ev.repeat) return;
+  if (KEYS[ev.key] && S.screen==="play"){ ev.preventDefault(); press(KEYS[ev.key]); return; }
+  if (ev.key===" " && S.screen==="play"){ ev.preventDefault(); togglePause(); return; }
+  if (ev.key==="Escape" && S.screen==="play"){ $("btnQuit").click(); }
+});
+$("pad").addEventListener("pointerdown", function(ev){
+  var b = ev.target.closest("button[data-dir]"); if (!b) return;
+  ev.preventDefault(); press(b.getAttribute("data-dir"));
+});
+if (!("ontouchstart" in window) && navigator.maxTouchPoints === 0) $("pad").classList.add("hide");
+$("btnPreview").addEventListener("click", function(){
+  if (!S.selected){ toast("곡을 선택하세요"); return; }
+  var p = safePath(S.selected.file); if (!p) return;
+  if (G.prev){ G.prev.pause(); G.prev=null; $("btnPreview").textContent="미리듣기"; return; }
+  G.prev = new Audio(p); G.prev.volume = 0.75; G.prev.play();
+  $("btnPreview").textContent = "정지";
+  G.prev.addEventListener("ended", function(){ G.prev=null; $("btnPreview").textContent="미리듣기"; });
+});
+
+/* ================== content views (info/shop/…) ==================== */
+var CTABS = [
+  {id:"info",   label:L.myInfo},
+  {id:"items",  label:L.myItem},
+  {id:"shop",   label:L.shop},
+  {id:"mypage", label:L.myPage},
+  {id:"option", label:L.option}
+];
+function showContent(tab){
+  $("ctabs").textContent = "";
+  CTABS.forEach(function(t){
+    var b = el("button", null, t.label);
+    b.type="button";
+    b.setAttribute("aria-current", t.id===tab ? "true":"false");
+    b.addEventListener("click", function(){ showContent(t.id); });
+    $("ctabs").appendChild(b);
+  });
+  var body = $("cbody"); body.textContent = "";
+  if (tab==="info"){
+    var c = el("div","card");
+    c.appendChild(el("b",null,"프로필"));
+    [["이름", S.nick],["레벨", "Lv.12"],["채널", S.chan],
+     ["보유 곡", S.songs.length.toLocaleString() + "개"],
+     ["스프라이트", S.sprites.length + "개"]].forEach(function(kv){
+      var r = el("div","row"); r.style.justifyContent="space-between";
+      r.style.borderBottom="1px solid var(--line)"; r.style.padding="9px 0";
+      r.appendChild(el("span","muted",kv[0])); r.appendChild(el("b",null,kv[1]));
+      c.appendChild(r);
+    });
+    body.appendChild(c);
+  } else if (tab==="shop" || tab==="items"){
+    var grid = el("div","shopgrid");
+    var src = S.sprites.slice(0, 18);
+    if (!src.length) grid.appendChild(el("p","muted","추출된 스프라이트가 없습니다."));
+    src.forEach(function(s){
+      var b = el("div","itembox");
+      var img = el("img"); img.src = s.file; img.alt = s.name || ""; img.loading="lazy";
+      b.appendChild(img);
+      b.appendChild(el("b",null,s.name || "—"));
+      b.appendChild(el("span",null,(s.width||0) + "×" + (s.height||0)));
+      grid.appendChild(b);
+    });
+    body.appendChild(grid);
+  } else if (tab==="mypage"){
+    body.appendChild(el("p","muted","마이페이지는 서버가 필요한 화면입니다. 원본 서버가 아카이브에 없으므로 로컬 데이터만 표시합니다."));
+    var c2 = el("div","card");
+    c2.appendChild(el("b",null,"로컬 통계"));
+    c2.appendChild(el("p","muted","곡 " + S.songs.length.toLocaleString() +
+      "개 · 스프라이트 " + S.sprites.length + "개 · 문자열 " + STRING_COUNT.toLocaleString() + "개"));
+    body.appendChild(c2);
+  } else {
+    var o = el("div","card");
+    o.appendChild(el("b",null,L.option));
+    o.appendChild(el("p","muted","해상도, 사운드, 키 설정은 원본 클라이언트의 옵션입니다. 웹에서는 오디오 볼륨과 난이도만 제공합니다."));
+    var r = el("div","row");
+    r.appendChild(el("label","muted","볼륨"));
+    var vol = el("input"); vol.type="range"; vol.min="0"; vol.max="1"; vol.step="0.05"; vol.value="0.9";
+    vol.addEventListener("input", function(){ if (G.gain) G.gain.gain.value = parseFloat(vol.value); });
+    r.appendChild(vol);
+    o.appendChild(r);
+    body.appendChild(o);
+  }
+  show("content");
+}
+$("nav").addEventListener("click", function(ev){
+  var b = ev.target.closest("button[data-go]"); if (!b) return;
+  var go = b.getAttribute("data-go");
+  if (go==="lobby") show("lobby");
+  else if (go==="browse") window.location.href = "index.html";
+  else showContent(go);
+});
+$("btnLeave").addEventListener("click", function(){ show("lobby"); });
+
+/* ============================ boot =============================== */
+var STRING_COUNT = 8871;
+function boot(){
+  fetch("manifest.json", {cache:"no-store"})
+    .then(function(r){ if(!r.ok) throw new Error("manifest HTTP "+r.status); return r.json(); })
+    .then(function(m){
+      S.manifest = m;
+      S.songs = (m.assets||[]).filter(function(a){ return a && a.format==="ogg" && safePath(a.file); });
+      S.songs.sort(function(a,b){ return (b.size||0)-(a.size||0); });
+      S.sprites = (m.ui_sprites||[]).filter(function(s){ return s && safePath(s.file); });
+      S.sprites.forEach(function(s){ S.spriteBy[s.name] = s; });
+
+      $("songStat").textContent = S.songs.length.toLocaleString() + "곡 · " +
+        S.sprites.length + " 스프라이트";
+      $("loginNote").textContent = S.songs.length
+        ? ("곡 " + S.songs.length.toLocaleString() + "개 준비됨")
+        : "ogg 에셋을 찾지 못했습니다";
+      renderModes(); renderChannels(); renderStrip(); renderSongs();
+      var n = $("v-login"); if (n) n.classList.remove("hide");
+    })
+    .catch(function(e){
+      $("netErr").textContent = L.connFailed.replace("%d","") + " — " + e.message;
+      $("netErr").classList.add("on");
+    });
+}
+/* ---- flow smoke test: ?flowtest=1 drives login→lobby→room ---- */
+function flowTest(){
+  var out = [];
+  function say(x){ out.push(x); $("loginNote").textContent = out.join(" | ");
+    if (window.console) console.log("[flow] "+x); }
+  var wait = setInterval(function(){
+    if (!S.songs.length) return;
+    clearInterval(wait);
+    say("songs=" + S.songs.length);
+    // login
+    $("nick").value = "Tester";
+    $("btnLogin").click();
+    say("screen=" + S.screen);
+    var okLogin = S.screen === "lobby";
+    // mode -> room
+    var modes = $("modes").querySelectorAll("button.mode");
+    say("modes=" + modes.length);
+    if (modes.length) modes[0].click();
+    say("screen=" + S.screen);
+    var okRoom = S.screen === "room" && $("seats").children.length > 0;
+    // pick a song
+    var rows = $("songs").querySelectorAll(".song");
+    if (rows.length) rows[0].click();
+    var okPick = !!S.selected;
+    // ready
+    $("btnReady").click();
+    var okReady = S.ready === true;
+    // difficulty
+    var dbtns = $("diffs").querySelectorAll("button");
+    if (dbtns.length) dbtns[2].click();
+    var okDiff = S.diff === "hard";
+    // nav views
+    var okViews = true;
+    ["info","items","shop","mypage","option"].forEach(function(t){
+      showContent(t);
+      if (S.screen !== "content" || !$("cbody").children.length) okViews = false;
+    });
+    show("room");
+    var pass = okLogin && okRoom && okPick && okReady && okDiff && okViews;
+    say("login=" + okLogin + " room=" + okRoom + " pick=" + okPick +
+        " ready=" + okReady + " diff=" + okDiff + " views=" + okViews);
+    say(pass ? "FLOWTEST PASS" : "FLOWTEST FAIL");
+    document.title = pass ? "FLOWTEST PASS" : "FLOWTEST FAIL";
+  }, 120);
+}
+boot();
+if (location.search.indexOf("flowtest") !== -1) flowTest();
+</script>
+</body>
+</html>

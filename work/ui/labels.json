@@ -1,0 +1,17 @@
+{
+ "GBExit": "나가기",
+ "GBOption": "옵션",
+ "Score": "점수",
+ "PREDIFFICULTY": "난이도",
+ "HiddenCatch_DifficultyOptionEasy": "쉬움",
+ "HiddenCatch_DifficultyOptionNormal": "보통",
+ "HiddenCatch_DifficultyOptionHard": "어려움",
+ "HC_PrepareStage_Stage": "스테이지",
+ "PRENAME": "이름",
+ "ItemName": "이름",
+ "Level": "레벨",
+ "MapLevel": "레벨",
+ "NMOptionDlgNickName": "별    명",
+ "CantCreateRoom": " 방을 만들 수 없습니다. 잠시 후 다시 시도하세요.",
+ "AllMustReady": " 모든 플레이어가 준비 상태이어야 합니다."
+}
