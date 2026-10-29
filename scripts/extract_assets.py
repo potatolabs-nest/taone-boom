@@ -2,9 +2,15 @@
 """
 Carve assets out of Club Audition .idd archives.
 
-Payloads are stored uncompressed and back-to-back inside the .idd, so we detect
-each payload by its format magic and compute its true length from the format's
-own header (never by guessing to the next magic).
+PRIMARY PATH (solved — see work/idd_layout_report.md):
+  Every big `ca da ef` / `fc 01 b2 05` `.idx` holds a global self-differential
+  XOR chain whose records give the EXACT payload size of every entry in the
+  sibling `.idd`.  sum(sizes) == .idd size exactly (measured, all 12 archives),
+  so the `.idd` is a plain concatenation of those payloads in record order.
+  This yields named, exactly-sized payloads and 100% byte coverage.
+
+FALLBACK PATH: magic-carve + per-format length parsing.  Kept because it still
+  handles any archive without a matching .idx.
 
 Usage:
   python3 -I extract_assets.py --dry-run
