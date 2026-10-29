@@ -56,103 +56,44 @@ original work inspired by these assets, **not** a port of the original.
 
 ---
 
-## Progress at a glance
+## Progress at a glance  (updated 2026-10-30)
 
-| Phase | Status | Progress |
+| Area | State | Detail |
 |---|---|---|
-| 0. Extract archive | ✅ Done | 367 files / 1.30 GB |
-| 1. Decode `ssi1` containers | ✅ Done | 30 files decoded |
-| 2. `ndadata/*.pak` | ✅ Done | 68 inflated |
-| 3. Extract assets from `.idd` | ✅ Done | **43,425 entries, 100.00% of 1,086 MB, lossless** |
-| 4. Copy UI sprites | ✅ Done | 34 BMPs, real names |
-| 5. Build asset extractor | ✅ Done | `scripts/extract_assets.py` |
-| 6. Asset browser | ✅ Done | 5 routes, DDS decode, XSS-tested |
-| 6b. Web client shell | ✅ Done | login/lobby/matching/room/play/result, FLOWTEST PASS |
-| 7. Playable game | ✅ Done | rhythm game, beat maps from audio, SELFTEST PASS |
-| 8. Crack `.idx` cipher | ✅ Done | **379 real names, 128 verified** |
-| 9. Name the big Fx* indexes | ✅ Done | **43,425 names**, chain walk solves to EOF |
-| 10. Game logic / renderer | ❌ Not achievable | logic is server-side + in Themida-protected `CA.dll` |
-| 11. Server protocol | ⬜ Not started | **infeasible**, see below |
+| Archive decode | ✅ **100%** | 43,425 entries, 1,086 MB, lossless, SHA-256 round-trip verified |
+| `.idx` name cipher | ✅ Solved | 379 + 43,425 names; verified against independent plaintext |
+| `.table` record header | ✅ Solved | `24 + 48*count`, holds on 40,349/40,349 |
+| Media extraction | ✅ Done | 747 Ogg songs, 91 JPEG, 34 UI sprite sheets, 180 event-art images |
+| **Game screenshots found** | ✅ **139 real in-game captures** | actual Crazy Arcade gameplay, HUD and item panel |
+| Web UI (Crazy Arcade look) | 🟡 **In progress** | glossy CA panels + sampled palette in; sprite-sheet frames being fixed |
+| Playable game | 🟡 In progress | rhythm mode works; **building the real maze/bomb stage** |
+| Sprite pixel codec | ❌ Not cracked | ~3.2 B/px proprietary codec; no public implementation exists anywhere |
+| Engine logic | ❌ Not reachable | Themida-encrypted `CA.dll` (`rawsz=0` section, EP in `.boot`) |
+| Server | 🟡 **Lead found** | `PinguBNB` (C#) — working, documented protocol, **but no KR locale** |
+| Game charts | ❌ Absent | archive contains no `.acv`; charts aren't here |
 
-### What the 43,425 entries actually are
+### What changed most recently
+1. **Game identity corrected** — this is *Crazy Arcade* (크레이지 아케이드 / BnB, NEXON),
+   not Audition. The archive's own strings prove it (`Nexon` ×24, `크아` ×159,
+   Bazzi/Dao/Uni/Lodumani, `Crazy Arcade BnB`).
+2. **139 real in-game screenshots recovered** from the quest bundles — actual
+   gameplay, the item panel (speed / bomb / range), HUD and map tiles.
+3. **UI rebuilt to the game's own design language** — palette sampled from the
+   sprites (`#09cdff` panel, `#026fc5` frame, `#3d00d8` accent), glossy beveled
+   panels and buttons, real sprite-sheet frames for mode buttons.
+4. **English + Vietnamese UI** with a language switcher, keyed by the original
+   Korean so nothing is lost.
+5. **A real server exists**: `PinguBNB` (C#, .NET 10) with documented framing —
+   TCP 3838/4848/4849, UDP 3839/4849, region cipher-degree model, opcode YAML.
+   It has **no KR locale**, which is the concrete gap for this client.
 
-The archive is **100% decoded and lossless**, but "decoded" is not the same as
-"renderable". Breaking the entries down by what their own bytes say:
-
-| kind | count | note |
-|---|--:|---|
-| data records | ~42,500 | sprite/avatar/map **descriptors**: small LE integer counts, entropy 2.6–6.5 |
-| Ogg audio | 747 | real, verified with `file`/`afinfo` |
-| JPEG images | 91 | real, `JFIF` |
-| UI sprites (`vh/`) | 34 | plaintext BMPs, real filenames |
-
-So the media — all the audio and every stored image — is recovered and named.
-The large remainder is the game's own metadata: the byte-exact cuts prove the
-*structure* is right, but those records are tables the engine interprets, not
-files anything else can open. That is the honest limit of what the archive holds.
-
-### Extraction coverage — measured, not estimated
-
-**The container is solved.** A `.idd` and its `.idx` are two halves of one archive:
-the `.idx` is the *directory* (it names every entry and stores that entry's exact
-byte length) and the `.idd` is the *payload blob* — the entries concatenated in
-`.idx` record order, no gaps, no per-file header.
-
-`sum(idx sizes) == os.path.getsize(.idd)` **exactly**, on all 12 archives. That
-identity makes extraction exact rather than heuristic: no magic scanning, no guessed
-lengths, no truncation, 100.00% byte coverage.
-
-| archive | size | entries | carved | coverage |
-|---|--:|--:|--:|--:|
-| CharTE | 289.0 MB | 17,558 | 289.02 MB | **100.00%** |
-| EmoTE | 225.4 MB | 8,564 | 225.41 MB | **100.00%** |
-| FxSound | 92.1 MB | 693 | 92.08 MB | **100.00%** |
-| FxMap | 90.2 MB | 4,781 | 90.22 MB | **100.00%** |
-| fx | 87.2 MB | 3,392 | 87.22 MB | **100.00%** |
-| FxMonster | 71.9 MB | 1,216 | 71.86 MB | **100.00%** |
-| FxStage | 56.2 MB | 1,137 | 56.22 MB | **100.00%** |
-| FxContents | 51.6 MB | 720 | 51.65 MB | **100.00%** |
-| FxDesktop | 48.5 MB | 1,935 | 48.54 MB | **100.00%** |
-| FxHiddenCatch | 40.3 MB | 302 | 40.29 MB | **100.00%** |
-| FxCharacter | 33.5 MB | 3,116 | 33.53 MB | **100.00%** |
-| FxAsset | 0.16 MB | 11 | 0.16 MB | **100.00%** |
-| **TOTAL** | **1,086 MB** | **43,425** | **1,086.20 MB** | **100.00%** |
-
-**Lossless, proved by round trip.** Reassembling each `.idd` from its extracted
-payloads reproduces the original file **byte for byte** — SHA-256 matches on
-**12/12** archives. Zero bytes are guessed or dropped.
-
-By format: 40,349 engine sprite/animation `table` records, 2,238 `bin` records
-(907 of them exact-size zlib — `[u32 comp][u32 inflated][zlib]`, both fields exact,
-10.3× ratio), 747 Ogg streams (`libVorbis`), 91 real JPEGs (`JFIF`, `Exif`).
-
-The `.idx` walk is also independent of, and consistent with, the archive already
-solved by another method: FxSound yields **exactly 693 records**, each a valid Ogg
-whose own page-walk total equals its declared size.
-
-### The one thing still open (and why it does not block assets)
-
-1,324 `bin` payloads are **keystream-encrypted** — mostly `Map/*` map data,
-`MapScriptTemplate/*` and object/attr tables. They are carved and named, but their
-insides need a keystream recovery. The keystream is partly **exposed**: in FxMap's
-893 `Map/*` records the high three bytes of the small-valued u32 fields are constant
-across 200/200 files (`44 71 9c`, `e3 1b 9c`, `a1 61 9d` at offsets 5–7, 9–11,
-13–15) — three direct samples, period ≠ 4. Ruled out for these: raw deflate, stored
-flat, the self-differential `.idx` cipher, and fixed-XOR.
-
-This is `Map` data, **not** the image/audio assets, which all live in the 40,349
-`table` records, the 907 zlib records and the 838 validated jpg/ogg files — all
-extracted. Details: [`work/idd_layout_report.md`](./work/idd_layout_report.md).
-
-External corroboration for the remaining family: the Zenhax thread calls the
-encryption *"custom (something like 256 different operations) and so it's useless to
-make a script for quickbms."* Consistent with the sampling above.
-
-**Overall: asset extraction is complete and lossless.** A port of the original game
-still remains impossible from this archive — the server is not in it, and the client
-binaries are Themida/GameGuard protected.
-
----
+### Honest blockers
+- **Sprite codec**: ~40,000 sprite payloads are a proprietary ~3.2 bytes/pixel
+  codec. Verified absent from public sources in six languages. The decoder lives
+  in Themida-encrypted `CA.dll`. *Workaround*: the 139 real screenshots supply the
+  art directly.
+- **KR opcode table**: PinguBNB covers JP/TW/CN/TH/VN/NA only.
+- **Charts**: not in this archive.
 
 ## TODO
 

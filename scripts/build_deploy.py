@@ -116,6 +116,12 @@ def main():
                   separators=(",", ":"))
         print(f"quest art  : {len(quest)}")
 
+    # real UI art as PNG, for the client's chrome and mode buttons
+    uisrc = os.path.join(ROOT, "app/public/ui")
+    if os.path.isdir(uisrc):
+        shutil.copytree(uisrc, os.path.join(OUT, "ui"), dirs_exist_ok=True)
+        print(f"ui art     : {len(os.listdir(uisrc))}")
+
     # i18n table (English / Vietnamese / Korean)
     for f in ("i18n.json",):
         src = os.path.join(ROOT, "app/public", f)
