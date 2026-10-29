@@ -763,3 +763,77 @@ a 3.2 bytes/pixel stream. Harnesses retained:
 Searched for any T3-engine sprite codec documentation or tool: none exists
 publicly. The `.idd`/`.idx` container itself has no public documentation either —
 this repo's own solution is the only one.
+
+## 19. CRAZY ARCADE — external research, correct game this time (2026-10-30)
+
+### The `.idd`/`.idx` extractor: ours appears to be the first public one
+- The one on-point public request is **unanswered**: The Spriters Resource thread
+  "Crazy Arcade .idd/.idx ripping?" (vg-resource.com/thread-43241.html, Dec 2024).
+  The poster reports HyperRipper *"rips UI graphics and nearly every MP3/sound
+  file"* but *"character/enemy/map sprites … are missing, plus HR doesn't work
+  with .idx files"*. Zero replies.
+- That corroborates our own result exactly: **signature scanning works** (which is
+  how FxSound reached 100%), and **parsing the `.idx` directory is what nobody
+  had** (which is what we built).
+- No QuickBMS script, no Dragon UnPACKer driver, no GitHub/Gitee project handles
+  this container.
+
+### A useful adjacent implementation, and what it adds
+**github.com/CongPhuongInfo/Idx-Poptag-GUI** — C# source for PopTag/Boom Online
+(Crazy Arcade) `.idx`/`.idd`. Confirms and extends our understanding:
+- `CharTE` — KeyTag **`bvat`**, header **47**, record **55**
+- `EmoTE` — KeyTag **`ghar`**, header **48**, record **56**
+- record layout: `TypeFlags | SubTag[4] | IddOffset | Field2 | Field3 | KeySize |
+  KeyTag[4] | KeyData`
+- **`IddOffset` is a per-record offset into the `.idd`** — a second, independent
+  path to payloads that our chain-walk also lands on
+- its `KeyData` blob is the **same obfuscated name field** our cipher works on
+  (both begin `20 04 25 11 …`), so the two approaches cross-validate
+- it explicitly has **no sprite pixel decoder** — its `DetectMagic` knows only
+  OGG/PNG/JPEG/BMP/GZIP/ZIP and treats everything else as opaque `bin`
+
+### The sprite codec: nobody has cracked it publicly
+Confirmed negative after searching English, Korean, Chinese, Taiwanese, Vietnamese
+and Indonesian sources. The Chinese/Taiwanese scenes reverse this game for **cheat
+tables and memory addresses** (bingfong `.CEM` dumps v039–v104, OllyDbg send-hook
+`ecx` values), never for image codecs. Nobody has published even a failed attempt.
+
+**The practical workaround the community uses instead:** redistributed original
+`Pic/*.bmp` art — uncompressed 24-bit BMPs, magenta background. Real, salvaged
+assets usable without the codec:
+- 爱给网 (aigei.com/game2d/lib/pao_pao_ta_1/) — 5,474-image 2D library
+  (`bazzi`, `Explosion`, `BigPopo`, map tiles), free with account
+- "单机版泡泡堂游戏完整源码" — a fan remake whose `Pic/` folder is a near-complete
+  original bitmap set
+- 老房网/nz998 — 2.74 MB pack of map tiles, explosion FX, characters, WAV/BGM
+
+### The server: there IS a working public one, and it is Python
+**forum.ragezone.com/threads/an-handmade-crazy-arcade-server-program.1270621/**
+(Aug 2026, author `zyrlyn`). Verbatim: *"server was made by Python… client and
+server and logon program wrote by Ecode"* and *"NO database — only run the python
+file and login program and login with an fake account to play. no score saved and
+all maps can play. client has been embedded."* Ships `Crazy Arcade.7z` (9.8 MB).
+The login tool needs the 易语言 (Ecode) runtime DLL. **This is the closest thing to
+a working emulator that exists publicly**, and it is the first real server lead —
+unlike Audition, this one targets the right game.
+
+Also:
+- **Port `8798`** — from a 2008 Shanda 泡泡堂 server config
+  (`access/bombgame/acc` `system.ini`, `OpenPort 8798`). The only sourced port
+  number for this game. Worth comparing against the server list we decoded.
+- Older leaked servers circulate (姬风网络 `NDAServer.EXE`/`SMAgent.EXE` needing
+  SQL2000; 盛大 V057 MySQL) — binaries + DB, never source.
+- A Taiwan standalone build is distributed **pre-patched with dgVoodoo2** for
+  Win10/11, launched via `Server.exe` + `CrazyArcade.exe` (Quark netdisk).
+- **No open server source for the original game exists.** Every GitHub
+  "CrazyArcade server" repo (`CrazyArcade/room-service`, `SCNU-A225/CrazyArcade`,
+  `SineYuan/BnBonline`, …) is a **from-scratch remake**, not an emulator.
+
+### The 单机版 ("standalone") concept
+Almost always *an old leaked server plus a patched client*, not a reimplementation.
+Confirms what we already found: the retail client cannot be rebuilt from public
+material, and there is **no public documentation of the retail map format** either.
+
+### Discarded as fabricated
+A Chinese blog claiming specifics like "packet XOR key `0x7A` in `Packet.dll`"
+reads as AI-generated and could not be corroborated. Recorded so it is not chased.
