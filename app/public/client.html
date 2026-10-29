@@ -926,6 +926,7 @@ var CTABS = [
   {id:"info",   label:L.myInfo},
   {id:"items",  label:L.myItem},
   {id:"shop",   label:L.shop},
+  {id:"catalog",label:"에셋 카탈로그"},
   {id:"mypage", label:L.myPage},
   {id:"option", label:L.option}
 ];
@@ -964,6 +965,50 @@ function showContent(tab){
       grid.appendChild(b);
     });
     body.appendChild(grid);
+  } else if (tab==="catalog"){
+    body.appendChild(el("p","muted",
+      "인덱스에서 복호화한 실제 에셋 이름 " + (CATALOG.length||0).toLocaleString() +
+      "개 (무손실 검증: SHA-256 왕복 일치)"));
+    var bar = el("div","row");
+    var q = el("input"); q.type="search"; q.placeholder="이름 검색 (예: MP3/, Character/)";
+    q.style.cssText="padding:9px 11px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);flex:1;min-width:0";
+    bar.appendChild(q);
+    var info = el("span","muted"); bar.appendChild(info);
+    body.appendChild(bar);
+    var list = el("div","songs"); list.style.maxHeight="460px"; list.style.marginTop="10px";
+    body.appendChild(list);
+    CATALOG_PAGE = 0;
+    function drawCat(){
+      list.textContent = "";
+      var needle = (q.value||"").trim().toLowerCase();
+      var hits = needle
+        ? CATALOG.filter(function(r){ return r[1].toLowerCase().indexOf(needle)>=0; })
+        : CATALOG;
+      info.textContent = hits.length.toLocaleString() + "개";
+      var start = CATALOG_PAGE*100, frag = document.createDocumentFragment();
+      hits.slice(start, start+100).forEach(function(r){
+        var row = el("div","song");
+        row.appendChild(el("span","n", r[0]));
+        row.appendChild(el("span", null, r[1]));
+        row.appendChild(el("span","muted", r[3]));
+        row.appendChild(el("span","k", Math.round(r[2]/1024) + " KB"));
+        frag.appendChild(row);
+      });
+      list.appendChild(frag);
+      var nav = el("div","row"); nav.style.marginTop="8px";
+      var prev = el("button",null,"‹ 이전"), next = el("button",null,"다음 ›");
+      var pages = Math.max(1, Math.ceil(hits.length/100));
+      prev.disabled = CATALOG_PAGE<=0; next.disabled = CATALOG_PAGE>=pages-1;
+      prev.addEventListener("click", function(){ CATALOG_PAGE--; drawCat(); });
+      next.addEventListener("click", function(){ CATALOG_PAGE++; drawCat(); });
+      nav.appendChild(prev);
+      nav.appendChild(el("span","muted", (CATALOG_PAGE+1) + " / " + pages));
+      nav.appendChild(next);
+      list.appendChild(nav);
+    }
+    var t=null;
+    q.addEventListener("input", function(){ clearTimeout(t); CATALOG_PAGE=0; t=setTimeout(drawCat,140); });
+    drawCat();
   } else if (tab==="mypage"){
     body.appendChild(el("p","muted","마이페이지는 서버가 필요한 화면입니다. 원본 서버가 아카이브에 없으므로 로컬 데이터만 표시합니다."));
     var c2 = el("div","card");
@@ -996,6 +1041,7 @@ $("btnLeave").addEventListener("click", function(){ show("lobby"); });
 
 /* ============================ boot =============================== */
 var STRING_COUNT = 8871;
+var CATALOG = [], CATALOG_PAGE = 0;
 function boot(){
   fetch("manifest.json", {cache:"no-store"})
     .then(function(r){ if(!r.ok) throw new Error("manifest HTTP "+r.status); return r.json(); })
@@ -1071,7 +1117,14 @@ function flowTest(){
     document.title = pass ? "FLOWTEST PASS" : "FLOWTEST FAIL";
   }, 120);
 }
+/* the named-asset catalog: all 43,425 decoded records, loaded lazily */
+function loadCatalog(){
+  fetch("catalog.json").then(function(r){ return r.ok ? r.json() : []; })
+    .then(function(rows){ CATALOG = rows || []; })
+    .catch(function(){ CATALOG = []; });
+}
 boot();
+loadCatalog();
 if (location.search.indexOf("flowtest") !== -1) flowTest();
 </script>
 </body>

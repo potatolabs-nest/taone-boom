@@ -15,7 +15,7 @@ ASSETS = os.path.join(ROOT, "work/assets")
 MANIFEST = os.path.join(ASSETS, "manifest.json")
 OUT = os.path.join(ROOT, "deploy")
 
-N_SONGS = 16
+N_SONGS = 60
 
 
 def main():
@@ -94,6 +94,11 @@ def main():
             sprites.append({"name": os.path.splitext(fn)[0], "file": rel,
                             "width": w, "height": abs(h),
                             "size": os.path.getsize(src)})
+
+    # named-asset catalog for the client's browse tab
+    cat = os.path.join(ROOT, "work/catalog.json")
+    if os.path.exists(cat):
+        shutil.copy(cat, os.path.join(OUT, "catalog.json"))
 
     json.dump({
         "generated": man.get("generated", ""),
