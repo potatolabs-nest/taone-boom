@@ -336,7 +336,7 @@ reverse-engineering problem, and more effort on this archive cannot move any of 
 
 | # | Blocker | Status |
 |---|---|---|
-| 1 | **The server** | Not in the archive. The one public emulator ("Audition Reborn", Java) is *"not finish server file. Full source code missing packet"* and targets Season 5 / Redbana 2019, not this build. |
+| 1 | **The server** | Not in the archive. Two public emulators exist, both incomplete and both for other builds: a Java one (*"not finish server file. Full source code missing packet"*, Season 5 / Redbana 2019), and an **openly readable C# one** whose account layer has real recovered framing (`ushort` length + opcode `0x65`) but whose GameServer README says it *"does not yet implement gameplay, rooms, user sync, client handshakes or protocol encryption."* |
 | 2 | **The protected binary** | `CA.exe`/`CA.dll` are Themida + GameGuard packed, so the client **cannot be recompiled**. And a browser client cannot pass XTrap/GameGuard/BlackCipher at all. |
 | 3 | **The note charts** | Not in the archive — charts live in `.acv` files and this archive contains **zero** `.acv`. No public decoder for the chart container exists. |
 
@@ -345,6 +345,14 @@ DirectX 9 client has now been shipped in a browser: *GunZ: The Duel* was compile
 to WASM behind a D3D9→WebGL layer, and its author is explicit that it is *"the
 actual GunZ client running natively, not a remake."* That route needs the client's
 C++ source or buildable DLLs — which is exactly what blocker 2 denies us.
+
+Server binaries for older versions (Chinese 12.4, 1.6, 1.7, 3.25, 8.3, 14.2,
+16.10) are publicly obtainable — but as **executables plus MySQL dumps, never
+source**, and users repeatedly describe them as **not turnkey**. The best open
+starting point, if anyone ever builds a server, is
+[`Marcmendozt/audition-server-platform`](https://github.com/Marcmendozt/audition-server-platform).
+**Client source code does not exist publicly anywhere** (verified negative across
+GitHub, GitLab, Codeberg, SourceForge and archive.org).
 
 **A browser remake of Audition already exists** (RaGEZONE, three.js + Node/SQLite),
 written in "a few hours" and self-described as rough. It is a reimplementation,
