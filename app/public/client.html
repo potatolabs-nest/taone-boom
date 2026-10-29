@@ -462,13 +462,15 @@ var S = {
   roommates:[]
 };
 
+/* Real Crazy Arcade game modes, taken from the client's own string table
+   (csysstr.ssd): 크아짱, 크아왕, 크아시티, 크아영웅전, 크아마블, 크아퐁. */
 var MODES = [
-  {id:"normal", label:"일반",   sprite:"Lobby_Normal_bt01",  desc:"4방향 노트"},
-  {id:"battle", label:"대결",   sprite:"Lobby_Battle_bt01",  desc:"1:1 승부"},
-  {id:"monster",label:"몬스터", sprite:"Lobby_Monster2_bt01",desc:"보스 스테이지"},
-  {id:"quick",  label:"빠른시작",sprite:"UXMatching_RoomUI_Bt_QuickStart", desc:"바로 입장"},
-  {id:"ladder", label:"래더",   sprite:"UXMatching_RoomUI_Bt_Ladder", desc:"랭크전"},
-  {id:"practice",label:"연습",  sprite:"UxMatching_RoomUI_Bt_Practice", desc:"자유 연습"}
+  {id:"jjang",  label:"크아짱",    sprite:"Lobby_Normal_bt01",  desc:"CA Jjang"},
+  {id:"king",   label:"크아왕",    sprite:"Lobby_Battle_bt01",  desc:"CA King"},
+  {id:"city",   label:"크아시티",  sprite:"Lobby_Monster2_bt01",desc:"CA City"},
+  {id:"hero",   label:"크아영웅전",sprite:"UXMatching_RoomUI_Bt_Ladder", desc:"CA Hero"},
+  {id:"marble", label:"크아마블",  sprite:"UXMatching_RoomUI_Bt_QuickStart", desc:"CA Marble"},
+  {id:"pong",   label:"크아퐁",    sprite:"UxMatching_RoomUI_Bt_Practice", desc:"CA Pong"}
 ];
 
 /* ============================ screens ============================= */
@@ -512,7 +514,7 @@ function renderModes(){
     }
     var box = el("span");
     box.appendChild(el("b", null, t(m.label)));
-    box.appendChild(el("span", null, m.desc));
+    box.appendChild(el("span", null, t(m.desc)));
     b.appendChild(box);
     b.addEventListener("click", function(){ goMatching(m); });
     host.appendChild(b);

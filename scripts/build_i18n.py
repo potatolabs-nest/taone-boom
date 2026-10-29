@@ -205,6 +205,33 @@ T.update({
 })
 
 
+T.update({
+ "크아짱": ["CA Jjang", "CA Jjang"],
+ "크아왕": ["CA King", "CA King"],
+ "크아시티": ["CA City", "CA City"],
+ "크아영웅전": ["CA Hero", "CA Hero"],
+ "크아마블": ["CA Marble", "CA Marble"],
+ "크아퐁": ["CA Pong", "CA Pong"],
+ "배찌": ["Bazzi", "Bazzi"],
+ "다오": ["Dao", "Dao"],
+ "우니": ["Uni", "Uni"],
+ "로두마니": ["Lodumani", "Lodumani"],
+ "크아포인트": ["CA Point", "CA Point"],
+ "크아컬렉션": ["CA Collection", "CA Collection"],
+ "크아미션": ["CA Mission", "CA Mission"],
+})
+
+
+T.update({
+ "CA Jjang": ["Style battle", "Đấu phong cách"],
+ "CA King": ["King of the map", "Vua bản đồ"],
+ "CA City": ["City mode", "Chế độ thành phố"],
+ "CA Hero": ["Hero castle", "Lâu đài anh hùng"],
+ "CA Marble": ["Marble mode", "Chế độ bi"],
+ "CA Pong": ["Pong mode", "Chế độ pong"],
+})
+
+
 def main():
     json.dump(T, open(OUT, "w"), ensure_ascii=False, indent=1)
     print(f"i18n table: {len(T)} keys -> {OUT}")
