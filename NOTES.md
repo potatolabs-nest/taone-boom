@@ -347,3 +347,32 @@ game**, so it tells us what infrastructure this build was pointed at:
 None of this is a server implementation — it is the client's view of one. It
 confirms the game was server-authoritative with named server+channel tiers,
 which is exactly the part that is missing from the archive.
+
+## 11. WHAT IS NOT IN THE ARCHIVE — the song charts
+
+Searched for chart/note data specifically, because that is what makes the game
+playable rather than just audible:
+
+- No payload name matches chart/sheet/note/timing/pattern. The 28 "chart-ish"
+  hits are all UI art (`Shop/...Basket...`, `ItemAIBattleQuestRewardNote*`).
+- The Ogg song files carry **plain Vorbis headers only** — vendor
+  `Xiph.Org libVorbis I 20020717`, one comment, no embedded timing or chart
+  metadata. Verified by parsing the identification and comment packets.
+- `product.ini` decodes to a numeric **item-ID table** (`1600001`, `1600002`, …),
+  not song data.
+- `720897.dat` / `720897_NGM_v2` look like a song ID (`720897`) but that string
+  appears nowhere in any decoded container.
+- `multisvr.ssd` gives the server names (DREAM / JOY / HAPPY SERVER), not charts.
+
+In Audition the note charts live in `.abm` files, which ship in the client's
+**`.acv` archives** — and this archive contains **no `.acv` files** (the file-type
+census is 91 `.pak`, 80 `.idx`/`.idd`, 34 `.bmp`, 19 `.dll`, 11 `.ssd`, 5 `.fft`,
+5 `.exe`, and no `.acv`).
+
+**Consequence:** authentic note charts cannot be recovered from `Boom.zip`. Any
+gameplay must generate its own charts — which is exactly what the rhythm game
+here does, detecting beats from each song's own audio. That is not a shortcut;
+it is the only option this archive allows.
+
+Also confirmed absent: any server implementation, database dump, or protocol
+documentation. `NMDATA/*.cfg` are ssi3 connection configs, not a server.
