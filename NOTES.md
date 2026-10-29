@@ -509,3 +509,46 @@ No. It sharpens it. The open C# tree is the best starting point if someone ever
 builds a server, but it is account-layer only, targets the legacy protocol, and
 does not match **Club Audition KR build 1014**. The three blockers stand: no
 complete server, no client source, no charts.
+
+## 14. THE ENGINE'S SPRITE FORMAT — descriptor decoded, pixel codec open
+
+The single most useful structural finding, and it unifies several earlier
+observations. **`.bmp`/`.png` payloads are not bare image files.** Every one
+begins with the same engine descriptor:
+
+    u32 kind | u32 2 | u32 frames | u32 0 | u32 width | u32 height | ...
+
+This is **the same header shape seen at the top of every large `.idd`**
+(`u32 A, u32 2, u32 B, …`) — the '.idd prologue' and these sprites are the same
+structure, which explains why magic-scanning for `BM`/`PNG` found so little.
+
+**Verified: all 290 sprite records carry sane dimensions at offsets 16/20.**
+Examples: `Quest/BtCheckBox` 75×15, `KBNB_20221006_21thBirthLobby_Bg` 598×639,
+`..._BT01` 345×75. That is a real result — the engine's image catalogue is readable.
+
+**Not decoded: the pixel encoding.** Tested and RULED OUT:
+- zlib / raw deflate / gzip at every offset 16..216 (0/20 decoded)
+- simple RLE variants (`[count][value]`, `[value][count]`) — none fit the exact
+  pixel count while consuming the body
+- body sizes do not equal `w*h*bpp` for 8/16/24/32 bpp, so it is a packed codec,
+  roughly 1.0–1.8 bytes per pixel
+
+So sprite dimensions are known and the blobs are carved and correctly named, but
+the pixels need the engine's decoder — which lives in the Themida-protected
+`CA.dll`. This is a proprietary codec, not a standard one.
+
+### ndadata results (independently verified)
+68 bundles, 485 records, **all 68 tile their `.idd` exactly**
+(`bytes_written == idd_size`, zero gaps, zero overflow — re-checked directly).
+- **195 high confidence**, stored raw and validated by parsing: 165 jpeg (segment
+  chains ending exactly at EOI at the stored size), 16 Lua 5.0 bytecode
+  (`1b 4c 75 61 50`), 12 Lua source, 2 xml
+- **290 low confidence** — the sprite blobs above, written under their real names
+  and flagged, NOT presented as recovered images
+
+Field `a` in the ndadata record trailer **remains unresolved** and is recorded as
+such: ruled out as a file offset, the running size sum, the record's own or its
+neighbour's position, an offset from any constant base, and CRC32/Adler32/FNV-1a/
+djb2/Java-hash of the name, stem, record or blob. It is not name-derived (23 of 24
+reused names keep the same size but carry different `a`), so it is positional.
+Nothing depends on it — `b` is the size and the payloads pack contiguously.
