@@ -1,6 +1,29 @@
-# Boom.zip / Club Audition client — format findings
+# Boom.zip / **Crazy Arcade** client — format findings
 
-Game: Club Audition / 오디션 (T3 Entertainment / YD Online), Windows, DirectX 9.
+## CORRECTION — the game identity (2026-10-30)
+
+**This is Crazy Arcade (크레이지 아케이드) by NEXON**, not Club Audition.
+An earlier version of these notes misidentified it, which sent external research
+to the wrong game entirely. The evidence is in the archive's own data:
+
+| evidence | source |
+|---|---|
+| `Nexon` ×24, `넥슨` ×88 | `csysstr.ssd`, `csysqstr.ssd` |
+| `크아` (Crazy Arcade) ×159, `크레이지` ×8 | `csysstr.ssd` string table |
+| `Crazy Arcade` (literal ASCII) | `multisvr.ssd` server list |
+| `BnB` ×22 — Crazy Arcade's alternate name | `csysstr.ssd` |
+| characters 배찌 Bazzi, 다오 Dao, 우니 Uni, 로두마니 Lodumani, 케피 Kepi, 디지니 Dizni, 모스 Mos | `csysstr.ssd`, ndadata art filenames (`Quest_2009_06_18_Bazzi_Misson_009.jpg`) |
+| `크아비엔비` = "Crazy Arcade **BnB**" | `csysstr.ssd` |
+
+**`CA.exe` / `CA.dll` mean CRAZY ARCADE** — not "Club Audition". `Boom.zip` is the
+Crazy Arcade BnB client. The `.idd`/`.idx` container is a **Nexon** archive format.
+
+Everything below about the *formats* stands and was verified by direct measurement.
+What must be discarded is the **game attribution**, and every external finding in
+§9, §12 and §13 that was gathered about Audition/T3 Entertainment — that research
+targeted a different publisher's game and does not apply here.
+
+Game: Crazy Arcade (크레이지 아케이드) / BnB, NEXON, Windows, DirectX 9.
 `CA.exe` is packed (nProtect GameGuard + BlackCipher). `CA.dll` and `DWK.dll` are
 byte-identical to each other and **encrypted on disk** (both contain only 2 literal
 `ca da ef` byte runs) — reverse-engineering those DLLs is NOT a viable path.

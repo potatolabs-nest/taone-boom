@@ -116,6 +116,12 @@ def main():
                   separators=(",", ":"))
         print(f"quest art  : {len(quest)}")
 
+    # i18n table (English / Vietnamese / Korean)
+    for f in ("i18n.json",):
+        src = os.path.join(ROOT, "app/public", f)
+        if os.path.exists(src):
+            shutil.copy(src, os.path.join(OUT, f))
+
     # named-asset catalog for the client's browse tab
     cat = os.path.join(ROOT, "work/catalog.json")
     if os.path.exists(cat):

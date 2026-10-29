@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Club Audition — Web Client</title>
+<title>Crazy Arcade — Web Client</title>
 <style>
   :root{
     /* Palette taken from the client's own UI art: deep navy panel, magenta
-       accent, cyan secondary — the Audition lobby palette. */
+       accent, cyan secondary — the Crazy Arcade lobby palette. */
     --bg:#080b13; --bg2:#0d1220; --panel:#141b2b; --panel2:#1b2436;
     --line:#27334a; --line2:#33415c;
     --ink:#e9eefc; --muted:#8ea0bf;
@@ -40,6 +40,10 @@
   .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
   .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
   .grow{flex:1;min-width:0}
+  .langsw{display:inline-flex;gap:2px;border:1px solid var(--line2);border-radius:9px;overflow:hidden}
+  .langsw button{border:0;border-radius:0;background:transparent;padding:6px 9px;font-size:12px;color:var(--muted)}
+  .langsw button[aria-pressed="true"]{background:var(--accent);color:#fff;font-weight:700}
+
   .muted{color:var(--muted);font-size:13px;line-height:1.6}
   .pill{border:1px solid var(--line2);border-radius:999px;padding:4px 11px;font-size:12px;color:var(--muted)}
 
@@ -154,9 +158,10 @@
 
   <!-- ===== title bar (real client nav labels) ===== -->
   <div class="top">
-    <span class="logo">CLUB AUDITION</span>
+    <span class="logo">CRAZY ARCADE</span>
     <span class="pill" id="pillNet">● 연결됨</span>
     <span class="grow"></span>
+    <span class="langsw" role="group" aria-label="Language"><button data-lang="en">EN</button><button data-lang="vi">VI</button><button data-lang="ko">KO</button></span>
     <nav class="topnav" id="nav">
       <button data-go="lobby" aria-current="true">로비</button>
       <button data-go="info">내정보</button>
@@ -369,8 +374,47 @@
 
 <script>
 "use strict";
+window.__I18N__ = {"로비": ["Lobby", "Sảnh chờ"], "내정보": ["Profile", "Thông tin"], "내아이템": ["My Items", "Vật phẩm"], "상점": ["Shop", "Cửa hàng"], "마이페이지": ["My Page", "Trang của tôi"], "옵션": ["Options", "Tùy chọn"], "에셋 브라우저": ["Asset browser", "Trình duyệt tài nguyên"], "나가기": ["Exit", "Thoát"], "연결됨": ["Connected", "Đã kết nối"], "로그인": ["Sign in", "Đăng nhập"], "원본 클라이언트에서 추출한 UI와 문자열로 구성한 웹 클라이언트입니다.": ["A web client built from UI and strings extracted from the original client.", "Ứng dụng web dựng từ giao diện và chuỗi ký tự trích xuất từ client gốc."], "닉네임": ["Nickname", "Biệt danh"], "이름": ["Name", "Tên"], "채널": ["Channel", "Kênh"], "접속": ["Connect", "Kết nối"], "이 게임은": ["This game has", "Trò chơi này"], "서버가 없습니다": ["no server", "không có máy chủ"], "원본은 서버 권한형 온라인 게임이며 서버가\n        아카이브에 포함되어 있지 않습니다. 따라서 로비·방·플레이는 모두 로컬에서\n        동작하고, 곡과 UI는 추출한 실제 에셋을 사용합니다.": ["The original is a server-authoritative online game and its server is not in the archive. So the lobby, rooms and play all run locally, while songs and UI use the real extracted assets.", "Bản gốc là game online do máy chủ quyết định và máy chủ không có trong kho lưu trữ. Nên sảnh, phòng và phần chơi đều chạy cục bộ, còn bài hát và giao diện dùng tài nguyên thật đã trích xuất."], "이름을 입력하세요.": ["Enter a name.", "Hãy nhập tên."], "곡": ["songs", "bài"], "개 준비됨": ["ready", "sẵn sàng"], "안녕하세요": ["Hello", "Xin chào"], "님": ["", ""], "채널을 선택하고 게임을 시작하세요.": ["Pick a channel and start a game.", "Chọn kênh và bắt đầu chơi."], "게임 모드": ["Game modes", "Chế độ chơi"], "채널 선택": ["Channels", "Kênh"], "곡 목록": ["Songs", "Bài hát"], "초보 채널": ["Beginner", "Kênh mới"], "자유 채널": ["Free", "Kênh tự do"], "고수 채널": ["Expert", "Kênh cao thủ"], "이벤트 채널": ["Event", "Kênh sự kiện"], "일반": ["Normal", "Thường"], "대결": ["Battle", "Đối kháng"], "몬스터": ["Monster", "Quái vật"], "빠른시작": ["Quick start", "Bắt đầu nhanh"], "래더": ["Ladder", "Xếp hạng"], "연습": ["Practice", "Luyện tập"], "방향 노트": ["4-direction notes", "Nốt 4 hướng"], "승부": ["Head to head", "Đối đầu"], "보스 스테이지": ["Boss stage", "Màn trùm"], "바로 입장": ["Jump straight in", "Vào ngay"], "랭크전": ["Ranked", "Đấu xếp hạng"], "자유 연습": ["Free practice", "Luyện tự do"], "방 목록": ["Room list", "Danh sách phòng"], "방": ["Rooms", "Phòng"], "전체방": ["All rooms", "Tất cả phòng"], "방만들기": ["Create room", "Tạo phòng"], "빠른 시작": ["Quick start", "Bắt đầu nhanh"], "내 정보": ["My info", "Thông tin"], "갱신": ["refreshed", "đã làm mới"], "개 방": ["rooms", "phòng"], "비밀번호가 걸린 방입니다": ["That room is locked.", "Phòng này có mật khẩu."], "방이 가득 찼습니다": ["That room is full.", "Phòng đã đầy."], "방을 찾는 중…": ["Looking for a room…", "Đang tìm phòng…"], "빈 방이 없습니다": ["No open rooms.", "Không có phòng trống."], "즐거운 방": ["Happy room", "Phòng vui vẻ"], "노래방": ["Karaoke", "Karaoke"], "초보 환영": ["Beginners welcome", "Chào mừng người mới"], "고수만": ["Experts only", "Chỉ cao thủ"], "자유": ["Free", "Tự do"], "커플": ["Couple", "Cặp đôi"], "연습방": ["Practice", "Phòng luyện"], "대결!": ["Battle!", "Đối kháng!"], "대기방": ["Waiting room", "Phòng chờ"], "준비": ["Ready", "Sẵn sàng"], "준비 취소": ["Cancel ready", "Hủy sẵn sàng"], "준비 완료": ["Ready", "Đã sẵn sàng"], "시작": ["Start", "Bắt đầu"], "음악": ["Music", "Nhạc"], "검색": ["Search", "Tìm"], "미리듣기": ["Preview", "Nghe thử"], "정지": ["Stop", "Dừng"], "곡을 선택하세요": ["Pick a song", "Chọn một bài"], "선택됨": ["selected", "đã chọn"], "스테이지": ["Stage", "Màn"], "난이도": ["Difficulty", "Độ khó"], "쉬움": ["Easy", "Dễ"], "보통": ["Normal", "Thường"], "어려움": ["Hard", "Khó"], "댄서A": ["DancerA", "DancerA"], "댄서B": ["DancerB", "DancerB"], "나)": ["you)", "bạn)"], "레벨": ["Lv", "Cấp"], "모든 플레이어가 준비 상태이어야 합니다.": ["Everyone must be ready.", "Mọi người phải sẵn sàng."], "방을 만들 수 없습니다. 잠시 후 다시 시도하세요.": ["Could not create the room. Try again shortly.", "Không tạo được phòng. Thử lại sau."], "일시정지": ["Pause", "Tạm dừng"], "재개": ["Resume", "Tiếp tục"], "일시정지됨": ["Paused", "Đã tạm dừng"], "재개됨": ["Resumed", "Đã tiếp tục"], "로딩…": ["Loading…", "Đang tải…"], "잘못된 경로": ["Bad path", "Đường dẫn sai"], "개 (오디오에서 검출)": ["notes, detected from the audio", "nốt, nhận từ âm thanh"], "개 (고정 그리드)": ["notes, fixed grid", "nốt, lưới cố định"], "노트": ["notes", "nốt"], "재생 실패": ["Playback failed", "Phát thất bại"], "이 브라우저가 Ogg Vorbis를 지원하지 않을 수 있습니다.": ["This browser may not support Ogg Vorbis.", "Trình duyệt này có thể không hỗ trợ Ogg Vorbis."], "점수": ["Score", "Điểm"], "콤보": ["Combo", "Chuỗi"], "다시하기": ["Play again", "Chơi lại"], "대기방으로": ["Back to room", "Về phòng chờ"], "정확도": ["accuracy", "độ chính xác"], "실패": ["failed", "thất bại"], "최고 콤보": ["MAX COMBO", "CHUỖI MAX"], "프로필": ["Profile", "Hồ sơ"], "보유 곡": ["Songs owned", "Bài hát có"], "스프라이트": ["sprites", "hình"], "추출된 스프라이트가 없습니다.": ["No extracted sprites.", "Không có hình nào."], "이벤트 이미지": ["Event art", "Ảnh sự kiện"], "에셋 카탈로그": ["Asset catalog", "Danh mục tài nguyên"], "아이템": ["Items", "Vật phẩm"], "로컬 통계": ["Local stats", "Thống kê cục bộ"], "볼륨": ["Volume", "Âm lượng"], "마이페이지는 서버가 필요한 화면입니다. 원본 서버가 아카이브에 없으므로 로컬 데이터만 표시합니다.": ["My Page needs a server. The original server is not in the archive, so only local data is shown.", "Trang của tôi cần máy chủ. Máy chủ gốc không có trong kho lưu trữ nên chỉ hiển thị dữ liệu cục bộ."], "해상도, 사운드, 키 설정은 원본 클라이언트의 옵션입니다. 웹에서는 오디오 볼륨과 난이도만 제공합니다.": ["Resolution, sound and key bindings were options in the original client. The web version offers volume and difficulty only.", "Độ phân giải, âm thanh và phím là tùy chọn của client gốc. Bản web chỉ có âm lượng và độ khó."], "인덱스에서 복호화한 실제 에셋 이름": ["Real asset names decrypted from the index", "Tên tài nguyên thật đã giải mã"], "개 (무손실 검증": ["entries (lossless verify", "mục (kiểm chứng không mất dữ liệu"], "왕복 일치": ["round trip matches", "khớp vòng lặp"], "팝업": ["Popup", "Popup"], "퀘스트 번들에서 실제 이름으로 복구한 이미지": ["images recovered by real name from the quest bundles", "ảnh phục hồi theo tên thật"], "개 (검증됨": ["entries (verified", "mục (đã kiểm"], "세그먼트 체인이 EOI에서 정확히 끝남)": ["segment chains ending exactly at EOI)", "chuỗi segment kết thúc đúng tại EOI)"], "이미지를 찾지 못했습니다.": ["No images found.", "Không tìm thấy ảnh."], "이름 검색 (예": ["Search names (e.g.", "Tìm tên (vd"], "이전": ["‹ Prev", "‹ Trước"], "다음": ["Next ›", "Sau ›"], "(이전)": ["(prev)", "(trước)"], "로그인 서버 접속에 실패했습니다. (%d) DEF1": ["Could not reach the login server.", "Không kết nối được máy chủ đăng nhập."], "채널 접속이 끊어졌습니다.": ["The channel connection dropped.", "Kết nối kênh đã ngắt."], "뒤로가기": ["Back", "Quay lại"], "도움말": ["Help", "Trợ giúp"], "유저장터": ["Market", "Chợ"], "퀘스트": ["Quest", "Nhiệm vụ"], "메신저": ["Messenger", "Tin nhắn"], "로비 가기": ["Go to lobby", "Về sảnh"], "개 · 스프라이트": ["· sprites", "· hình"], "개 · 문자열": ["· strings", "· chuỗi"], "곡 ·": ["songs ·", "bài ·"], "에셋을 찾지 못했습니다": ["No assets found", "Không tìm thấy tài nguyên"], "이벤트 이미지 게시판": ["Event art board", "Bảng ảnh sự kiện"], "4방향 노트": ["4-direction notes", "Nốt 4 hướng"], "개": ["", ""], "서버": ["server", "máy chủ"]};
+var LANG = (function(){ try { return localStorage.getItem("lang") || "en"; } catch(e){ return "en"; } })();
+function t(s){
+  if (LANG === "ko") return s;
+  var e = window.__I18N__[s];
+  if (!e) return s;
+  return LANG === "vi" ? e[1] : e[0];
+}
+function setLang(l){
+  LANG = l;
+  try { localStorage.setItem("lang", l); } catch(e){}
+  document.documentElement.lang = l;
+  localizeStatic();
+  location.reload();
+}
+/* swap text nodes in the static markup, keyed by their Korean source */
+function localizeStatic(){
+  if (LANG === "ko") return;
+  var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+  var n, todo = [];
+  while ((n = w.nextNode())) {
+    var raw = n.nodeValue, k = raw.replace(/\s+/g, " ").trim();
+    if (!k) continue;
+    var e = window.__I18N__[k];
+    if (!e) continue;
+    var tr = (LANG === "vi") ? e[1] : e[0];
+    if (!tr) { todo.push([n, ""]); continue; }
+    todo.push([n, raw.replace(/\s+/g, " ") && raw.trim() === k ? tr : raw.replace(k, tr)]);
+  }
+  todo.forEach(function(p){ p[0].nodeValue = p[1]; });
+  // attributes: placeholders, titles and aria-labels carry Korean too
+  ["placeholder", "title", "aria-label"].forEach(function(attr){
+    Array.prototype.forEach.call(document.querySelectorAll("[" + attr + "]"), function(e2){
+      var v = e2.getAttribute(attr);
+      var e3 = window.__I18N__[String(v).replace(/\s+/g, " ").trim()];
+      if (e3) e2.setAttribute(attr, (LANG === "vi") ? e3[1] : e3[0]);
+    });
+  });
+}
 /* ==========================================================================
-   Club Audition — web client.
+   Crazy Arcade — web client.
 
    This is a RECONSTRUCTION of the client's shell, not a port of the game:
    the original is a server-authoritative MMO and its server is not in the
@@ -382,7 +426,7 @@ var $ = function(id){ return document.getElementById(id); };
 function el(tag, cls, text){
   var n = document.createElement(tag);
   if (cls) n.className = cls;
-  if (text != null) n.textContent = String(text);   // never innerHTML
+  if (text != null) n.textContent = t(String(text));   // never innerHTML; translated
   return n;
 }
 function safePath(p){
@@ -394,8 +438,8 @@ function safePath(p){
   return p;
 }
 function toast(msg){
-  var t = $("toast"); t.textContent = msg; t.classList.add("on");
-  clearTimeout(t._h); t._h = setTimeout(function(){ t.classList.remove("on"); }, 2200);
+  var el2 = $("toast"); el2.textContent = t(msg); t.classList.add("on");
+  clearTimeout(el2._h); el2._h = setTimeout(function(){ el2.classList.remove("on"); }, 2200);
 }
 
 /* ---------- real client strings (work/strings/csysstr.ssd.json) ---------- */
@@ -445,13 +489,13 @@ function show(name){
 /* ============================ login ============================== */
 $("btnLogin").addEventListener("click", function(){
   var n = ($("nick").value || "").trim();
-  if (!n){ $("loginNote").textContent = "이름을 입력하세요."; return; }
+  if (!n){ $("loginNote").textContent = t("이름을 입력하세요."); return; }
   S.nick = n; S.chan = $("chan").value;
-  $("hello").textContent = "안녕하세요, " + n + "님";
-  $("lobbySub").textContent = S.chan + " · 곡 " + S.songs.length.toLocaleString() + "개";
+  $("hello").textContent = t("안녕하세요") + ", " + n;
+  $("lobbySub").textContent = t(S.chan) + " · " + t("곡") + " " + S.songs.length.toLocaleString();
   $("lobbySub").textContent = S.chan + " · " + L.difficulty + " " +
-    (S.diff==="easy"?L.easy:S.diff==="hard"?L.hard:L.normal) + " · 곡 " +
-    S.songs.length.toLocaleString() + "개";
+    t(S.diff==="easy"?L.easy:S.diff==="hard"?L.hard:L.normal) + " · " + t("곡") + " " +
+    S.songs.length.toLocaleString();
   show("lobby");
 });
 
@@ -467,7 +511,7 @@ function renderModes(){
       b.appendChild(img);
     }
     var box = el("span");
-    box.appendChild(el("b", null, m.label));
+    box.appendChild(el("b", null, t(m.label)));
     box.appendChild(el("span", null, m.desc));
     b.appendChild(box);
     b.addEventListener("click", function(){ goMatching(m); });
@@ -488,7 +532,7 @@ function renderChannels(){
     r.addEventListener("click", function(){
       S.chan = c[0]; renderChannels();
       $("lobbySub").textContent = S.chan + " · 곡 " + S.songs.length.toLocaleString() + "개";
-      toast(c[0] + " 접속");
+      toast(t(c[0]));
     });
     host.appendChild(r);
   });
@@ -526,7 +570,7 @@ function genRooms(seed){
   return r;
 }
 function renderMatching(){
-  $("matchTitle").textContent = S.modeLabel ? (S.modeLabel + " 방 목록") : "방 목록";
+  $("matchTitle").textContent = t(S.modeLabel || "") + (S.modeLabel ? " · " : "") + t("방 목록");
   $("matchChan").textContent = S.chan;
   $("matchMe").textContent = S.nick + " · Lv.12 · " + (L.difficulty) + " " +
     (S.diff==="easy"?L.easy:S.diff==="hard"?L.hard:L.normal);
@@ -544,7 +588,7 @@ function renderMatching(){
     b.addEventListener("click", function(){
       if (a[0].indexOf("CreateRoom")>=0){ enterRoom({id:"normal",label:"일반"}); return; }
       if (a[0].indexOf("QuickStart")>=0){ quickStart(); return; }
-      S.rooms = genRooms(Date.now()&0x7fff); renderMatching(); toast(a[1]+" 갱신");
+      S.rooms = genRooms(Date.now()&0x7fff); renderMatching(); toast(t(a[1]) + " · " + t("갱신"));
     });
     acts.appendChild(b);
   });
@@ -558,17 +602,17 @@ function renderMatching(){
       im.style.cssText="width:26px;height:26px;object-fit:contain";
       row.appendChild(im); }
     row.appendChild(el("span","n", r.id + ""));
-    row.appendChild(el("span", null, r.name + (r.locked ? " 🔒" : "")));
+    row.appendChild(el("span", null, t(r.name) + (r.locked ? " 🔒" : "")));
     row.appendChild(el("span","muted", r.mode + " · " + r.song.slice(0,16)));
     row.appendChild(el("span","k", r.people + "/" + r.cap));
     row.addEventListener("click", function(){
-      if (r.locked){ toast("비밀번호가 걸린 방입니다"); return; }
-      if (r.people >= r.cap){ toast("방이 가득 찼습니다"); return; }
+      if (r.locked){ toast(t("비밀번호가 걸린 방입니다")); return; }
+      if (r.people >= r.cap){ toast(t("방이 가득 찼습니다")); return; }
       enterRoom({id:"normal", label:r.mode});
     });
     host.appendChild(row);
   });
-  $("matchCount").textContent = S.rooms.length + "개 방";
+  $("matchCount").textContent = S.rooms.length + " " + t("방");
 
   var art = $("matchArt"); art.textContent = "";
   ["UXMatching_RoomUI_Bt_QuickStart","UXMatching_RoomUI_Bt_Lobby","UxMatching_RoomUI_Bt_AllRoom"]
@@ -578,9 +622,9 @@ function renderMatching(){
   });
 }
 function quickStart(){
-  toast("빠른 시작 — 방을 찾는 중…");
+  toast(t("빠른 시작") + " — " + t("방을 찾는 중…"));
   var wait = genRooms(Date.now()&0x7fff).filter(function(r){ return !r.locked && r.people<r.cap; });
-  if (!wait.length){ toast("빈 방이 없습니다"); return; }
+  if (!wait.length){ toast(t("빈 방이 없습니다")); return; }
   enterRoom({id:"normal", label:wait[0].mode});
 }
 $("btnQuick").addEventListener("click", quickStart);
@@ -597,7 +641,7 @@ function goMatching(mode){
 function enterRoom(mode){
   S.mode = mode.id;
   S.ready = false;
-  $("roomName").textContent = mode.label + " 방";
+  $("roomName").textContent = t(mode.label) + " " + t("방");
   $("roomMode").textContent = mode.label;
   $("stageName").textContent = S.selected ? (S.selected.name || S.selected.id) : "—";
   S.roommates = [{n:S.nick, me:true, rdy:false}, {n:"댄서A", me:false, rdy:true},
@@ -608,7 +652,7 @@ function renderSeats(){
   var host = $("seats"); host.textContent = "";
   S.roommates.forEach(function(p){
     var d = el("div","seat" + (p.me ? " me" : ""));
-    d.appendChild(el("b", null, p.n + (p.me ? " (나)" : "")));
+    d.appendChild(el("b", null, t(p.n) + (p.me ? " " + t("나)") : "")));
     d.appendChild(el("span", null, "Lv." + (p.me ? 12 : 8 + Math.floor(Math.random()*30))));
     if (p.rdy) d.appendChild(el("div","rdy","준비 완료"));
     host.appendChild(d);
@@ -654,16 +698,16 @@ function pickSong(s){
   S.selected = s;
   renderSongs();
   $("stageName").textContent = s.name || s.id || s.file;
-  $("pickNote").textContent = (s.name || s.id) + " 선택됨";
+  $("pickNote").textContent = (s.name || s.id) + " " + t("선택됨");
 }
 $("q").addEventListener("input", renderSongs);
 $("btnReady").addEventListener("click", function(){
   S.ready = !S.ready;
   S.roommates[0].rdy = S.ready;
-  $("btnReady").textContent = S.ready ? "준비 취소" : "준비";
+  $("btnReady").textContent = t(S.ready ? "준비 취소" : "준비");
   renderSeats();
   $("btnStartGame").disabled = !(S.ready && S.selected);
-  $("roomNote").textContent = S.ready && !S.selected ? "곡을 선택하세요" : "";
+  $("roomNote").textContent = S.ready && !S.selected ? t("곡을 선택하세요") : "";
   if (S.ready && S.selected) $("btnStartGame").disabled = false;
 });
 $("btnStartGame").addEventListener("click", startGame);
@@ -825,11 +869,11 @@ function loop(){
   $("prog").style.width = Math.max(0,Math.min(100,(now/(G.buf.duration||1))*100)) + "%";
 }
 function startGame(){
-  if (!S.selected){ toast("곡을 선택하세요"); return; }
+  if (!S.selected){ toast(t("곡을 선택하세요")); return; }
   var p = safePath(S.selected.file);
-  if (!p){ toast("잘못된 경로"); return; }
+  if (!p){ toast(t("잘못된 경로")); return; }
   G.song = S.selected;
-  $("playNote").textContent = "로딩…";
+  $("playNote").textContent = t("로딩…");
   show("play");
   fetch(p).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.arrayBuffer(); })
   .then(function(buf){
@@ -850,11 +894,11 @@ function startGame(){
     G.src = src; G.gain = gain;
     src.start(G.startAt);
     $("playNote").textContent = beats.detected
-      ? ("노트 " + beats.times.length + "개 (오디오에서 검출)")
-      : ("노트 " + beats.times.length + "개 (고정 그리드)");
+      ? (beats.times.length + " " + t("개 (오디오에서 검출)"))
+      : (beats.times.length + " " + t("개 (고정 그리드)"));
     loop();
   }).catch(function(e){
-    $("playNote").textContent = "재생 실패: " + e.message + " — 이 브라우저가 Ogg Vorbis를 지원하지 않을 수 있습니다.";
+    $("playNote").textContent = t("재생 실패") + ": " + e.message + " — " + t("이 브라우저가 Ogg Vorbis를 지원하지 않을 수 있습니다.");
   });
 }
 function endGame(failed){
@@ -868,7 +912,7 @@ function endGame(failed){
   $("rGrade").style.color = grade==="F"?"var(--bad)":grade==="S"?"var(--accent)":"var(--accent2)";
   $("rScore").textContent = G.score.toLocaleString() + " " + L.score;
   $("rSong").textContent = ((G.song && (G.song.name||G.song.id)) || "곡") +
-    " · 정확도 " + acc.toFixed(1) + "%" + (failed ? " · 실패" : "");
+    " · " + t("정확도") + " " + acc.toFixed(1) + "%" + (failed ? " · " + t("실패") : "");
   var host=$("rStats"); host.textContent="";
   [["PERFECT",G.counts.perfect],["GREAT",G.counts.great],["COOL",G.counts.cool],
    ["GOOD",G.counts.good],["MISS",G.counts.miss],["MAX COMBO",G.maxCombo]].forEach(function(kv){
@@ -880,17 +924,17 @@ function endGame(failed){
 function togglePause(){
   if (!G.running && !G.paused) return;
   G.paused = !G.paused;
-  $("btnPause").textContent = G.paused ? "재개" : "일시정지";
+  $("btnPause").textContent = t(G.paused ? "재개" : "일시정지");
   if (G.paused){
     try { if (G.src){ G.stoppedAt = G.audioCtx.currentTime - G.startAt; G.src.stop(); } } catch(e){}
-    $("playNote").textContent = "일시정지됨";
+    $("playNote").textContent = t("일시정지됨");
   } else {
     var off = Math.max(0, G.stoppedAt||0);
     var src = G.audioCtx.createBufferSource();
     src.buffer = G.buf; src.connect(G.gain);
     G.src = src; G.startAt = G.audioCtx.currentTime - off;
     src.start(0, off);
-    $("playNote").textContent = "재개됨";
+    $("playNote").textContent = t("재개됨");
     loop();
   }
 }
@@ -915,10 +959,10 @@ if (!("ontouchstart" in window) && navigator.maxTouchPoints === 0) $("pad").clas
 $("btnPreview").addEventListener("click", function(){
   if (!S.selected){ toast("곡을 선택하세요"); return; }
   var p = safePath(S.selected.file); if (!p) return;
-  if (G.prev){ G.prev.pause(); G.prev=null; $("btnPreview").textContent="미리듣기"; return; }
+  if (G.prev){ G.prev.pause(); G.prev=null; $("btnPreview").textContent=t("미리듣기"); return; }
   G.prev = new Audio(p); G.prev.volume = 0.75; G.prev.play();
-  $("btnPreview").textContent = "정지";
-  G.prev.addEventListener("ended", function(){ G.prev=null; $("btnPreview").textContent="미리듣기"; });
+  $("btnPreview").textContent = t("정지");
+  G.prev.addEventListener("ended", function(){ G.prev=null; $("btnPreview").textContent=t("미리듣기"); });
 });
 
 /* ================== content views (info/shop/…) ==================== */
@@ -943,10 +987,10 @@ function showContent(tab){
   var body = $("cbody"); body.textContent = "";
   if (tab==="info"){
     var c = el("div","card");
-    c.appendChild(el("b",null,"프로필"));
-    [["이름", S.nick],["레벨", "Lv.12"],["채널", S.chan],
-     ["보유 곡", S.songs.length.toLocaleString() + "개"],
-     ["스프라이트", S.sprites.length + "개"]].forEach(function(kv){
+    c.appendChild(el("b",null,t("프로필")));
+    [[t("이름"), S.nick],[t("레벨"), "Lv.12"],[t("채널"), t(S.chan)],
+     [t("보유 곡"), S.songs.length.toLocaleString()],
+     [t("스프라이트"), String(S.sprites.length)]].forEach(function(kv){
       var r = el("div","row"); r.style.justifyContent="space-between";
       r.style.borderBottom="1px solid var(--line)"; r.style.padding="9px 0";
       r.appendChild(el("span","muted",kv[0])); r.appendChild(el("b",null,kv[1]));
@@ -956,7 +1000,7 @@ function showContent(tab){
   } else if (tab==="shop" || tab==="items"){
     var grid = el("div","shopgrid");
     var src = S.sprites.slice(0, 18);
-    if (!src.length) grid.appendChild(el("p","muted","추출된 스프라이트가 없습니다."));
+    if (!src.length) grid.appendChild(el("p","muted",t("추출된 스프라이트가 없습니다.")));
     src.forEach(function(s){
       var b = el("div","itembox");
       var img = el("img"); img.src = s.file; img.alt = s.name || ""; img.loading="lazy";
@@ -971,7 +1015,7 @@ function showContent(tab){
       "팝업/퀘스트 번들에서 실제 이름으로 복구한 이미지 " + (QUEST.length||0) +
       "개 (검증됨: JPEG 세그먼트 체인이 EOI에서 정확히 끝남)"));
     var g = el("div","shopgrid"); g.style.marginTop="10px";
-    if (!QUEST.length) g.appendChild(el("p","muted","이미지를 찾지 못했습니다."));
+    if (!QUEST.length) g.appendChild(el("p","muted",t("이미지를 찾지 못했습니다.")));
     QUEST.forEach(function(q){
       var b = el("div","itembox");
       var im = el("img"); im.src = q.file; im.alt = q.name; im.loading="lazy";
@@ -988,7 +1032,7 @@ function showContent(tab){
       "인덱스에서 복호화한 실제 에셋 이름 " + (CATALOG.length||0).toLocaleString() +
       "개 (무손실 검증: SHA-256 왕복 일치)"));
     var bar = el("div","row");
-    var q = el("input"); q.type="search"; q.placeholder="이름 검색 (예: MP3/, Character/)";
+    var q = el("input"); q.type="search"; q.placeholder=t("이름 검색 (예: MP3/, Character/)");
     q.style.cssText="padding:9px 11px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);flex:1;min-width:0";
     bar.appendChild(q);
     var info = el("span","muted"); bar.appendChild(info);
@@ -1002,7 +1046,7 @@ function showContent(tab){
       var hits = needle
         ? CATALOG.filter(function(r){ return r[1].toLowerCase().indexOf(needle)>=0; })
         : CATALOG;
-      info.textContent = hits.length.toLocaleString() + "개";
+      info.textContent = hits.length.toLocaleString();
       var start = CATALOG_PAGE*100, frag = document.createDocumentFragment();
       hits.slice(start, start+100).forEach(function(r){
         var row = el("div","song");
@@ -1014,7 +1058,7 @@ function showContent(tab){
       });
       list.appendChild(frag);
       var nav = el("div","row"); nav.style.marginTop="8px";
-      var prev = el("button",null,"‹ 이전"), next = el("button",null,"다음 ›");
+      var prev = el("button",null,t("이전")), next = el("button",null,t("다음"));
       var pages = Math.max(1, Math.ceil(hits.length/100));
       prev.disabled = CATALOG_PAGE<=0; next.disabled = CATALOG_PAGE>=pages-1;
       prev.addEventListener("click", function(){ CATALOG_PAGE--; drawCat(); });
@@ -1030,7 +1074,7 @@ function showContent(tab){
   } else if (tab==="mypage"){
     body.appendChild(el("p","muted","마이페이지는 서버가 필요한 화면입니다. 원본 서버가 아카이브에 없으므로 로컬 데이터만 표시합니다."));
     var c2 = el("div","card");
-    c2.appendChild(el("b",null,"로컬 통계"));
+    c2.appendChild(el("b",null,t("로컬 통계")));
     c2.appendChild(el("p","muted","곡 " + S.songs.length.toLocaleString() +
       "개 · 스프라이트 " + S.sprites.length + "개 · 문자열 " + STRING_COUNT.toLocaleString() + "개"));
     body.appendChild(c2);
@@ -1039,7 +1083,7 @@ function showContent(tab){
     o.appendChild(el("b",null,L.option));
     o.appendChild(el("p","muted","해상도, 사운드, 키 설정은 원본 클라이언트의 옵션입니다. 웹에서는 오디오 볼륨과 난이도만 제공합니다."));
     var r = el("div","row");
-    r.appendChild(el("label","muted","볼륨"));
+    r.appendChild(el("label","muted",t("볼륨")));
     var vol = el("input"); vol.type="range"; vol.min="0"; vol.max="1"; vol.step="0.05"; vol.value="0.9";
     vol.addEventListener("input", function(){ if (G.gain) G.gain.gain.value = parseFloat(vol.value); });
     r.appendChild(vol);
@@ -1070,11 +1114,11 @@ function boot(){
       S.sprites = (m.ui_sprites||[]).filter(function(s){ return s && safePath(s.file); });
       S.sprites.forEach(function(s){ S.spriteBy[s.name] = s; });
 
-      $("songStat").textContent = S.songs.length.toLocaleString() + "곡 · " +
-        S.sprites.length + " 스프라이트";
+      $("songStat").textContent = S.songs.length.toLocaleString() + " " + t("곡") + " · " +
+        S.sprites.length + " " + t("스프라이트");
       $("loginNote").textContent = S.songs.length
-        ? ("곡 " + S.songs.length.toLocaleString() + "개 준비됨")
-        : "ogg 에셋을 찾지 못했습니다";
+        ? (S.songs.length.toLocaleString() + " " + t("곡") + " " + t("개 준비됨"))
+        : t("에셋을 찾지 못했습니다");
       renderModes(); renderChannels(); renderStrip(); renderSongs();
       var n = $("v-login"); if (n) n.classList.remove("hide");
     })
@@ -1150,6 +1194,11 @@ function loadCatalog(){
     .then(function(rows){ CATALOG = rows || []; })
     .catch(function(){ CATALOG = []; });
 }
+Array.prototype.forEach.call(document.querySelectorAll('[data-lang]'), function(b){
+  b.setAttribute('aria-pressed', b.getAttribute('data-lang') === LANG ? 'true' : 'false');
+  b.addEventListener('click', function(){ setLang(b.getAttribute('data-lang')); });
+});
+localizeStatic();
 boot();
 loadCatalog();
 loadQuest();

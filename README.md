@@ -1,14 +1,21 @@
-# Boom → Web
+# Crazy Arcade → Web
 
-Porting the **Club Audition / 오디션** (T3 Entertainment) Windows client in `Boom.zip`
-to something usable on the web.
+Porting the **Crazy Arcade** (크레이지 아케이드 / BnB) NEXON client in `Boom.zip`
+to the web.
+
+> **Correction (2026-10-30):** this project was previously misidentified as
+> "Club Audition" by T3 Entertainment. It is **Crazy Arcade by NEXON** — the
+> archive's own string tables contain `Nexon` ×24, `넥슨` ×88, `크아` ×159 and the
+> Crazy Arcade roster (배찌 Bazzi, 다오 Dao, 우니 Uni, 로두마니 Lodumani). `CA.exe`
+> means **Crazy Arcade**. Research notes gathered about Audition (§9, §12, §13 of
+> `NOTES.md`) targeted the wrong game and have been marked as such.
 
 - **Source archive:** `Boom.zip` (558 MB → 1.30 GB extracted, 367 files)
 - **Extracted to:** `extracted/Boom/`
 - **Format research:** [`NOTES.md`](./NOTES.md) ← all reverse-engineering findings
-- **Last updated:** 2026-10-28
+- **Live:** https://potatolabs-nest.github.io/taone-boom/
 
----
+
 
 ## ⚠️ Read this first: what "port to web" can and cannot mean
 
