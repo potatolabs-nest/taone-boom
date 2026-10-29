@@ -582,3 +582,56 @@ recovered and verified; the pixels need the engine's decoder, which lives in the
 Themida-protected `CA.dll`. This is the honest stop point. `scripts/crack_sprite.py`
 holds the brute-force harness, so if anyone ever obtains an unpacked `CA.dll` this
 is where to resume.
+
+## 16. THE ENGINE — why it cannot be reversed, proven not asserted
+
+Attempted the engine itself, not just assets. Evidence:
+
+**1. The archive code exists in exactly one place.**
+Scanned all 22 binaries in the client for the format signatures (`ca da ef`,
+`fc 01 b2 05`, `PACK0001`, `ssi1/3`, `.idd`, `.idx`, `.pak`, `.abm`, `.tbm`,
+`FxSound`, `multisvr`, …). Result:
+
+| binary | hits |
+|---|---|
+| `CA.dll` | `ca da ef` ×2, and that is all |
+| `DWK.dll` | `ca da ef` ×2 (byte-identical to `CA.dll`) |
+| everything else | **no format signatures at all** |
+
+No unpacked binary contains any `.idd`/`.idx`/`.pak` string. So there is no
+alternate, analyzable implementation to read.
+
+**2. Both carriers are Themida + UPX.**
+`CA.dll` and `DWK.dll` are byte-identical, entropy 7.94, and contain both
+`.themida` and UPX markers — i.e. double-protected.
+
+**3. The PE layout confirms the code is encrypted on disk, not merely packed.**
+```
+sections = 11,  image base 0x10000000,  entry point 0x7df058
+  .themida  VA=0x00041000  vsz=7,987,200  raw=0            <- virtual only
+  .boot     VA=0x007df000  vsz=4,990,976  raw=4,990,976    <- EP lands here
+```
+- `.themida` has **raw size 0**: nothing on disk, a 7.9 MB virtual region Themida
+  allocates at runtime and decrypts the original sections into.
+- The **entry point sits inside `.boot`**, Themida's loader stub, whose contents are
+  high-entropy ciphertext.
+- The original `.text` (the first section, 170 KB virtual) is likewise encrypted.
+
+So the sequence at runtime is: `.boot` decrypts the real sections into `.themida`,
+applies relocations, resolves imports, jumps to the original entry point. The key
+material is derived at runtime and Themida carries anti-debug/anti-dump. **Nothing
+on disk decrypts statically**, which is why Ghidra returns high-entropy noise.
+
+**Conclusion — and this is the end of the line, not a lack of effort:**
+- Asset formats: **fully reversed** (`.idx`/`.idd`, `ssi1/3`, `pak`, the name
+  cipher, the sprite descriptor). 43,425 entries, lossless.
+- Engine logic: **not reversible by any static method.** Recovering it requires
+  running the Themida-protected DLL under a debugger on Windows and dumping after
+  unpack — an anti-debug arms race, outside what this archive permits, and the
+  resulting code would still be x86 that a browser cannot execute.
+- `scripts/crack_sprite.py` and the format notes above are the exact resume point
+  if an unpacked `CA.dll` ever appears.
+
+Searched for an unpacked copy publicly: none exists (see §13 — no client source
+anywhere, verified negative across GitHub, GitLab, Codeberg, SourceForge and
+archive.org).
