@@ -48,7 +48,11 @@ def decode(raw, k, off=OFF):
 
 
 def walk(pt, limit=400000):
-    """Chain records. Returns (recs, consumed, ok_end)."""
+    """Chain records. Returns (recs, consumed, ok_end).
+
+    The FINAL record has a 16-byte trailer (no L_next), so the loop condition
+    accepts a short trailer once fewer than TRAILER bytes remain.
+    """
     n = len(pt)
     i = 0
     while i < n and pt[i] in RUNCH:
@@ -56,13 +60,16 @@ def walk(pt, limit=400000):
     L = i
     recs = []
     p = 0
-    while 2 <= L <= 4096 and p + L + TRAILER <= n and len(recs) < limit:
+    while 2 <= L <= 4096 and p + L + 16 <= n and len(recs) < limit:
+        have_next = p + L + TRAILER <= n
         nm = pt[p:p + L]
-        tr = [u32(pt, p + L + 4 * j) for j in range(5)]
+        tr = [u32(pt, p + L + 4 * j) for j in range(5 if have_next else 4)]
         recs.append((p, L, nm, tr))
-        Lnext = tr[4]
+        if not have_next:
+            p = p + L + 16
+            break
         p = p + L + TRAILER
-        L = Lnext
+        L = tr[4]
     return recs, p
 
 
@@ -118,7 +125,8 @@ def main():
             "body_frac": round(frac, 5),
             "names": [{"off": p, "len": L, "name": nm.decode("latin1", "replace"),
                        "hash": tr[0], "size_a": tr[1], "size_b": tr[2],
-                       "zero": tr[3]} for p, L, nm, tr in recs],
+                       "zero": tr[3], "L_next": (tr[4] if len(tr) > 4 else 0)}
+                      for p, L, nm, tr in recs],
             "exts": exts,
         }
         total_names += len(recs)

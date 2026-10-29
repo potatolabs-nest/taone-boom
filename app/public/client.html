@@ -232,6 +232,39 @@
     </div>
   </section>
 
+  <!-- ===== MATCHING / ROOM LIST (the client's signature screen) ===== -->
+  <section id="v-matching" class="hide">
+    <div class="lobby">
+      <div style="display:grid;gap:14px">
+        <div class="card">
+          <div class="row" style="justify-content:space-between">
+            <b id="matchTitle">방 목록</b>
+            <span class="pill" id="matchChan">—</span>
+          </div>
+          <div class="modegrid" style="margin-top:12px" id="matchActs"></div>
+        </div>
+        <div class="card">
+          <div class="row" style="justify-content:space-between;margin-bottom:10px">
+            <b>방</b>
+            <span class="muted" id="matchCount">—</span>
+          </div>
+          <div class="songs" id="roomlist" style="max-height:420px"></div>
+        </div>
+      </div>
+      <div style="display:grid;gap:14px">
+        <div class="card">
+          <b>빠른 시작</b>
+          <div class="strip" id="matchArt" style="margin-top:10px"></div>
+          <button class="primary" id="btnQuick" style="width:100%;margin-top:12px">빠른 시작</button>
+        </div>
+        <div class="card">
+          <b>내 정보</b>
+          <div class="muted" id="matchMe" style="margin-top:6px">—</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ===== ROOM ===== -->
   <section id="v-room" class="hide">
     <div class="lobby">
@@ -381,7 +414,7 @@ var L = {
 var S = {
   nick:"Dancer", chan:"자유 채널", screen:"login",
   manifest:null, songs:[], sprites:[], spriteBy:{},
-  selected:null, diff:"normal", ready:false, mode:"normal",
+  selected:null, diff:"normal", ready:false, mode:"normal", rooms:[], modeLabel:"",
   roommates:[]
 };
 
@@ -397,7 +430,7 @@ var MODES = [
 /* ============================ screens ============================= */
 function show(name){
   S.screen = name;
-  ["login","lobby","room","play","result","content"].forEach(function(v){
+  ["login","lobby","matching","room","play","result","content"].forEach(function(v){
     $("v-"+v).classList.toggle("hide", v !== name);
   });
   $("nav").classList.toggle("hide", name === "login");
@@ -437,7 +470,7 @@ function renderModes(){
     box.appendChild(el("b", null, m.label));
     box.appendChild(el("span", null, m.desc));
     b.appendChild(box);
-    b.addEventListener("click", function(){ enterRoom(m); });
+    b.addEventListener("click", function(){ goMatching(m); });
     host.appendChild(b);
   });
 }
@@ -470,6 +503,94 @@ function renderStrip(){
   });
   var b = S.spriteBy["Lobby_Normal_bt01"] || S.sprites[0];
   if (b) $("bannerArt").src = b.file;
+}
+
+
+/* ==================== matching (room list) ======================== */
+var ROOMNAMES = ["즐거운 방","노래방","초보 환영","고수만","자유","커플","연습방","대결!"];
+function genRooms(seed){
+  var r = [], rnd = seed || 1;
+  function nx(){ rnd = (rnd*1103515245 + 12345) & 0x7fffffff; return rnd; }
+  var n = 6 + (nx()%7);
+  for (var i=0;i<n;i++){
+    var mode = MODES[nx()%MODES.length];
+    var ppl = 1 + (nx()%4);
+    r.push({
+      id:i, name:ROOMNAMES[nx()%ROOMNAMES.length],
+      mode:mode.label, sprite:mode.sprite,
+      people:ppl, cap:4, locked:(nx()%7===0),
+      song: S.songs.length ? (S.songs[nx()%S.songs.length].name || S.songs[nx()%S.songs.length].id || "—") : "—",
+      stage: (nx()%12)+1
+    });
+  }
+  return r;
+}
+function renderMatching(){
+  $("matchTitle").textContent = S.modeLabel ? (S.modeLabel + " 방 목록") : "방 목록";
+  $("matchChan").textContent = S.chan;
+  $("matchMe").textContent = S.nick + " · Lv.12 · " + (L.difficulty) + " " +
+    (S.diff==="easy"?L.easy:S.diff==="hard"?L.hard:L.normal);
+
+  // action buttons, using the real matching sprites
+  var acts = $("matchActs"); acts.textContent = "";
+  [["UxMatching_RoomUI_Bt_AllRoom","전체방"],["UXMatching_RoomUI_Bt_QuickStart","빠른시작"],
+   ["UXMatching_RoomUI_Bt_Ladder","래더"],["UxMatching_RoomUI_Bt_CreateRoom","방만들기"]]
+  .forEach(function(a){
+    var b = el("button","mode"); b.type="button";
+    var sp = S.spriteBy[a[0]];
+    if (sp){ var im = el("img"); im.src = sp.file; im.alt=""; im.loading="lazy"; b.appendChild(im); }
+    var box = el("span"); box.appendChild(el("b",null,a[1]));
+    b.appendChild(box);
+    b.addEventListener("click", function(){
+      if (a[0].indexOf("CreateRoom")>=0){ enterRoom({id:"normal",label:"일반"}); return; }
+      if (a[0].indexOf("QuickStart")>=0){ quickStart(); return; }
+      S.rooms = genRooms(Date.now()&0x7fff); renderMatching(); toast(a[1]+" 갱신");
+    });
+    acts.appendChild(b);
+  });
+
+  var host = $("roomlist"); host.textContent = "";
+  S.rooms.forEach(function(r){
+    var row = el("div","song");
+    row.tabIndex = 0;
+    var sp = S.spriteBy[r.sprite];
+    if (sp){ var im = el("img"); im.src = sp.file; im.alt="";
+      im.style.cssText="width:26px;height:26px;object-fit:contain";
+      row.appendChild(im); }
+    row.appendChild(el("span","n", r.id + ""));
+    row.appendChild(el("span", null, r.name + (r.locked ? " 🔒" : "")));
+    row.appendChild(el("span","muted", r.mode + " · " + r.song.slice(0,16)));
+    row.appendChild(el("span","k", r.people + "/" + r.cap));
+    row.addEventListener("click", function(){
+      if (r.locked){ toast("비밀번호가 걸린 방입니다"); return; }
+      if (r.people >= r.cap){ toast("방이 가득 찼습니다"); return; }
+      enterRoom({id:"normal", label:r.mode});
+    });
+    host.appendChild(row);
+  });
+  $("matchCount").textContent = S.rooms.length + "개 방";
+
+  var art = $("matchArt"); art.textContent = "";
+  ["UXMatching_RoomUI_Bt_QuickStart","UXMatching_RoomUI_Bt_Lobby","UxMatching_RoomUI_Bt_AllRoom"]
+  .forEach(function(n){
+    var sp = S.spriteBy[n]; if (!sp) return;
+    var im = el("img"); im.src = sp.file; im.alt=""; im.loading="lazy"; art.appendChild(im);
+  });
+}
+function quickStart(){
+  toast("빠른 시작 — 방을 찾는 중…");
+  var wait = genRooms(Date.now()&0x7fff).filter(function(r){ return !r.locked && r.people<r.cap; });
+  if (!wait.length){ toast("빈 방이 없습니다"); return; }
+  enterRoom({id:"normal", label:wait[0].mode});
+}
+$("btnQuick").addEventListener("click", quickStart);
+
+/* enter the room from the lobby via the matching screen */
+function goMatching(mode){
+  S.mode = mode.id; S.modeLabel = mode.label;
+  S.rooms = genRooms((Date.now()&0x7fff) ^ (mode.id.length*7919));
+  renderMatching();
+  show("matching");
 }
 
 /* ============================ room =============================== */
@@ -917,7 +1038,14 @@ function flowTest(){
     say("modes=" + modes.length);
     if (modes.length) modes[0].click();
     say("screen=" + S.screen);
-    var okRoom = S.screen === "room" && $("seats").children.length > 0;
+    var okMatch = S.screen === "matching" && $("roomlist").children.length > 0;
+    say("rooms=" + S.rooms.length);
+    // join the first unlocked room
+    var rows = $("roomlist").querySelectorAll(".song");
+    var joined = false;
+    for (var i=0;i<rows.length;i++){ rows[i].click(); if (S.screen==="room"){ joined=true; break; } }
+    say("screen=" + S.screen);
+    var okRoom = joined && $("seats").children.length > 0;
     // pick a song
     var rows = $("songs").querySelectorAll(".song");
     if (rows.length) rows[0].click();
@@ -936,8 +1064,8 @@ function flowTest(){
       if (S.screen !== "content" || !$("cbody").children.length) okViews = false;
     });
     show("room");
-    var pass = okLogin && okRoom && okPick && okReady && okDiff && okViews;
-    say("login=" + okLogin + " room=" + okRoom + " pick=" + okPick +
+    var pass = okLogin && okMatch && okRoom && okPick && okReady && okDiff && okViews;
+    say("matching=" + okMatch + " login=" + okLogin + " room=" + okRoom + " pick=" + okPick +
         " ready=" + okReady + " diff=" + okDiff + " views=" + okViews);
     say(pass ? "FLOWTEST PASS" : "FLOWTEST FAIL");
     document.title = pass ? "FLOWTEST PASS" : "FLOWTEST FAIL";
