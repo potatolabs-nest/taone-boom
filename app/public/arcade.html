@@ -124,27 +124,58 @@ function passable(x,y){
   if (x<0||y<0||x>=COLS||y>=ROWS) return false;
   var c = G.grid[y][x];
   if (c==='#'||c==='~'||c==='+') return false;
-  for (var i=0;i<G.bombs.length;i++) if (G.bombs[i].x===x && G.bombs[i].y===y) return false;
+  for (var i=0;i<G.bombs.length;i++) if (!G.bombs[i].done && G.bombs[i].x===x && G.bombs[i].y===y) return false;
   return true;
 }
 
 /* ---------------- movement ---------------- */
+/* Movement is continuous, not tile-snapped: the player has a real position in
+   tile units and only snaps to the grid at a cell centre. That makes speed
+   frame-rate independent (the previous version moved a whole tile per call,
+   which ran at ~61 tiles/s and scaled with refresh rate). */
+var SPEED = 4.6;                       // tiles per second
+
+function canEnter(nx, ny){
+  // test the cell the body would occupy after this move
+  var cx = Math.round(nx), cy = Math.round(ny);
+  return passable(cx, cy);
+}
+
 function step(dt){
-  var sp = 4.2;                        // tiles / second
   var dx=0, dy=0;
   if (G.keys.up) dy=-1; else if (G.keys.down) dy=1;
   else if (G.keys.left) dx=-1; else if (G.keys.right) dx=1;
+  if (!dx && !dy) return false;
 
-  var moved = false;
-  if (dx || dy){
-    var nx = G.px + dx, ny = G.py + dy;
-    if (passable(nx,ny)){ G.px = nx; G.py = ny; moved = true; }
+  var movingAxis = dx ? 'x' : 'y';
+  // stay on the corridor centre-line of the other axis
+  if (movingAxis === 'x') G.fy += (G.py - G.fy) * Math.min(1, dt*12);
+  else                    G.fx += (G.px - G.fx) * Math.min(1, dt*12);
+
+  // only start a move from a cell centre, so corners behave predictably
+  var offAxis = (movingAxis === 'x') ? Math.abs(G.fy - G.py) : Math.abs(G.fx - G.px);
+  if (offAxis > 0.18) return false;
+
+  var nx = G.fx + dx * SPEED * dt;
+  var ny = G.fy + dy * SPEED * dt;
+
+  // clamp: never step past the centre of an allowed cell
+  if (movingAxis === 'x'){
+    var target = (dx > 0) ? Math.floor(G.fx) + 1 : Math.ceil(G.fx) - 1;
+    if (!canEnter(target, G.py)) target = Math.round(G.fx);
+    if ((dx > 0 && nx > target) || (dx < 0 && nx < target)) nx = target;
+    if (!canEnter(Math.round(nx), G.py) && Math.abs(nx - Math.round(nx)) < 0.5) nx = G.fx;
+    G.fx = nx; G.px = Math.round(nx);
+    G.py = Math.round(G.fy);
+  } else {
+    var ty = (dy > 0) ? Math.floor(G.fy) + 1 : Math.ceil(G.fy) - 1;
+    if (!canEnter(G.px, ty)) ty = Math.round(G.fy);
+    if ((dy > 0 && ny > ty) || (dy < 0 && ny < ty)) ny = ty;
+    if (!canEnter(G.px, Math.round(ny)) && Math.abs(ny - Math.round(ny)) < 0.5) ny = G.fy;
+    G.fy = ny; G.py = Math.round(ny);
+    G.px = Math.round(G.fx);
   }
-  // ease the sprite toward the logical tile
-  var k = Math.min(1, dt * sp);
-  G.fx += (G.px - G.fx) * k;
-  G.fy += (G.py - G.fy) * k;
-  return moved;
+  return true;
 }
 
 function enemiesStep(dt){
@@ -350,12 +381,18 @@ function selfTest(){
   function say(x){ out.push(x); document.title = out.join(' | '); }
   reset();
   say('maze=' + COLS + 'x' + ROWS);
-  // 1. movement into open floor
-  G.px=1; G.py=1; G.keys.right=true; step(0.1); G.keys.right=false;
-  say('move=' + (G.px===2 ? 'ok':'FAIL'));
+  // 1. movement into open floor (simulate 1 second of holding right)
+  G.px=1; G.py=1; G.fx=1; G.fy=1; G.grid=MAZE.map(function(r){return r.split('');});
+  G.keys.right=true;
+  for (var i=0;i<60;i++) step(1/60);
+  G.keys.right=false;
+  var movedTiles = G.px - 1;
+  say('move=' + (G.px>1 ? 'ok':'FAIL'));
+  // speed sanity: about SPEED tiles per second, not tens
+  say('speed=' + ((movedTiles>=2 && movedTiles<=7) ? 'ok' : 'FAIL(' + movedTiles + 't/s)'));
   // 2. a hard wall blocks movement: from an open tile, step INTO a '#'
-  G.grid[1][1]='.'; G.grid[1][2]='#'; G.px=1; G.py=1;
-  G.keys.right=true; step(0.1); G.keys.right=false;
+  G.grid[1][1]='.'; G.grid[1][2]='#'; G.px=1; G.py=1; G.fx=1; G.fy=1;
+  G.keys.right=true; for (var j=0;j<30;j++) step(1/60); G.keys.right=false;
   var blocked = (G.px===1);
   say('wall=' + (blocked?'ok':'FAIL'));
   G.grid[1][2]='.';
