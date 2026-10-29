@@ -19,7 +19,7 @@ original, no.**
 |---|---|---|
 | **Asset browser / viewer** | ✅ **Done** | 5 routes, DDS decode, XSS-tested. |
 | **Data/string browser** | ✅ **Done** | 30 decoded containers incl. 10k+ Korean strings. |
-| **Web client shell** | ✅ **Done** | Login → lobby → room → play → result, real UI strings and sprites. |
+| **Web client shell** | ✅ **Done** | Login → lobby → matching → room → play → result, real UI strings and sprites. |
 | **Playable rhythm game** | ✅ **Done** | Original game on the real assets — see [Playable game](#-playable-game). |
 | **Port of the original game** | ❌ **Not feasible** | See the four blockers below. |
 | **All assets extracted** | 🟡 **~12.6%** | Payload layout needs a protected binary. |
@@ -59,7 +59,7 @@ original work inspired by these assets, **not** a port of the original.
 | 4. Copy UI sprites | ✅ Done | 34 BMPs, real names |
 | 5. Build asset extractor | ✅ Done | `scripts/extract_assets.py` |
 | 6. Asset browser | ✅ Done | 5 routes, DDS decode, XSS-tested |
-| 6b. Web client shell | ✅ Done | login/lobby/room/play/result, FLOWTEST PASS |
+| 6b. Web client shell | ✅ Done | login/lobby/matching/room/play/result, FLOWTEST PASS |
 | 7. Playable game | ✅ Done | rhythm game, beat maps from audio, SELFTEST PASS |
 | 8. Crack `.idx` cipher | ✅ Done | **379 real names, 128 verified** |
 | 9. Name the big Fx* indexes | 🟡 In progress | cipher cracked, record walk pending |
