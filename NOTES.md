@@ -552,3 +552,33 @@ neighbour's position, an offset from any constant base, and CRC32/Adler32/FNV-1a
 djb2/Java-hash of the name, stem, record or blob. It is not name-derived (23 of 24
 reused names keep the same size but carry different `a`), so it is positional.
 Nothing depends on it — `b` is the size and the payloads pack contiguously.
+
+## 15. SPRITE CODEC — full attempt, and the honest stop point
+
+Tried to crack the engine's pixel encoding properly, not just describe it.
+
+**Descriptor decoded (confirmed):**
+`u32 kind | u32 2 | u32 frames | u32 0 | u32 width | u32 height`, then a
+frame-rectangle table of `u32` values. For `Quest/BtCheckBox.bmp` the table is
+`15,15,15,15 / 0…0 / 15,15,30,15 / 15,15,45,15 / …` — i.e. **five 15×15 frames laid
+horizontally across a 75×15 sheet**, which matches `w=75 h=15` and `frames=1`
+being a frame-count field of a different meaning. So the sheet layout is understood.
+
+**Codec: NOT cracked, and here is the evidence.**
+- Body is `(len-284)/pixels = 1.78` bytes/pixel for the checkbox. Not 3 or 4, so
+  pixels are **packed**, not stored raw.
+- Raw RGB / RGBA / BGR / ABGR / greyscale / RGB565 / RGBA5551 decodings were all
+  generated as PNGs across ten candidate start offsets and inspected — none is a
+  coherent image.
+- No zlib / raw-deflate / gzip at any offset 16..216.
+- No simple RLE (`[count][value]`, `[value][count]`) satisfies the exact pixel
+  count while consuming the body.
+- The byte pattern `4b db 72 e0` **looks** like RGBA (a green pixel) but the
+  overall size rules out a plain 4-byte layout, so it is likely a deltified or
+  dictionary-packed stream rather than literal pixels.
+
+**Conclusion:** the image catalogue (every sprite's name and dimensions) is
+recovered and verified; the pixels need the engine's decoder, which lives in the
+Themida-protected `CA.dll`. This is the honest stop point. `scripts/crack_sprite.py`
+holds the brute-force harness, so if anyone ever obtains an unpacked `CA.dll` this
+is where to resume.
