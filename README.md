@@ -328,6 +328,40 @@ than a directory.
 
 ---
 
+## Can the original game run in a browser? No — blocked on three fronts at once
+
+Exhaustive external research (three web sweeps; sources in `NOTES.md` §12) and
+direct archive analysis agree. Only **one** of the three blockers is a
+reverse-engineering problem, and more effort on this archive cannot move any of them.
+
+| # | Blocker | Status |
+|---|---|---|
+| 1 | **The server** | Not in the archive. The one public emulator ("Audition Reborn", Java) is *"not finish server file. Full source code missing packet"* and targets Season 5 / Redbana 2019, not this build. |
+| 2 | **The protected binary** | `CA.exe`/`CA.dll` are Themida + GameGuard packed, so the client **cannot be recompiled**. And a browser client cannot pass XTrap/GameGuard/BlackCipher at all. |
+| 3 | **The note charts** | Not in the archive — charts live in `.acv` files and this archive contains **zero** `.acv`. No public decoder for the chart container exists. |
+
+**The renderer is no longer the hard part, and that is worth knowing.** A real
+DirectX 9 client has now been shipped in a browser: *GunZ: The Duel* was compiled
+to WASM behind a D3D9→WebGL layer, and its author is explicit that it is *"the
+actual GunZ client running natively, not a remake."* That route needs the client's
+C++ source or buildable DLLs — which is exactly what blocker 2 denies us.
+
+**A browser remake of Audition already exists** (RaGEZONE, three.js + Node/SQLite),
+written in "a few hours" and self-described as rough. It is a reimplementation,
+not the original — which is the same honest category as what this repo delivers.
+
+### Also confirmed: avatars are 3D, not 2D sprites
+
+Audition runs on the **Gamebryo** engine with DirectX 9.0c. `.rgm` models are built
+in 3DS MAX 8 and carry **bone hierarchies and animation keyframes** with DDS
+textures. So the archive's ~42,500 data records are 3D model/animation data plus
+UI layout — which is why they are not renderable images, and why a faithful visual
+port would need a skinned-mesh renderer rather than a sprite slicer. (Checked
+directly: their headers are integer rectangle tables — counts and coordinates such
+as `131, 106, 104, 118` — with no float keyframe data at the expected offsets.)
+
+---
+
 ## Can the online game be restored? No — and here is why, precisely
 
 Searched for server source code (details and links in `NOTES.md` §9).
