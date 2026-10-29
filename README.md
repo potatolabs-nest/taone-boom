@@ -370,6 +370,26 @@ Indonesian sources — nobody has published even a failed attempt. The community
 works around it by **redistributing the original `Pic/*.bmp` art** (5,474-image
 library on 爱给网; a fan remake whose `Pic/` holds a near-complete bitmap set).
 
+### ⭐ A real open-source server exists: PinguBNB
+[`york8817612/PinguBNB`](https://github.com/york8817612/PinguBNB) — C# / .NET 10
+**BNB game server emulator**, verified by fetching it. Wire protocol is documented:
+
+- Listens on **TCP 3838/4848/4849, UDP 3839/4849**
+- Region-dependent framing via a "cipher degree" (1 = JP/TW, 2 = CN, 3 = TH/VN/NA),
+  controlling header length, opcode width and CRC (CRC32 vs CRC8)
+- Header byte = `(0 + 231) ^ (192 + seq)`; length fields XOR-masked with `0xA569`
+  or `0x96CA5395`; payload is an XOR stream keyed on packet sequence
+- Opcodes in per-locale YAML: `LoginReq: 3`, `CreateSessionReq: 80`,
+  `JoinSessionReq: 81`, `StartGameReq: 106`, `BombIgniteReq: 140`, …
+
+**The gap:** it has **no KR locale**, and our client is Korean build 1014 (Oct 2022).
+So it won't drive this client as-is — but it is a working skeleton whose cipher
+model we can follow, and adding a KR opcode table is concrete work rather than
+speculation.
+
+*Caveat:* no LICENSE, no README, reverse-engineered tables. Reference material,
+not something to redistribute.
+
 ### The one thing that would finish this
 The **Python server + embedded client** bundle is the most promising path to a
 genuinely playable Crazy Arcade — more so than anything found for the `.idd`
