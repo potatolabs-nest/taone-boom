@@ -7,7 +7,7 @@ writes is regenerable from Boom.zip, so ./deploy is not committed.
 
 Usage: python3 -I build_deploy.py
 """
-import json, os, shutil, sys
+import json, os, shutil, struct, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC_GAME = os.path.join(ROOT, "app/public/game.html")
@@ -47,30 +47,53 @@ def main():
     else:
         picked = usable
 
+    # real in-game names, decoded from the index (verified byte-exact)
+    names = {}
+    npath = os.path.join(ROOT, "work/asset_names.json")
+    if os.path.exists(npath):
+        names = json.load(open(npath))
+
     out_assets = []
     for i, a in enumerate(picked):
         src = os.path.join(ASSETS, a["file"])
         if not os.path.exists(src):
             continue
-        rel = "FxSound/%06d.ogg" % i
+        # name the output file after the real asset, e.g. MP3__CAHero_BadBoy.ogg
+        real = names.get(str(a.get("index")))
+        stem = ("MP3__" + os.path.basename(real)) if real else ("%06d" % i)
+        stem = "".join(c if c.isalnum() or c in "_-." else "_" for c in stem)
+        rel = "FxSound/%s.ogg" % stem
         shutil.copy(src, os.path.join(OUT, rel))
         out_assets.append({
             "id": "FxSound/%06d" % i, "archive": "FxSound", "index": i,
             "offset": a.get("offset", 0), "size": os.path.getsize(os.path.join(OUT, rel)),
-            "format": "ogg", "mime": "audio/ogg", "name": None,
+            "format": "ogg", "mime": "audio/ogg",
+            "name": real,                      # the real name, e.g. MP3/CAHero_BadBoy
             "file": rel, "confidence": "high",
         })
 
+    # The UI sprites are plaintext BMPs already named by the game, so take them
+    # straight from disk. The manifest's ui_sprites list is not relied on: the
+    # index-decoded manifest describes the .idd payloads instead.
     sprites = []
-    for s in man.get("ui_sprites", []):
-        src = os.path.join(ASSETS, s["file"])
-        if not os.path.exists(src):
-            continue
-        rel = "vh/" + os.path.basename(s["file"])
-        shutil.copy(src, os.path.join(OUT, rel))
-        sprites.append({"name": s.get("name"), "file": rel,
-                        "width": s.get("width", 0), "height": s.get("height", 0),
-                        "size": os.path.getsize(os.path.join(OUT, rel))})
+    vh = os.path.join(ASSETS, "vh")
+    if os.path.isdir(vh):
+        for fn in sorted(os.listdir(vh)):
+            if not fn.lower().endswith(".bmp"):
+                continue
+            src = os.path.join(vh, fn)
+            rel = "vh/" + fn
+            shutil.copy(src, os.path.join(OUT, rel))
+            w = h = 0
+            try:
+                with open(src, "rb") as fh:
+                    head = fh.read(32)
+                w, h = struct.unpack_from("<ii", head, 18)
+            except Exception:
+                pass
+            sprites.append({"name": os.path.splitext(fn)[0], "file": rel,
+                            "width": w, "height": abs(h),
+                            "size": os.path.getsize(src)})
 
     json.dump({
         "generated": man.get("generated", ""),
