@@ -95,7 +95,8 @@ var MAZE = [
 ];
 
 var G = {
-  grid: [], px: 1, py: 1,     // player tile
+  grid: MAZE.map(function(r){ return r.split(''); }),  // ready before first draw
+  px: 1, py: 1,               // player tile
   fx: 1, fy: 1,               // smooth position (tile units)
   bombs: [], flames: [], enemies: [],
   score: 0, lives: 3, bombMax: 1, power: 1, time: 120,
@@ -181,7 +182,8 @@ function explode(b){
     for (var i=1;i<=G.power;i++){
       var x=b.x+d[0]*i, y=b.y+d[1]*i;
       if (x<0||y<0||x>=COLS||y>=ROWS) break;
-      var c = G.grid[y][x];
+      var rr = G.grid[y]; if (!rr) continue;
+      var c = rr[x];
       if (c==='#'||c==='~') break;
       if (c==='+'){ G.grid[y][x]='.'; G.score += 5; cells.push([x,y]); break; }
       cells.push([x,y]);
@@ -211,6 +213,7 @@ function hurt(){
 
 /* ---------------- draw ---------------- */
 function draw(){
+  if (!G.grid || !G.grid.length) G.grid = MAZE.map(function(r){ return r.split(''); });
   var cv = $('cv'), g = cv.getContext('2d');
   var w = COLS*T, h = ROWS*T;
   if (cv.width !== w){ cv.width = w; cv.height = h; }
