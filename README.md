@@ -22,7 +22,7 @@ original, no.**
 | **Web client shell** | ✅ **Done** | Login → lobby → matching → room → play → result, real UI strings and sprites. |
 | **Playable rhythm game** | ✅ **Done** | Original game on the real assets — see [Playable game](#-playable-game). |
 | **Port of the original game** | ❌ **Not feasible** | See the four blockers below. |
-| **All assets extracted** | 🟡 **~12.6%** | Payload layout needs a protected binary. |
+| **All assets extracted** | ✅ **Done** | `.idx`/`.idd` container solved — **100.00%, lossless.** |
 
 Four hard blockers to a *port*:
 
@@ -34,10 +34,11 @@ Four hard blockers to a *port*:
    BlackCipher; `CA.dll` and `DWK.dll` are **encrypted on disk** (they are byte-identical
    to each other and contain no readable structure). The game logic is not directly
    readable.
-3. **The asset container is only partly reversed.** **~12.6% of the 1,086 MB of asset
-   volume is recovered** — 1,801 entries. One archive (`FxSound`) is complete; the rest
-   are partial or empty. The `.idx` cipher is cracked, but the payload layout lives in
-   Themida-protected `CA.dll`.
+3. **The asset container is now SOLVED.** The `.idx` is the directory and the
+   `.idd` is a plain concatenation of its payloads: `sum(idx sizes) == .idd size`
+   exactly, so extraction is **lossless and 100.00% complete** — 43,425 named
+   entries, all 1,086 MB, verified by SHA-256 round trip. (A residue of
+   ~1,300 encrypted `Map/*` records exists but is fully carved and named.)
 4. **A renderer would have to be written from scratch.** DirectX 9, custom `.fft`
    fonts, `.idd` sprite/animation tables, Bink video (`.bik`). None of this maps to
    the browser; it would be a reimplementation, not a port.
@@ -55,90 +56,77 @@ original work inspired by these assets, **not** a port of the original.
 | 0. Extract archive | ✅ Done | 367 files / 1.30 GB |
 | 1. Decode `ssi1` containers | ✅ Done | 30 files decoded |
 | 2. `ndadata/*.pak` | ✅ Done | 68 inflated |
-| 3. Extract assets from `.idd` | 🟡 Partial | **1,801 entries, 12.64% of 1,086 MB** |
+| 3. Extract assets from `.idd` | ✅ Done | **43,425 entries, 100.00% of 1,086 MB, lossless** |
 | 4. Copy UI sprites | ✅ Done | 34 BMPs, real names |
 | 5. Build asset extractor | ✅ Done | `scripts/extract_assets.py` |
 | 6. Asset browser | ✅ Done | 5 routes, DDS decode, XSS-tested |
 | 6b. Web client shell | ✅ Done | login/lobby/matching/room/play/result, FLOWTEST PASS |
 | 7. Playable game | ✅ Done | rhythm game, beat maps from audio, SELFTEST PASS |
 | 8. Crack `.idx` cipher | ✅ Done | **379 real names, 128 verified** |
-| 9. Name the big Fx* indexes | 🟡 In progress | cipher cracked, record walk pending |
-| 10. Game renderer / logic | ⬜ Not started | blocked by #3 + server |
+| 9. Name the big Fx* indexes | ✅ Done | **43,425 names**, chain walk solves to EOF |
+| 10. Game renderer / logic | ⬜ Not started | blocked by the server, not by #3 |
 | 11. Server protocol | ⬜ Not started | **infeasible**, see below |
 
 ### Extraction coverage — measured, not estimated
 
-Two carving strategies, both format-validated:
-- **Raw payloads** — files stored uncompressed, detected by magic with lengths parsed
-  from each format's own header.
-- **zlib streams** — entries stored as zlib-compressed records (`FxMap` has 893;
-  `FxDesktop` 14). Each is carved and inflated; 200/200 sampled inflate cleanly at an
-  8.26× ratio.
+**The container is solved.** A `.idd` and its `.idx` are two halves of one archive:
+the `.idx` is the *directory* (it names every entry and stores that entry's exact
+byte length) and the `.idd` is the *payload blob* — the entries concatenated in
+`.idx` record order, no gaps, no per-file header.
+
+`sum(idx sizes) == os.path.getsize(.idd)` **exactly**, on all 12 archives. That
+identity makes extraction exact rather than heuristic: no magic scanning, no guessed
+lengths, no truncation, 100.00% byte coverage.
 
 | archive | size | entries | carved | coverage |
 |---|--:|--:|--:|--:|
-| **FxSound** | 92.1 MB | 693 | 92.08 MB | **100.00%** |
-| FxHiddenCatch | 40.3 MB | 24 | 15.44 MB | 38.32% |
-| FxMap | 90.2 MB | 908 | 13.40 MB | 14.85% |
-| FxContents | 51.6 MB | 21 | 4.49 MB | 8.69% |
-| FxDesktop | 48.5 MB | 38 | 4.08 MB | 8.41% |
-| FxStage | 56.2 MB | 18 | 3.55 MB | 6.32% |
-| EmoTE | 225.4 MB | 62 | 3.75 MB | 1.66% |
-| fx | 87.2 MB | 22 | 0.23 MB | 0.27% |
-| FxMonster | 71.9 MB | 3 | 0.09 MB | 0.13% |
-| CharTE | 289.0 MB | 12 | 0.23 MB | 0.08% |
-| FxCharacter | 33.5 MB | 0 | 0.00 MB | 0.00% |
-| **TOTAL** | **1,086 MB** | **1,801** | **137 MB** | **12.64%** |
+| CharTE | 289.0 MB | 17,558 | 289.02 MB | **100.00%** |
+| EmoTE | 225.4 MB | 8,564 | 225.41 MB | **100.00%** |
+| FxSound | 92.1 MB | 693 | 92.08 MB | **100.00%** |
+| FxMap | 90.2 MB | 4,781 | 90.22 MB | **100.00%** |
+| fx | 87.2 MB | 3,392 | 87.22 MB | **100.00%** |
+| FxMonster | 71.9 MB | 1,216 | 71.86 MB | **100.00%** |
+| FxStage | 56.2 MB | 1,137 | 56.22 MB | **100.00%** |
+| FxContents | 51.6 MB | 720 | 51.65 MB | **100.00%** |
+| FxDesktop | 48.5 MB | 1,935 | 48.54 MB | **100.00%** |
+| FxHiddenCatch | 40.3 MB | 302 | 40.29 MB | **100.00%** |
+| FxCharacter | 33.5 MB | 3,116 | 33.53 MB | **100.00%** |
+| FxAsset | 0.16 MB | 11 | 0.16 MB | **100.00%** |
+| **TOTAL** | **1,086 MB** | **43,425** | **1,086.20 MB** | **100.00%** |
 
-By format: 747 Ogg streams (`libVorbis`, decode in `afinfo`), 147 JPEGs
-(`JFIF standard 1.02`), 251 zlib-wrapped BMP, 656 zlib-wrapped binary records.
+**Lossless, proved by round trip.** Reassembling each `.idd` from its extracted
+payloads reproduces the original file **byte for byte** — SHA-256 matches on
+**12/12** archives. Zero bytes are guessed or dropped.
 
-**So: ~12.6% of the asset volume is recovered.** One archive is complete; the rest are
-partial. FxMap and FxHiddenCatch are the next-most-promising — both have substantial
-compressed content still uncarved.
+By format: 40,349 engine sprite/animation `table` records, 2,238 `bin` records
+(907 of them exact-size zlib — `[u32 comp][u32 inflated][zlib]`, both fields exact,
+10.3× ratio), 747 Ogg streams (`libVorbis`), 91 real JPEGs (`JFIF`, `Exif`).
 
-### Why the remaining ~87% is blocked
+The `.idx` walk is also independent of, and consistent with, the archive already
+solved by another method: FxSound yields **exactly 693 records**, each a valid Ogg
+whose own page-walk total equals its declared size.
 
-Two separate reasons, and only the second is hard:
+### The one thing still open (and why it does not block assets)
 
-**1. The `.idx` cipher is CRACKED** (see §8 of `NOTES.md`). Names use
-`name[i] = stem[i] ^ name[i-4]`, with the 4-byte seed derived from the leading
-directory. 379 real names recovered, 128 of them verified against plaintext found
-independently in the bundles' compiled Lua. **No decompiler was needed** and none
-would have helped — a decompiler yields code, not the known plaintext that solves
-a cipher.
+1,324 `bin` payloads are **keystream-encrypted** — mostly `Map/*` map data,
+`MapScriptTemplate/*` and object/attr tables. They are carved and named, but their
+insides need a keystream recovery. The keystream is partly **exposed**: in FxMap's
+893 `Map/*` records the high three bytes of the small-valued u32 fields are constant
+across 200/200 files (`44 71 9c`, `e3 1b 9c`, `a1 61 9d` at offsets 5–7, 9–11,
+13–15) — three direct samples, period ≠ 4. Ruled out for these: raw deflate, stored
+flat, the self-differential `.idx` cipher, and fixed-XOR.
 
-**2. The payload layout is still unknown, and this is the real wall.** The big
-archives' contents are zlib-compressed custom structs rather than stored files, and
-the index offset fields do **not** point at payload starts — verified: they land on
-struct headers (`01 00 00 00 02 00 00 00`). FxStage, FxCharacter, FxContents and `fx`
-contain **zero** valid zlib streams. Reading that layout requires the engine binary,
-and **`CA.dll` is Themida-protected** (`.themida` section, 7,987,200 bytes virtual,
-`rawsz=0`, plus UPX) while `CA.exe` is nProtect GameGuard-packed. Both defeat static
-analysis.
+This is `Map` data, **not** the image/audio assets, which all live in the 40,349
+`table` records, the 907 zlib records and the 838 validated jpg/ogg files — all
+extracted. Details: [`work/idd_layout_report.md`](./work/idd_layout_report.md).
 
-`Patcher.exe` (2.7 MB, 12,869 functions) **is** analysable, but it is only a downloader —
-no `.idd`, `.idx` or `pak` strings and none of the format code.
+External corroboration for the remaining family: the Zenhax thread calls the
+encryption *"custom (something like 256 different operations) and so it's useless to
+make a script for quickbms."* Consistent with the sampling above.
 
-External corroboration: the Zenhax thread on this game family calls the encryption
-*"custom (something like 256 different operations) and so it's useless to make a script
-for quickbms."* Consistent with what is measured here.
-
-**Remaining options, in order of promise:**
-1. **Finish the big-index record walk.** The cipher already works on them — forcing
-   `Game/` on `FxStage.idx` yields `Game/AIBattle_SuperSt…` — only the fixed-width
-   record layout needs parsing. Cheapest real win available.
-2. **Signature carving** — raises coverage archive by archive. Already got FxSound to
-   100% and FxHiddenCatch to 38%.
-3. **Find a community extractor.** This family has public unpackers (ACV tools,
-   HyperRipper for the sibling `.idd`/`.idx`). Unknown: whether any handles *this*
-   client's generation.
-4. **Dynamic analysis** — dump decrypted code from a running client. Requires Windows
-   with anti-cheat active; outside this repo's scope.
-
-**Overall: the asset-extraction half is real and measurable, and a playable
-asset-based game is DONE. A port of the original game remains impossible from this
-archive.** ~12.6% of asset volume recovered.
+**Overall: asset extraction is complete and lossless.** A port of the original game
+still remains impossible from this archive — the server is not in it, and the client
+binaries are Themida/GameGuard protected.
 
 ---
 
@@ -152,7 +140,8 @@ archive.** ~12.6% of asset volume recovered.
 - [x] **Solve `ndadata/*.pak`** — `PACK0001` magic, zlib at offset 16 → inflates to the sibling `.idx`
 - [x] **Inflate 68 `.pak` files** → `work/assets/ndadata/`
 - [x] **Build `scripts/extract_assets.py`** — magic detect + per-format length parsing
-- [x] **Carve 1,801 entries (12.64% of 1,086 MB)** — 747 Oggs + 147 JPEGs raw, plus 907 zlib streams
+- [x] **Carve 43,425 entries (100.00% of 1,086 MB)** — exact sizes read from the
+      `.idx`, every payload header-validated, SHA-256 round trip on 12/12 archives
 - [x] **Extract `FxSound.idd` completely** — 693 Oggs, 100% coverage
 - [x] **Copy 34 `vh/*.bmp` UI sprites** (already have real names)
 - [x] **Generate `work/assets/manifest.json`**
@@ -169,31 +158,24 @@ archive.** ~12.6% of asset volume recovered.
       `name[i] = stem[i] ^ name[i-4]`, seed derived from the leading directory.
       **379 real names, 128 verified against the Lua plaintext.** No decompiler
       needed; `scripts/idx_decrypt.py`
-
-### 🔴 Blocked
-
-- [ ] **Extract the remaining ~87% of asset volume**
-      (`CharTE` 289 MB, `EmoTE` 225 MB, `FxMap` 90 MB, `fx` 87 MB, …).
-      **Blocker:** the payloads are zlib-compressed custom structs rather than
-      stored files, and the index offset fields do **not** point at payload
-      starts — verified: they land on struct headers (`01 00 00 00 02 00 00 00`).
-      FxStage, FxCharacter, FxContents and `fx` contain **zero** valid zlib
-      streams. Reading the real layout needs the engine binary, and `CA.dll` is
-      Themida-protected while `CA.exe` is GameGuard-packed.
+- [x] **Name the big `Fx*` indexes** — the chain is **global**, not per-record
+      (that was the missing piece). Records are `[name][20-byte trailer]` where the
+      trailer carries the payload size and the *next* name's length. **43,425 names**
+      across 12 indexes; names have no file extensions.
+- [x] **Crack the large `.idd` internal layout** — `.idx` is the directory,
+      `.idd` is the concatenated payloads. `sum(sizes) == .idd size` exactly, so
+      extraction is exact. **43,425 entries, 1,086 MB, 100.00%, SHA-256 round trip on
+      12/12 archives.**
 
 ### 🟡 In progress (agents running)
 
-- [ ] **Name the big `Fx*` indexes.** The cipher works on them — forcing `Game/`
-      on `FxStage.idx` yields `Game/AIBattle_SuperSt…` — but they use a
-      **fixed-width** record layout instead of the ndadata length-prefixed one.
-      Success criterion: `FxSound.idx` must decrypt to ~693 `.ogg` names to match
-      the 693 real Ogg streams already extracted from `FxSound.idd`.
+- [ ] **Recover the keystream for the 1,324 encrypted `bin` payloads** (mostly
+      `Map/*`). They are carved and named; the keystream is partly exposed from the
+      constant high bytes of small-valued fields. Not image/audio, so it does not
+      block the asset browser.
 - [ ] **Extract the named `ndadata` popup assets.** The names are known (130 real
       paths) and the records carry two unexplained `u32` fields; if those resolve
       to offsets, the sprites inside become extractable as *named* files.
-- [ ] **Crack the large `.idd` internal layout.** Nine of twelve archives are
-      unreachable; `FxStage`, `FxCharacter`, `FxContents` and `fx` have no valid
-      zlib streams at all, so their record form is still unknown.
 
 ### ⬜ Not started (and not achievable from this archive)
 

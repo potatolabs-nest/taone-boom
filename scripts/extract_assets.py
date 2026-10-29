@@ -19,6 +19,8 @@ Usage:
 """
 import argparse, json, os, struct, sys, time
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 BOOM = "/Users/hieu/Workspaces/taone/extracted/Boom"
 OUT = "/Users/hieu/Workspaces/taone/work/assets"
 
@@ -51,6 +53,36 @@ def u16(b, o):
 
 def u32(b, o):
     return struct.unpack_from("<I", b, o)[0]
+
+
+SAFE = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.")
+
+
+def safe(name):
+    """Turn an index name ('Bonus/Airplane1') into a filesystem-safe stem."""
+    s = name.replace("/", "__").replace("\\", "__")
+    s = "".join(c if c in SAFE else "_" for c in s).strip("_")
+    return (s or "unnamed")[:120]
+
+
+def sniff(blob):
+    """Classify a carved payload by validating its own header.
+
+    Returns (format, confidence). The LENGTH is already exact (it comes from
+    the .idx); this only labels the content, and says so honestly when the
+    content is an engine-specific table rather than a known file format.
+    """
+    for magic, fmt, fn in DETECTORS:
+        if blob[:len(magic)] == magic:
+            size, conf = fn(blob, 0)
+            if size and size == len(blob):
+                return fmt, "high"          # header agrees with the exact size
+            if size and size <= len(blob):
+                return fmt, "medium"        # valid header, size is authoritative
+    # engine tables open with `u32 count, u32 2` and carry 0xFFFFFFFF sentinels
+    if len(blob) >= 8 and u32(blob, 4) == 2 and u32(blob, 0) < 100_000:
+        return "table", "exact-size"
+    return "bin", "exact-size"
 
 
 # ---------- per-format length parsers ----------
@@ -436,18 +468,120 @@ def find_zlib_streams(buf):
     return out
 
 
+def write_manifest(all_assets, archives, sprites, paks):
+    by_format = {}
+    by_archive = {}
+    for a in all_assets:
+        by_format[a["format"]] = by_format.get(a["format"], 0) + 1
+        by_archive[a["archive"]] = by_archive.get(a["archive"], 0) + 1
+    manifest = {
+        "generated": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        "summary": {
+            "total_assets": len(all_assets),
+            "by_format": by_format,
+            "by_archive": by_archive,
+            "ui_sprites": len(sprites),
+            "ndadata_pak": len(paks),
+            "total_bytes": sum(a.get("size", 0) for a in all_assets),
+        },
+        "archives": archives,
+        "assets": all_assets,
+        "ui_sprites": sprites,
+        "ndadata": paks,
+    }
+    os.makedirs(OUT, exist_ok=True)
+    mpath = os.path.join(OUT, "manifest.json")
+    with open(mpath, "w") as fh:
+        json.dump(manifest, fh, separators=(",", ":"))
+    print(f"\nmanifest: {mpath} ({os.path.getsize(mpath):,} bytes)")
+    print(f"total assets: {len(all_assets):,}  bytes: {manifest['summary']['total_bytes']:,}")
+    print(f"by format: {by_format}")
+    return manifest
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--archive", action="append")
     ap.add_argument("--limit", type=int)
     ap.add_argument("--names", help="JSON mapping id -> real filename")
+    ap.add_argument("--magic-only", action="store_true",
+                    help="skip the exact idx-driven carve and only magic-carve")
     args = ap.parse_args()
 
     names = {}
     if args.names and os.path.exists(args.names):
         with open(args.names) as fh:
             names = json.load(fh)
+
+    # ---- PRIMARY PATH: idx-driven exact carve -------------------------------
+    # The .idx gives the exact size of every .idd payload, and the sizes sum to
+    # the .idd byte size, so this is exact rather than heuristic. It also
+    # supplies the real (extension-less) asset names.
+    if not args.magic_only:
+        import idx_idd
+        targets = args.archive or list(ARCHIVES)
+        idir = os.path.join(OUT, "by_index")
+        all_assets = []
+        if not args.dry_run:
+            os.makedirs(idir, exist_ok=True)
+        idx_archives = []
+        for name in targets:
+            fn = ARCHIVES.get(name)
+            if not fn:
+                continue
+            idd_path = os.path.join(BOOM, fn)
+            idx_path = idx_idd.index_for(idd_path)
+            if not idx_path:
+                continue
+            t0 = time.time()
+            entries, stats = idx_idd.read_index(idx_path)
+            idd_size = os.path.getsize(idd_path)
+            declared = sum(e["size"] for e in entries)
+            if declared != idd_size:
+                print(f"!! {name}: index sums to {declared:,} != idd {idd_size:,}",
+                      file=sys.stderr)
+                continue
+            sub = os.path.join(idir, name)
+            if not args.dry_run:
+                os.makedirs(sub, exist_ok=True)
+            n = 0
+            for i, (e, blob) in enumerate(idx_idd.carve(idd_path, entries)):
+                fmt, conf = sniff(blob)
+                ext = fmt if fmt != "bin" else "dat"
+                rel = f"by_index/{name}/{i:05d}_{safe(e['name'])}.{ext}"
+                if not args.dry_run and (args.limit is None or i < args.limit):
+                    with open(os.path.join(OUT, rel), "wb") as out:
+                        out.write(blob)
+                all_assets.append({
+                    "id": f"{name}/{i:05d}",
+                    "archive": name,
+                    "index": i,
+                    "name": e["name"],
+                    "offset": e["offset"],
+                    "size": e["size"],
+                    "format": fmt,
+                    "mime": MIME.get(fmt, "application/octet-stream"),
+                    "file": rel,
+                    "confidence": conf,
+                    "source": "idx",
+                })
+                n += 1
+            idx_archives.append({
+                "name": name, "idd_size": idd_size, "entries": len(entries),
+                "declared_bytes": declared, "coverage": declared / idd_size if idd_size else 0,
+                "index_complete": stats["complete"],
+            })
+            print(f"{name:14s} idx-carve {n:>7,} entries  {declared:,}/{idd_size:,} "
+                  f"= {declared/idd_size*100:6.2f}%  ({time.time() - t0:.1f}s)")
+        if args.dry_run:
+            tot = sum(a["size"] for a in all_assets)
+            print(f"\nDRY RUN — {len(all_assets):,} idx entries, {tot:,} bytes "
+                  f"({tot / 1e6:.1f} MB) — nothing written")
+            return
+        if idx_archives:
+            write_manifest(all_assets, idx_archives, [], [])
+            return
 
     targets = args.archive or list(ARCHIVES)
     all_assets, archives = [], []
@@ -517,33 +651,7 @@ def main():
         print(f"{name + '_zlib':14s} {len(streams):>7,} zlib streams")
     all_assets.extend(zlib_assets)
 
-    by_format = {}
-    by_archive = {}
-    for a in all_assets:
-        by_format[a["format"]] = by_format.get(a["format"], 0) + 1
-        by_archive[a["archive"]] = by_archive.get(a["archive"], 0) + 1
-
-    manifest = {
-        "generated": time.strftime("%Y-%m-%dT%H:%M:%S"),
-        "summary": {
-            "total_assets": len(all_assets),
-            "by_format": by_format,
-            "by_archive": by_archive,
-            "ui_sprites": len(sprites),
-            "ndadata_pak": len(paks),
-        },
-        "archives": archives,
-        "assets": all_assets,
-        "ui_sprites": sprites,
-        "ndadata": paks,
-    }
-    os.makedirs(OUT, exist_ok=True)
-    mpath = os.path.join(OUT, "manifest.json")
-    with open(mpath, "w") as fh:
-        json.dump(manifest, fh, separators=(",", ":"))
-    print(f"\nmanifest: {mpath} ({os.path.getsize(mpath):,} bytes)")
-    print(f"total assets: {len(all_assets):,}  ui_sprites: {len(sprites)}  paks: {len(paks)}")
-    print(f"by format: {by_format}")
+    write_manifest(all_assets, archives, sprites, paks)
 
 
 if __name__ == "__main__":
