@@ -837,3 +837,74 @@ material, and there is **no public documentation of the retail map format** eith
 ### Discarded as fabricated
 A Chinese blog claiming specifics like "packet XOR key `0x7A` in `Packet.dll`"
 reads as AI-generated and could not be corroborated. Recorded so it is not chased.
+
+## 20. A REAL OPEN-SOURCE SERVER EXISTS — PinguBNB (verified 2026-10-30)
+
+The single most important external find. **github.com/york8817612/PinguBNB** — a
+C# / .NET 10, AOT-ready **BNB (Crazy Arcade) game server emulator**. Verified
+directly by fetching it (repo 200, `AGENTS.md` 200 on `master`).
+
+### Verified wire protocol (from `AGENTS.md` and `Networking/Codec.cs`)
+Listeners: **TCP 3838 / 4848 / 4849** and **UDP 3839 / 4849**.
+
+The framing is region-dependent, controlled by a "cipher degree":
+
+| degree | region | header | payload-len idx | opcode len | CRC len |
+|---|---|---|---|---|---|
+| 1 | JP, TW (default) | 3 | 1 | 1 | 4 |
+| 2 | CN | 3 | 1 | 1 | 1 |
+| 3 | TH, VN, NA | 4 | 2 | 2 | 1 |
+
+Constants (verbatim from `Codec.cs`):
+```
+HeaderType = 0
+HeaderCodeRcvBase = 192
+HeaderCodeSndBase = 102
+HeaderCodeModifier  = 231
+PacketRcvSeqDelta   = 3
+PacketSndSeqDelta   = 3
+```
+Header byte = `(HeaderType + 231) ^ (HeaderCodeRcvBase + seq)`.
+Length fields are XOR-obfuscated (`^ 0xA569` degree 1/2, `^ 0x96CA5395` degree 3).
+Payload is decrypted by `SimpleStream.Decrypt3(payload, seq)` — an XOR stream keyed
+on the packet sequence. Integrity: `CRC32(seq, payload)` degree 1, else `CRC8`.
+
+Opcodes live in per-locale YAML (`{Locale}_{Ver}_recv.yaml` / `_send.yaml`), e.g.
+`CN_12_recv.yaml`: `LoginReq: 3`, `ChatMsg: 25`, `CreateSessionReq: 80`,
+`JoinSessionReq: 81`, `StartGameReq: 106`, `BombIgniteReq: 140`,
+`EatItemReq: 144`, `AirplaneReq: 156`, `AskFxStock: 213`.
+
+Version map: `TW_VER 5, JP_VER 17, CN_VER 12, TH_VER 12, NA_VER 12, VN_VER 2`.
+
+### The gap that matters
+**There is no KR entry.** This emulator covers JP/TW/CN/TH/VN/NA only, and our
+client is **Korean, build 1014, Oct 2022**. So it will not talk to our client as-is.
+But it is a *working protocol skeleton* with the exact cipher model, and adding a
+KR locale means deriving `KR_VER`'s opcode table — which is the kind of thing a
+browser client could do from the KR client's own dispatch.
+
+### Legal caveat, stated plainly
+**No LICENSE file and no README.** Only `AGENTS.md` (an AI-agent briefing) exists.
+Its legal status is unstated and its opcode tables are reverse-engineered. Do not
+redistribute it; treat it as reference material.
+
+### Other server findings
+- **`~Luca~`'s PopTag emulator** (RaGEZONE 1262019 / 1263649): "lobby, room, and
+  in game … basically playable", beta online with PvP — but explicitly **not open
+  source**: *"luca main dev have no intention going open source perhaps in the near
+  future."*
+- **`zyrlyn`'s Python server** (RaGEZONE 1270621, Aug 2026): no database, all maps
+  playable, client embedded, 9.8 MB `Crazy Arcade.7z`, login-gated.
+- **Chinese leaked servers**: authentic old stack is **SQL Server 2000 + ODBC +
+  `NDAServer.EXE` / `SMAgent.EXE`** (姬风网络), plus 盛大 V057 on MySQL with
+  **`OpenPort 8798`**. Binaries and DB dumps only, never source.
+- **No Nexon client source leaked.** GitHub's 138 `crazyarcade` repos are all
+  from-scratch student imitations.
+- **Discarded**: a claim of a "2005–2008 leaked Korean server source" traces to one
+  likely-generated SEO article with no linked source. Not corroborated.
+
+### Why this changes the plan
+Until now a real playable port was blocked on "no server exists". That is no longer
+true: **a working, open, protocol-documented emulator exists**, just for other
+regions. The remaining work is concrete rather than speculative — add a KR locale
+(opcode table) and point it at this client build.
