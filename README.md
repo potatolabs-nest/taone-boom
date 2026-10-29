@@ -64,8 +64,25 @@ original work inspired by these assets, **not** a port of the original.
 | 7. Playable game | ✅ Done | rhythm game, beat maps from audio, SELFTEST PASS |
 | 8. Crack `.idx` cipher | ✅ Done | **379 real names, 128 verified** |
 | 9. Name the big Fx* indexes | ✅ Done | **43,425 names**, chain walk solves to EOF |
-| 10. Game renderer / logic | ⬜ Not started | blocked by the server, not by #3 |
+| 10. Game logic / renderer | ❌ Not achievable | logic is server-side + in Themida-protected `CA.dll` |
 | 11. Server protocol | ⬜ Not started | **infeasible**, see below |
+
+### What the 43,425 entries actually are
+
+The archive is **100% decoded and lossless**, but "decoded" is not the same as
+"renderable". Breaking the entries down by what their own bytes say:
+
+| kind | count | note |
+|---|--:|---|
+| data records | ~42,500 | sprite/avatar/map **descriptors**: small LE integer counts, entropy 2.6–6.5 |
+| Ogg audio | 747 | real, verified with `file`/`afinfo` |
+| JPEG images | 91 | real, `JFIF` |
+| UI sprites (`vh/`) | 34 | plaintext BMPs, real filenames |
+
+So the media — all the audio and every stored image — is recovered and named.
+The large remainder is the game's own metadata: the byte-exact cuts prove the
+*structure* is right, but those records are tables the engine interprets, not
+files anything else can open. That is the honest limit of what the archive holds.
 
 ### Extraction coverage — measured, not estimated
 
