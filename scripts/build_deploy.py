@@ -95,6 +95,27 @@ def main():
                             "width": w, "height": abs(h),
                             "size": os.path.getsize(src)})
 
+    # real UI art recovered from the ndadata bundles by name (validated jpegs)
+    ndsrc = os.path.join(ROOT, "work/assets_named/ndadata")
+    ndout = os.path.join(OUT, "quest")
+    quest = []
+    if os.path.isdir(ndsrc):
+        os.makedirs(ndout, exist_ok=True)
+        for dp, _, fs in os.walk(ndsrc):
+            for fn in sorted(fs):
+                if not fn.lower().endswith((".jpg", ".jpeg", ".png")):
+                    continue
+                src = os.path.join(dp, fn)
+                rel_name = os.path.relpath(src, ndsrc).replace(os.sep, "__")
+                dst = os.path.join(ndout, rel_name)
+                shutil.copy(src, dst)
+                quest.append({"name": os.path.relpath(src, ndsrc),
+                              "file": "quest/" + rel_name,
+                              "size": os.path.getsize(src)})
+        json.dump(quest, open(os.path.join(OUT, "quest.json"), "w"),
+                  separators=(",", ":"))
+        print(f"quest art  : {len(quest)}")
+
     # named-asset catalog for the client's browse tab
     cat = os.path.join(ROOT, "work/catalog.json")
     if os.path.exists(cat):

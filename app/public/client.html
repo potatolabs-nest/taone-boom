@@ -926,6 +926,7 @@ var CTABS = [
   {id:"info",   label:L.myInfo},
   {id:"items",  label:L.myItem},
   {id:"shop",   label:L.shop},
+  {id:"quest",  label:"이벤트 이미지"},
   {id:"catalog",label:"에셋 카탈로그"},
   {id:"mypage", label:L.myPage},
   {id:"option", label:L.option}
@@ -965,6 +966,23 @@ function showContent(tab){
       grid.appendChild(b);
     });
     body.appendChild(grid);
+  } else if (tab==="quest"){
+    body.appendChild(el("p","muted",
+      "팝업/퀘스트 번들에서 실제 이름으로 복구한 이미지 " + (QUEST.length||0) +
+      "개 (검증됨: JPEG 세그먼트 체인이 EOI에서 정확히 끝남)"));
+    var g = el("div","shopgrid"); g.style.marginTop="10px";
+    if (!QUEST.length) g.appendChild(el("p","muted","이미지를 찾지 못했습니다."));
+    QUEST.forEach(function(q){
+      var b = el("div","itembox");
+      var im = el("img"); im.src = q.file; im.alt = q.name; im.loading="lazy";
+      im.style.maxHeight="110px"; im.style.objectFit="contain";
+      b.appendChild(im);
+      b.appendChild(el("b",null, q.name.split("__").pop()));
+      b.appendChild(el("span",null, Math.round((q.size||0)/1024) + " KB"));
+      b.addEventListener("click", function(){ window.open(q.file,"_blank"); });
+      g.appendChild(b);
+    });
+    body.appendChild(g);
   } else if (tab==="catalog"){
     body.appendChild(el("p","muted",
       "인덱스에서 복호화한 실제 에셋 이름 " + (CATALOG.length||0).toLocaleString() +
@@ -1041,7 +1059,7 @@ $("btnLeave").addEventListener("click", function(){ show("lobby"); });
 
 /* ============================ boot =============================== */
 var STRING_COUNT = 8871;
-var CATALOG = [], CATALOG_PAGE = 0;
+var CATALOG = [], CATALOG_PAGE = 0, QUEST = [];
 function boot(){
   fetch("manifest.json", {cache:"no-store"})
     .then(function(r){ if(!r.ok) throw new Error("manifest HTTP "+r.status); return r.json(); })
@@ -1118,6 +1136,15 @@ function flowTest(){
   }, 120);
 }
 /* the named-asset catalog: all 43,425 decoded records, loaded lazily */
+function loadQuest(){
+  fetch("quest.json").then(function(r){ return r.ok ? r.json() : []; })
+    .then(function(rows){
+      QUEST = rows || [];
+      // use a real event image as the lobby banner
+      if (QUEST.length){ var b=$("bannerArt"); if (b) { b.src = QUEST[0].file; } }
+    })
+    .catch(function(){ QUEST = []; });
+}
 function loadCatalog(){
   fetch("catalog.json").then(function(r){ return r.ok ? r.json() : []; })
     .then(function(rows){ CATALOG = rows || []; })
@@ -1125,6 +1152,7 @@ function loadCatalog(){
 }
 boot();
 loadCatalog();
+loadQuest();
 if (location.search.indexOf("flowtest") !== -1) flowTest();
 </script>
 </body>
