@@ -635,3 +635,54 @@ on disk decrypts statically**, which is why Ghidra returns high-entropy noise.
 Searched for an unpacked copy publicly: none exists (see §13 — no client source
 anywhere, verified negative across GitHub, GitLab, Codeberg, SourceForge and
 archive.org).
+
+## 17. THE DATA RECORDS CONTAIN REAL ARTWORK — major correction
+
+I earlier called the ~42,500 unrecognised records "metadata, not hidden media" and
+said avatars were 3D so there was nothing to render. **Both claims were wrong.**
+An agent proved otherwise and I verified the core of it.
+
+### What the records actually are
+`.table` records, ~40,349 of them. Layout (solved, verified):
+
+    u32 count | u32 2 | u32 hdr2 | u32 hdr3 | u32 w_max | u32 h_max
+    count x 48-byte entries (12 x u32)   <- frame rectangles + layer transforms
+    payload = the rest of the record     <- THE ARTWORK
+
+Header law: `header_len == 24 + 48*count`, which holds on **40,349/40,349**
+records. Entries are sprite-atlas frames; e.g. `Lobby_Monster2_bt01` declares
+`w_max=880 h_max=171` against a BMP of 171x880 — the atlas is **transposed**
+relative to the BMP.
+
+### Proof the payload is image data (not metadata)
+- A **189-byte exact common run** exists between the record payload (offset
+  35,132) and the BMP's pixels (offset 394,878) — 63 RGB pixels verbatim.
+  Verified directly. Random controls: 0.
+- Byte-histogram cosine similarity against ground-truth BMP pixels is **0.777
+  mean over 28 name-matched pairs**, versus 0.010 for random controls. The
+  `vh/*.bmp` plaintext sprites pair **by name** with `.table` records, giving
+  real ground truth to work against.
+
+### The codec: still not cracked, but now sharply characterised
+- ~**3.2 bytes/pixel** (`Lobby_Monster2_bt01`: 482,668 payload bytes vs 454,080
+  BMP pixel bytes; w*h*3 = 451,440).
+- 3-byte interleaved (RGB-like) by autocorrelation.
+- **Byte agreement over the whole overlap is only 1.5%**, yet a 189-byte run is
+  verbatim. That combination — long literal runs inside a mostly-differing stream
+  — is the signature of an **LZ77-style codec**: literals pass through unchanged,
+  matches are emitted as coded (distance,length) pairs. It is NOT a permutation
+  and NOT a plain entropy code.
+- Ruled out by direct test: zlib, raw deflate, gzip, bzip2, lzma, LZ4, Snappy,
+  LZO1X; PackBits and RLE token layouts (2..8 byte tokens, every count position);
+  PNG per-scanline filters; planar/column-major/transposed/YUV; fixed XOR. No
+  raster stride at any width.
+
+### Also solved: the `.dat` minimap family
+`.dat` = `[u32 compressed_len][u32 inflated_len][zlib]`, both fields exact on
+**907/907**. They inflate to `.table` records, so they share the same open codec.
+
+### Status
+The artwork is confirmed present and the container is understood. The remaining
+unknown is a **custom LZ77-family codec**, which is exactly the kind of thing the
+engine implements — and the engine is Themida-encrypted (§16). This is the honest
+boundary: container solved, image data proven present, codec unrecovered.
