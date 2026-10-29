@@ -376,3 +376,84 @@ it is the only option this archive allows.
 
 Also confirmed absent: any server implementation, database dump, or protocol
 documentation. `NMDATA/*.cfg` are ssi3 connection configs, not a server.
+
+## 12. EXTERNAL RESEARCH — the definitive picture (2026-10-29)
+
+Three exhaustive web sweeps (GitHub/forums/archives, format tooling, browser-port
+feasibility). Findings with sources. **None of this changes what is in the
+archive; it establishes what is reachable from outside it.**
+
+### Avatars are 3D, not 2D sprites — an important correction
+Audition runs on the **Gamebryo** engine (Wikipedia, CONFIRMED) with **DirectX
+9.0c**. Avatars are skinned 3D meshes, not layered 2D art:
+- `.rgm` is the model format — "rgm files are made with **3DS MAX 8** … contain
+  **animations and stage + avatars** with **dds file as textures**" (zenhax t=2314)
+- A 2026 RaGEZONE RGM thread describes parsing "skeleton data extraction and
+  animation frame processing" and "how it stores **bone hierarchies and animation
+  keyframes**" (forum.ragezone.com/threads/audition-rgm.1259668/)
+
+**Consequence for this repo:** the ~42,500 "data records" are most likely 3D
+model/animation data (skeleton, keyframes, mesh) plus UI layout — which is exactly
+why they are not renderable images. It also means a faithful visual port would
+need a 3D skinned-mesh renderer, not a sprite slicer.
+
+### A browser remake of Audition already exists (not a port)
+"[Showcase] Audition Web: a rough browser remake of my childhood game" — the
+author states it "uses **three.js** for the graphics and **Node + SQLite** for the
+server. It already works online with friends", and "It's rough and unfinished
+because I only put a few hours into it."
+(forum.ragezone.com/threads/...1276219/) CONFIRMED.
+Also `khaizinam/beatup_html_game` — HTML5 Canvas + Web Audio, no original assets.
+Neither runs the original client; both are reimplementations.
+
+### Running a real DX9 client in a browser — proven, but the route is closed here
+**GunZ: The Duel now runs fully in a browser** by compiling the *actual* client to
+WASM with a D3D9→WebGL layer: "This is the actual GunZ client running natively,
+not a remake or reimplementation" (forum.ragezone.com/threads/...1261522/;
+github.com/LostMyCode/d3d9-webgl).
+**But** that needs the client's C++ source or buildable DLLs. Audition's client is
+**Themida/GameGuard-packed with encrypted DLLs**, so it cannot be recompiled. The
+layer is also **FFP-only** ("HLSL vertex/pixel shaders are not supported"), and
+whether this client uses shader paths is unknown.
+Alternatives all fall short: **Boxedwine** — "Direct3D is not yet supported";
+**ExeBrowser** — "10–40% of native CPU performance"; **wemu** — "Sound output is
+not implemented yet"; **wine-assembly** — partial D3D9.
+
+### Anti-cheat
+This build ships **XTrap + nProtect GameGuard + BlackCipher**. The Java server
+guide notes "the Audition client includes XTrap anti-cheat which will kill the
+process after **~75 seconds**" without a stub, and ships `build_xtrap_stub.py`.
+A browser client cannot participate in any of this.
+
+### Format tooling — what is public and what is not
+| format | public spec? | public tool? |
+|---|---|---|
+| `.acv` gens 1–4 | **Yes** — 8-byte header, records `name(0xa0)+u32+zsize+size+offset` | Yes, mostly login-gated |
+| `.acv` gen 5 / acv7 | No | **No confirmed tool** |
+| `.idd`/`.idx` (this client) | **No** | **No** — solved only here |
+| `.abm` | Only "audio behind a ~252-byte custom header" | partial (player/editor) |
+| **`.tbm`** | **No** | **No decoder** — decryption requests unanswered |
+| **`.slk`** (where note data actually lives) | Column maps exist (`16A+4B+C=D`, `n`/`s`/`f`, key digits) | Yes — Excel, SLK Editor, SMtoSLK |
+| `.thd` | Purpose only (server validates it) | generator only |
+| `.rgm`, `.fft`, `.scr`, `.ani` | **No** | **No** |
+
+`.tbm` carries the ASCII magic **`AuditionMusic`** (filext.com). Charts travel with
+the music under one "music code", and the server echoes a header from
+`music_headers.dat` that the client validates against its local `.tbm`.
+
+### Verified against our own archive
+Searched all 43,425 payloads for a SYLK/SLK signature (`ID;P`, `ID;`) — **zero
+hits**. Combined with the earlier finding that the archive contains **no `.acv`
+files at all**, this confirms: **the note charts are not in this archive and no
+public decoder for the chart container exists.**
+
+### Bottom line
+"100% the same as the exe in a browser" is blocked on three fronts at once, and
+only one is a reverse-engineering problem:
+1. **the server** — not in the archive; only public emulator is incomplete and for
+   a different client generation;
+2. **the protected binary** — cannot be recompiled, cannot pass its own anti-cheat
+   in a browser;
+3. **the charts** — not in the archive, no public decoder.
+
+A *new* game on these assets is achievable and is what this repo delivers.
