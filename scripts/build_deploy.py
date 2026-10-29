@@ -30,11 +30,20 @@ def main():
 
     # the playable client shell is the landing page; the rhythm game is kept
     # alongside it as a direct-entry route
+    # The maze game is the product: real tiles cropped from the game's own
+    # screenshots, real Bazzi and skull sprites. It is the landing page.
+    arcade = os.path.join(ROOT, "app/public/arcade.html")
     client = os.path.join(ROOT, "app/public/client.html")
-    shutil.copy(client if os.path.exists(client) else SRC_GAME,
+    shutil.copy(arcade if os.path.exists(arcade) else SRC_GAME,
                 os.path.join(OUT, "index.html"))
     if os.path.exists(client):
-        shutil.copy(SRC_GAME, os.path.join(OUT, "game.html"))
+        shutil.copy(client, os.path.join(OUT, "client.html"))
+    if os.path.exists(SRC_GAME):
+        shutil.copy(SRC_GAME, os.path.join(OUT, "rhythm.html"))
+    # maze tile art
+    tiles = os.path.join(ROOT, "app/public/game/tiles")
+    if os.path.isdir(tiles):
+        shutil.copytree(tiles, os.path.join(OUT, "tiles"), dirs_exist_ok=True)
     # keep Pages from running Jekyll over the output
     open(os.path.join(OUT, ".nojekyll"), "w").close()
 
