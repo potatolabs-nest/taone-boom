@@ -686,3 +686,57 @@ The artwork is confirmed present and the container is understood. The remaining
 unknown is a **custom LZ77-family codec**, which is exactly the kind of thing the
 engine implements — and the engine is Themida-encrypted (§16). This is the honest
 boundary: container solved, image data proven present, codec unrecovered.
+
+## 18. SPRITE CODEC — deeper characterisation (raw runs confirmed)
+
+Attacked the codec with ground truth (`vh/Lobby_Monster2_bt01.bmp` pairs by name
+with `FxStage/00561_Lobby__Monster2_bt01.table`). Result: the format is
+**partly raw**, which is new and narrows it considerably.
+
+### What the payload looks like
+```
+payload[0:24]   u32 171 | u32 176 | u32 174 | u32 186 | u32 0 | u32 0
+```
+Those first four are exactly the frame rectangles from the 48-byte entry table
+(entries 1 and 3 carry `171,176,174,186`), i.e. the payload **repeats its own
+frame table**.
+
+```
+payload[24:28]  u32 298169          <- a length field
+payload[28:...] 00 BA 7F FF ...     <- image data
+payload[-12:]   ff ba 07 7f ff ba 07 ...   <- RAW RGB
+```
+The **tail is uncompressed RGB**: `ff ba 07` is byte-identical to the BMP's own
+opening pixels (R255 G186 B7, orange), repeating as flat-colour runs. So this
+codec **emits raw literal runs**, consistent with the 189-byte verbatim run found
+earlier — it is not a whole-stream transform.
+
+### Statistical character (why it is a real codec, not obfuscation)
+- Payload mean 4 KB-block entropy **6.973** vs the BMP's **5.923**; the payload is
+  near-random and its four 4-byte phase positions are each uniform (256 distinct
+  values, ~6% zeros, ~3.4% `0xFF`) — so there is no alpha channel or raw stride
+  visible, and it is genuinely compressed.
+- Raw RGB/RGBA at any offset does not reproduce the image.
+- No zlib, raw deflate or gzip at **any** offset 0..4000 (0 hits).
+- Candidate LZSS decoders (flag-byte + 8 items, offsets 8..16 bits, lengths 4..8
+  bits, both literal polarities) all fail to produce a consistent stream.
+
+### Status — the honest boundary
+| layer | state |
+|---|---|
+| `.idx`/`.idd` container | **solved**, lossless, SHA-256 verified |
+| `.table` record header + frame table | **solved**, `24+48*count`, 40,349/40,349 |
+| payload sub-header (frame dims, length) | **solved** |
+| raw RGB runs inside the payload | **confirmed** |
+| the codec linking them | **not cracked** |
+
+The artwork is proven present, its container is understood, and it is known to be
+a custom codec that emits raw runs. Reproducing it exactly needs either the
+decoder from an unpacked `CA.dll` (§16) or a much longer bit-level effort against
+a 3.2 bytes/pixel stream. Harnesses retained:
+`scripts/crack_sprite.py`, `scripts/crack_t3_sprite.py`.
+
+### Public search
+Searched for any T3-engine sprite codec documentation or tool: none exists
+publicly. The `.idd`/`.idx` container itself has no public documentation either —
+this repo's own solution is the only one.
