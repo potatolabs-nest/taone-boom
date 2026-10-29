@@ -326,3 +326,24 @@ people who do these kind of jobs move their A!! just for money."*
 **Conclusion:** asset/data recovery from this archive is 100% done and lossless.
 A faithful *online* port is blocked by a missing server, not by anything left in
 the archive. The playable client here is a local reconstruction.
+
+## 10. THE CLIENT'S SERVER LIST — what the client expects
+
+`multisvr.ssd` decodes (ssi1 + zlib) to the **server list the client shows in
+game**, so it tells us what infrastructure this build was pointed at:
+
+- **DREAM SERVER**, **JOY SERVER**, **HAPPY SERVER** — named game servers
+- Embedded dates/naming: `2002년 7월 30일`, `2001년 10월 16일` — the file carries
+  its own history notes, including a rename notice for DREAM SERVER
+- Korean partner names still present: 네띠앙 (Netian), 벅스뮤직 (Bugs Music),
+  엠파스 (Empas), 코리아 — old Korean portals, i.e. this client line has roots
+  back to the original 2001-2002 launch era
+- Strings follow a length-prefixed table: `u32 len` + bytes, repeated
+- `NMDATA/Server_201009.cfg` and `6e475f4b41960000.cfg` are **ssi3** — the same
+  container family as `ssi1` but *not* zlib (the ssi3 payloads do not inflate),
+  so they are a differently-packed config; they hold what look like
+  connection lists for nProtect rather than game servers
+
+None of this is a server implementation — it is the client's view of one. It
+confirms the game was server-authoritative with named server+channel tiers,
+which is exactly the part that is missing from the archive.
