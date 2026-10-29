@@ -74,7 +74,7 @@ DIRS = ("Quest/", "PopupEvent/", "Game/", "Item/", "Icon/", "Event/", "Data/",
         "UI/", "Monster/", "Object/", "Path/", "Cash/", "Pet/", "Npc/",
         "Stage/", "Map/", "Texture/", "Image/", "Model/", "Anim/", "Font/",
         "Music/", "Voice/", "Bgm/", "Loading/", "Common/", "Character/",
-        "Avatar/", "Movie/", "Wave/", "see/", "Disp/", "Item2/")
+        "Avatar/", "Movie/", "Wave/", "see/", "Disp/", "Item2/", "ShopTop/")
 # Extensions plus the suffixless leaf names the Icon bundles use
 # (Icon/BingGo01, Icon/Bomb585icon, Icon/A02_10_3006icon, ...).
 EXTS = (".bmp", ".jpg", ".jpeg", ".png", ".luc", ".xml", ".dds", ".tga",
@@ -91,12 +91,16 @@ def decrypt(stem, seed):
     return bytes(out)
 
 
-def try_name(stem):
+def try_name(stem, bundle=None):
     """Recover a stored path, deriving the seed from each known directory.
 
     Deterministic: a candidate is accepted only when the seed implied by a
     prefix yields a path that really starts with that prefix and ends in a
     known extension.  No scoring, so no false accepts from printable garbage.
+
+    The small Icon bundles store a leaf with no extension ("Icon/BingGo01").
+    Those are accepted only when the leaf also appears in the bundle filename,
+    which keeps the ambiguous seeds from accepting plain garbage.
     """
     if len(stem) < 4:
         return None
@@ -111,16 +115,20 @@ def try_name(stem):
         if any(b < 31 or b > 126 for b in nm):
             continue
         s = nm.rstrip(b"\x00").decode("latin1")
-        if not s.lower().endswith(EXTS):
-            continue
         if "//" in s or "/." in s or s.endswith("/"):
             continue
-        return s
+        if s.lower().endswith(EXTS):
+            return s
+        # extensionless leaf: accept only if it echoes the bundle name
+        if bundle:
+            leaf = s.rsplit("/", 1)[-1]
+            if len(leaf) >= 4 and leaf.lower() in bundle.lower():
+                return s
     return None
 
 
-def parse_idx(path):
-    """Return (idx_bytes, [(recpos, stemlen, name, A, size, zero), ...], complete).
+def parse_idx(path, bundle=None):
+    """Return (idx_bytes, [(recpos, stemlen, name, A, size, C), ...], complete).
 
     Returns records=None when the .idx does not walk cleanly.
     """
@@ -138,7 +146,7 @@ def parse_idx(path):
         ln = struct.unpack_from("<I", d, p)[0]
         if not (4 < ln < 2048 and p + 4 + ln + 16 <= n):
             continue
-        if try_name(d[p + 4:p + 4 + ln]) is None:
+        if try_name(d[p + 4:p + 4 + ln], bundle) is None:
             continue
         nxt = p + 4 + ln + 16
         if nxt == n:
@@ -147,42 +155,52 @@ def parse_idx(path):
         if nxt + 4 <= n:
             ln2 = struct.unpack_from("<I", d, nxt)[0]
             if 4 < ln2 < 2048 and nxt + 4 + ln2 + 16 <= n \
-                    and try_name(d[nxt + 4:nxt + 4 + ln2]) is not None:
+                    and try_name(d[nxt + 4:nxt + 4 + ln2], bundle) is not None:
                 first = p
                 break
 
     recs = []
     if first is not None:
-        # record 0 (short form, 12-byte trailer)
-        L0 = first - 16 - 12
+        # record 0 has the same 16-byte trailer as the rest but no u32 length
+        # prefix, so its stem runs from offset 16 up to the trailer.
+        L0 = first - 16 - 16
         if L0 >= 4:
-            nm0 = try_name(d[16:16 + L0])
+            nm0 = try_name(d[16:16 + L0], bundle)
             if nm0 is not None:
-                A, size, _z = struct.unpack_from("<III", d[first - 12])
-                recs.append((12, L0, nm0, A, size, 0))
+                _h, A, size, _z = struct.unpack_from("<IIII", d, first - 16)
+                recs.append((16, L0, nm0, A, size, 0))
         p = first
         while p + 4 <= n:
             ln = struct.unpack_from("<I", d, p)[0]
             if not (4 < ln < 2048 and p + 4 + ln + 16 <= n):
                 break
-            nm = try_name(d[p + 4:p + 4 + ln])
+            nm = try_name(d[p + 4:p + 4 + ln], bundle)
             if nm is None:
                 break
-            A, size, C, Z = struct.unpack_from("<IIII", d, p + 4 + ln)
-            recs.append((p, ln, nm, A, size, C))
+            f0, A, size, Z = struct.unpack_from("<IIII", d, p + 4 + ln)
+            recs.append((p, ln, nm, A, size, f0))
             p = p + 4 + ln + 16
         if recs and p == n:
             return d, recs, True
         # fall through to single-record handling if that did not complete
 
-    # --- single-record bundles (icon sets): no regular record ---------------
-    # layout: u32 len | stem | u32 A | u32 size | u32 zero
-    L0 = n - 16 - 12
-    if L0 >= 4:
-        nm0 = try_name(d[16:16 + L0])
+    # --- single-record bundles (icon sets) ---------------------------------
+    # layout identical to record 0 of the multi-record bundles:
+    #     u32 len | stem[len] | u32 hash | u32 size | u32 zero
+    # (the leading len here IS the stem length, unlike record 0 above).
+    ln0 = struct.unpack_from("<I", d, 12)[0]
+    if 4 < ln0 < 2048 and 16 + ln0 + 16 == n:
+        nm0 = try_name(d[16:16 + ln0], bundle)
         if nm0 is not None:
-            A, size, _z = struct.unpack_from("<III", d[n - 12])
-            return d, [(12, L0, nm0, A, size, 0)], True
+            _h, A, size, _z = struct.unpack_from("<IIII", d, 16 + ln0)
+            return d, [(12, ln0, nm0, A, size, 0)], True
+    # last resort: stem runs from 16 to EOF minus the 16-byte trailer
+    L0 = n - 16 - 16
+    if L0 >= 4:
+        nm0 = try_name(d[16:16 + L0], bundle)
+        if nm0 is not None:
+            _h, A, size, _z = struct.unpack_from("<IIII", d, n - 16)
+            return d, [(16, L0, nm0, A, size, 0)], True
     return d, (recs or None), False
 
 
@@ -237,6 +255,22 @@ def valid_png(p):
     return j + 8 if j >= 0 else None
 
 
+def valid_lua_source(blob):
+    """Lua 5.x source text (not compiled): mostly printable, with Lua tokens.
+
+    The sources are CP949-encoded (Korean comments), so bytes >= 0x80 are
+    allowed; the test is that the text has almost no control bytes and does
+    contain Lua punctuation/keywords.
+    """
+    if not blob or blob[:1] == b"\x1b":
+        return False
+    sample = blob[:4096]
+    ctrl = sum(1 for b in sample if b < 9 or (13 < b < 32) or b == 127)
+    if ctrl > len(sample) * 0.02:
+        return False
+    return any(tok in blob for tok in (b"--", b"function", b"local", b"return", b"="))
+
+
 def validate(blob, ext):
     """Return (format, confidence, detail).
 
@@ -245,7 +279,9 @@ def validate(blob, ext):
     practice none is stored bare, so those come back as "sprite"/"low".
     """
     if valid_lua(blob):
-        return "lua", "high", "Lua 5.0 bytecode header"
+        return "lua_bytecode", "high", "Lua 5.0 bytecode header"
+    if ext in ("lua", "luc") and valid_lua_source(blob):
+        return "lua_source", "high", "Lua source text"
     if blob[:5] == b"<?xml":
         return "xml", "high", "xml declaration"
     e = valid_jpeg(blob)
@@ -265,12 +301,13 @@ def validate(blob, ext):
         sz = struct.unpack_from("<I", blob, 4)[0]
         if sz + 8 <= len(blob):
             return "riff", "high", f"RIFF size {sz + 8}"
-    # engine sprite wrapper: <u32 kind><u32 2><u32 1>...
+    # engine sprite wrapper: <u32 kind><u32 2><u32 nframes>
     if len(blob) >= 24:
         u = struct.unpack_from("<III", blob, 0)
-        if u[1] == 2 and u[2] == 1 and u[0] < 64:
+        if u[1] == 2 and 1 <= u[2] <= 16 and u[0] < 64:
             return "sprite", "low", \
-                f"engine sprite descriptor (kind={u[0]}); not a bare image"
+                f"engine sprite descriptor (kind={u[0]}, frames={u[2]}); " \
+                "not a bare image"
     return "unknown", "low", "no recognised header"
 
 
@@ -289,7 +326,7 @@ def main():
         iddp = os.path.join(ND, name + ".idd")
         if not os.path.exists(iddp):
             continue
-        d, recs, complete = parse_idx(ip)
+        d, recs, complete = parse_idx(ip, name)
         idd = open(iddp, "rb").read()
         if not recs:
             bundle_rows.append({
@@ -304,12 +341,14 @@ def main():
         n_high = n_low = 0
         for rpos, slen, nm, A, size, C in recs:
             blob = idd[off:off + size]
-            ext = nm.rsplit(".", 1)[-1].lower() if "." in nm.rsplit("/", 1)[-1] else ""
+            leaf = nm.rsplit("/", 1)[-1]
+            ext = leaf.rsplit(".", 1)[-1].lower() if "." in leaf else ""
             fmt, conf, detail = validate(blob, ext)
-            # keep the client's own extension so the name round-trips
-            store_ext = ext if ext and "." in nm.rsplit("/", 1)[-1] else (
-                {"jpeg": "jpg", "lua": "luc"}.get(fmt, "bin"))
-            rel = os.path.join(name, nm.replace("/", os.sep) + "." + store_ext)
+            # The output file keeps the client's own path and extension exactly;
+            # the real byte format is recorded in the manifest.  Never append a
+            # second extension - a stored `.luc` is Lua bytecode, and the client
+            # itself relies on that name.
+            rel = os.path.join(name, nm.replace("/", os.sep))
             dest = os.path.join(args.out, rel)
             os.makedirs(os.path.dirname(dest), exist_ok=True)
             with open(dest, "wb") as fh:

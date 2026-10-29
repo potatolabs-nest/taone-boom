@@ -457,3 +457,55 @@ only one is a reverse-engineering problem:
 3. **the charts** — not in the archive, no public decoder.
 
 A *new* game on these assets is achievable and is what this repo delivers.
+
+## 13. CORRECTION — an OPEN server source tree does exist
+
+In §9 I said the only public emulator was the Java one behind a RaGEZONE login.
+**That was incomplete.** There is also an openly-readable C# reconstruction:
+
+**github.com/Marcmendozt/audition-server-platform** — .NET monorepo, no login,
+no license file. Verified by fetching it directly (repo page 200; README raw 200).
+
+Structure: `01-GameDBAgent`, `02-LoginDBAgent`, `03-GatewayServer`,
+`04-AccountServer`, `05-GameServer`, `07-Tools`, `08-Database`
+(including `audition.sql`, `auditionlog.sql`, `auditionlogin.sql`).
+
+**What it actually contains** (from the component READMEs, fetched):
+- `04-AccountServer` is the most advanced: **legacy packet framing recovered** —
+  `ushort` length prefix plus sequential payload, with a worked example building a
+  116-byte packet whose third byte is opcode **`0x65`**; ports **4500/4501/4502/4503**
+- `05-GameServer` README states verbatim: *"No implementa todavia gameplay, rooms,
+  sincronizacion de usuarios, handshakes de cliente ni cifrado del protocolo
+  nativo"* — **it does not yet implement gameplay, rooms, user sync, client
+  handshakes, or native protocol encryption**. It is a TCP listener reserving the port
+- Bundled server INIs from a live build: `BattleInfo.ini`, `NoticeInfo.ini`,
+  `ServerInfo.ini`
+- Explicitly contains **no game client**
+
+So the accurate position: **partial server source exists and is openly readable**,
+but it implements account/auth framing only. Gameplay, rooms, handshakes and the
+protocol cipher are all missing — which is exactly the part a game needs.
+
+### Also corrected / newly confirmed
+- **Client source code does not exist publicly anywhere.** Verified negative across
+  GitHub, GitLab, Codeberg, SourceForge and archive.org.
+- **Full client+server pairs ARE publicly obtainable as binaries** for older
+  versions — notably Chinese 12.4 (server EXEs + MySQL dumps + PHP web + client,
+  mirrored on Xunlei/Baidu), plus 1.6, 1.7, 3.25, 8.3, 14.2, 16.10. Not source,
+  and repeatedly described by users as *not turnkey* (broken DB/login to fix).
+- A genuine **T3 3.0 C/C++ server source tree** exists (`API_Account`, `API_DBAgent`,
+  `API_Gateway`, `API_LoginDBAgent`, CS2K3/VS2005) but is behind a paid Chinese
+  download.
+- **A live private server** distributes a client openly: Audition Galaxy
+  (MEGA + magnet on auditiongalaxy.com/download).
+- Open chart tooling on GitLab: `sm2slk-bu` / `sm2slk-12` convert StepMania `.sm`
+  to Audition `.slk`.
+- Claimed "OpenAU, 2.3k stars, DMCA'd" from a Chinese blog is **fabricated** —
+  GitHub search finds no such project. Recorded so it is not chased.
+- Port data corroborated: 18200/18206/18300/18301/18505.
+
+### Does this change the verdict?
+No. It sharpens it. The open C# tree is the best starting point if someone ever
+builds a server, but it is account-layer only, targets the legacy protocol, and
+does not match **Club Audition KR build 1014**. The three blockers stand: no
+complete server, no client source, no charts.

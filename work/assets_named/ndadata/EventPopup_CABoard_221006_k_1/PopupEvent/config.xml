@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+
+<Popup>
+	<Event type="NormalEvent"></Event>
+
+	<Dialog viewbuttoncount="6">
+		<!-- 메인 배경 (뒤쪽) -->
+		<Back img="PopupEvent/_back.bmp" x="0" y="0"/>
+		<CheckBox img="" x="554" y="480"/>
+		<CloseButton img="PopupEvent/_EventPopup_CombineNotice_BtClose.bmp" x="593" y="475"/>
+		<ScrollBar x="599" y="93" img="PopupEvent/_EventPopup_VScroll_Ball.bmp" width="19" height="351"/>
+		<Buttons x="431" y="92" step_x="0" step_y="59">
+			<!-- Button 종류
+				 0: 디폴트 버튼, 사용하지 마세요.
+				 1: 마이페이지, config=0 으로 메인탭 선택
+				 2: 샵이동, config0, config1로 메인탭, 서브탭 선택
+				 3: 튜토리얼 팝업, config0, config1로 메인탭, 서브탭 선택
+				 4: 샵검색, search 으로 검색이름 설정
+				 쾅쾅(예시)
+			     		<Button type="4" img="PopupEvent/NoticeBoard_BT_01.bmp" search="쾅쾅"/>
+				 5: 방생성, gametype, maptheme로 지정
+				 6: 링크버튼, 특정 커스텀 기능 수행
+					 뽀끼뽀끼(예시)
+							<Button type="6" img="PopupEvent/BbokkiBbokki.bmp" link="Bbokki"/>
+					 시간의상점(예시)
+							<Button type="6" img="PopupEvent/TimeShop_Bt.bmp" link="TimeLimitShop"/>
+					크아미션(예시)
+							<Button type="6" img="PopupEvent/CAMission.bmp" link="CAMission"/>
+				 7: 일반 퀘스트 창 오픈, quest 으로 설정
+				 	<Button type="7" img="PopupEvent/WeekendEvent_Go_Bt.bmp" quest="WeekendCp2"/>
+				 8: URL 링크 버튼, 특정 website 오픈, url 로 설정
+				 	<Button type="8" img="PopupEvent/NoticeBoard_20140724_4_BT.bmp" url="http://ca.nexon.com/board/2097152023/978/" explain="WebPage"/>
+				 9: 버튼클릭 시, 미동작 버튼타입
+					<Button type="9" img="PopupEvent/NoticeBoard_BT_05.bmp"/>
+			-->
+
+			<!-- 버튼 이미지 -------------------------------------------------------------------------------------------------------------------------------------->
+
+			<!-- [매출] 시간의상점 : 10/06 ~ 11/02 -->
+			<Button type="6" img="PopupEvent/TimeShop_Bt.bmp" link="TimeLimitShop"/>
+			
+			<!-- [매출] 드랍더템시즌3 : 09/01 ~ 11/30 -->
+			<Button type="6" img="PopupEvent/DropTheTem_Bt.bmp" link="DropTheTem"/>
+
+			<!-- [퀘스트] 도전 출석왕 : 10/06 ~ 10/26 -->
+			<Button type="7" img="PopupEvent/StampKing_BT.bmp" quest="StampKing3"/>		
+
+			<!-- [컨텐츠] 클럽DJ를 잡아라 : 10/06 ~ 10/19 -->
+			<Button type="9" img="PopupEvent/NoticeBoard_202201006_3_Bt.bmp"/>	
+
+			<!-- [컨텐츠] 크아미션 : 09/01 ~ 09/28 -->
+			<Button type="6" img="PopupEvent/CAMission.bmp" link="CAMission"/>			
+	
+			<!-- [이벤트] 01월 주말 핫타임 : 연중 -->
+			<Button type="9" img="PopupEvent/HotTime_Bt.bmp"/>
+
+			<!-- [패션왕] 09월  -->
+			<Button type="9" img="PopupEvent/FashionKing_Bt.bmp"/>	
+			
+			</Buttons>
+			
+			<!-- 좌측 메인 이미지 -------------------------------------------------------------------------------------------------------------------------------------->
+			<MainImages x="40" y="94">
+
+			<!-- [매출] 시간의상점 : 10/06 ~ 11/02 -->
+			<Static img="PopupEvent/NoticeBoard_202201006_1.jpg"/>
+
+			<!-- [매출] 드랍더템시즌2 : 06/02 ~ 08/31 -->
+			<Static img="PopupEvent/NoticeBoard_20220901_5.jpg"/>
+
+			<!-- [퀘스트] 도전 출석왕 : 10/06 ~ 10/26 -->
+			<Static img="PopupEvent/NoticeBoard_202201006_2.jpg"/>	
+
+			<!-- [컨텐츠] 클럽DJ를 잡아라 : 10/06 ~ 10/19 -->
+			<Static img="PopupEvent/NoticeBoard_202201006_3.jpg"/>	
+
+			<!-- [컨텐츠] 크아미션 :  10/06 -->
+			<Static img="PopupEvent/NoticeBoard_20221006.jpg"/>	
+
+			<!-- [이벤트] 01월 주말 핫타임 : 연중 -->
+			<Static img="PopupEvent/NoticeBoard_9.jpg"/>
+
+			<!-- [패션왕] 09월  -->			
+			<Static img="PopupEvent/NoticeBoard_20220908.jpg"/>			
+			
+			</MainImages>
+		<Texts>
+			<Static text="NotShowAgainEvent" x="391" y="481" bold="1"/>
+		</Texts>
+	</Dialog>
+
+<!-- 
+* 버튼 Type 3가지
+Type = 0 - 마이페이지 : config0으로 메인 탭 선택
+Type = 1 - 샵이동 : config0, config1로 메인 탭, 서브탭 선택
+Type = 2 - 도움말 팝업 : config0, config1로 메인 탭, 서브탭 선택
+explain = "MyPage"은 그냥 주석임
+
+* 버튼은 최대 4개까지 추가 가능
+같은 Type이 여러개 가능합니다.
+버튼 수에 맞추어서 ButtonCount를 수정하고 ButtonInfo00 ~ 03까지 추가하시면 됩니다.
+
+
+버튼 크기: 160 x 54
+-->
+
+</Popup>
