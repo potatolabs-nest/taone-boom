@@ -274,3 +274,55 @@ Run: `python3 -I scripts/idx_decrypt.py`
 The cipher was recovered entirely from file structure plus known plaintext. No
 decompiler was involved, and none would have helped: its targets are
 Themida-protected (`CA.dll`) or GameGuard-packed (`CA.exe`).
+
+## 9. SERVER SOURCE CODE — what exists publicly (searched 2026-10-29)
+
+The blocker for a true 100% port is the server. It is **not in `Boom.zip`**.
+What the community does have:
+
+### "Audition Reborn" / agx-server (Java, the closest thing to a server)
+A Java private-server emulator for Audition Online **Season 5** (Redbana 2019
+client). Documented on RaGEZONE (thread 1262567).
+
+- **93 packet types** — the server refuses to work unless it validates exactly 93
+  ("Client closes when entering Dancing Hall" if the count is wrong)
+- Ports: **18505** login, **18506** game, **18510** file transfer
+- Package layout: `net/` (`Client`, `Crypto`, `Packets`), `server/` packet
+  handlers, `game/` (Character, Session, Inbox), Hibernate persistence
+- `music_headers.dat` — song validation headers for 202 songs
+- `build_xtrap_stub.py` — an **XTrap bypass** DLL generator, i.e. the client
+  ships anti-cheat that must be defeated to run a private server
+- Gameplay detail recovered: end-of-game is detected three ways — `lastRound=1`
+  in dance packets, a client `ResultsRequestPacket`, or any `GAME_END` subtype
+
+**Crucially, it is INCOMPLETE.** The thread states "this is not finish server
+file. Full source code missing packet". Downloads also require a RaGEZONE login.
+
+### Binary server files exist for many versions, but not as source
+Releases exist pairing server binaries + MySQL with a client for versions 1.6,
+1.7, 1.75, 3.1, 3.2, 3.25, 5.5, 6.5, 8.3, and Chinese 12.4 / 16.10. Setup is
+MySQL with three databases (`audition`, `auditionlog`, `auditionlogin`) plus a
+PHP registration site. Client IP is patched with a `/t3enter <hex>` command-line
+argument. These are **binaries plus database dumps**, not source.
+
+### The community has explicitly declined to publish a complete emulator
+Verbatim from RaGEZONE: *"No, and nobody is gonna start working on an emulator as
+a public thing. It's all private and will always be the case because actually
+people who do these kind of jobs move their A!! just for money."*
+
+### What this means for "recover 100% to web"
+1. **The server is not in the archive and there is no complete public
+   implementation** — so the online game cannot be restored from what we have.
+2. The public emulator targets **Season 5 / Redbana 2019**, whereas this archive
+   is **Club Audition KR, build 1014, Oct 2022**. Client versions differ
+   substantially; packet layouts are version-specific.
+3. A real port would need three things built: the **client protocol** (93 packet
+   types, partially documented), a **working server** (public one is incomplete),
+   and the **client rewritten for the browser**. That is a multi-month project on
+   top of this archive, not an extraction task.
+4. Anti-cheat is a further obstacle: this client ships **XTrap + nProtect
+   GameGuard + BlackCipher**, and a browser client cannot participate in that.
+
+**Conclusion:** asset/data recovery from this archive is 100% done and lossless.
+A faithful *online* port is blocked by a missing server, not by anything left in
+the archive. The playable client here is a local reconstruction.
