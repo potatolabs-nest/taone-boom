@@ -328,6 +328,31 @@ than a directory.
 
 ---
 
+## Can the online game be restored? No — and here is why, precisely
+
+Searched for server source code (details and links in `NOTES.md` §9).
+
+| | |
+|---|---|
+| Is the server in `Boom.zip`? | **No.** |
+| Is there a public emulator? | **Partly.** "Audition Reborn" (Java) — 93 packet types, login 18505, game 18506. But its release thread states *"not finish server file. Full source code missing packet"*, and downloads need a forum account. |
+| Does it match this client? | **No.** It targets Season 5 / Redbana 2019. This archive is Club Audition KR, build 1014, Oct 2022. Packet layouts are version-specific. |
+| Binary server files? | Yes, for versions 1.6–16.10, as binaries plus MySQL dumps — never as source. |
+| Will a complete one appear? | The community has declined outright: *"nobody is gonna start working on an emulator as a public thing."* |
+
+**So a faithful online port needs three things built from scratch:** the client
+protocol (93 packet types, only partly documented), a working server (the public
+one is incomplete), and the client rewritten for the browser. That is a
+multi-month engineering project *on top of* this archive — not something
+extraction can reach.
+
+One further obstacle: this client ships **XTrap + nProtect GameGuard +
+BlackCipher**, and a browser client cannot participate in that anti-cheat stack
+at all.
+
+The client in this repo is therefore a **local reconstruction** — real assets,
+real UI, real flow, local rooms — not the live online game.
+
 ## Getting set up from a fresh clone
 
 `main` carries source only. The extracted assets are generated, so build them first:
